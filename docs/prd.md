@@ -1,0 +1,167 @@
+# Product Requirements: Chapter Social Generator
+
+## Overview
+
+Chapter Social Generator is a single-purpose, browser-based tool for making Instagram grid posts for [Chapter](https://www.chapter.nyc), a NYC social club that runs monthly themed events. The user picks one of a fixed set of brand templates, fills it with photos and text, previews it, and exports finished PNGs that are ready to upload to Instagram.
+
+**Problem it solves:** the templates were designed in Illustrator and then recreated in Adobe Express for day-to-day use. Express hasn't produced quality, consistent output: style elements such as the drop shadow, texture treatment, polaroid frame and type drift from post to post. The generator makes creating content easier and locks those style elements down in code, so every post matches the design.
+
+**Primary user:** Chapter's founder, producing a handful of posts after each event and before upcoming ones.
+
+**Shape of the product:** a static site with input in and PNGs out. There are no accounts, no backend, no CMS, and nothing persists between sessions.
+
+## Goals and non-goals
+
+### Goals
+
+- Produce pixel-accurate, on-brand Instagram grid posts from five templates.
+- Make a session's worth of posts (typically 3–15) quickly: upload photos once, build several posts, download them all at once.
+- Handle both regular phone photos and photos of real polaroids.
+- Export at Instagram's 3:4 portrait size: **1080×1440 PNG**.
+
+### Non-goals (v1)
+
+- Instagram Stories (9:16) and Reels covers.
+- Carousel management. The tool outputs individual PNGs, and he assembles carousels in Instagram.
+- Posting or scheduling to Instagram.
+- Accounts, saved drafts, or any persistence, including browser storage (`localStorage`, IndexedDB). Closing the tab ends the session.
+- Persisting uploaded textures. Uploaded textures are usable only during the session.
+- Auto-incrementing the event number.
+- Automatic polaroid edge detection.
+- Editing templates in the UI. Templates are defined in code (see [Template Spec](template-spec.md)).
+
+## Brand context
+
+Source: *Wordmark and Social Template Brief* (designer's brief to the founder) and the template files `CoverPost.ai`, `GraphicPost.ai` and `InfoPost.ai`.
+
+- **Pillars:** nostalgic, hip, fun, approachable.
+- **Concept, "About Last Night…":** 2010s party photography, Brooklyn and indie-sleaze energy, polaroids.
+- **Visual system:** content sits on a photographed **floor, wall, or table texture** (wood parquet, terrazzo, white tile, etc.) with a **mild drop shadow** for depth. Photos are candid and casual.
+- **Type in templates:**
+  - **Druk** (condensed, bold) for the wordmark and headlines. Chapter holds the license. It's also used for titles in the generator UI (see [Generator UI notes](#generator-ui-notes)).
+  - **Instrument Serif** for body copy.
+- **Marks:**
+  - The custom `chapter` wordmark (modified Druk).
+  - The `ch.` secondary mark.
+  - Events are numbered like chapters: `ch. 1`, `ch. 2`, and so on.
+
+## Templates
+
+All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and field limits are defined in the [Template Spec](template-spec.md).
+
+| ID | Template | Purpose | Inputs | Reference |
+|---|---|---|---|---|
+| `cover` | **Cover** | Hero post with the brand front and center | 1 photo (in a polaroid), background texture. The `chapter` wordmark overlays the photo. | `CoverPost.ai`, `First Post@2x.png` |
+| `photo` | **Photo** | Post-event photo | 1 photo (in a polaroid), background texture | `polaroidArtboard 3@2x.png` |
+| `multi-photo` | **Multi-Photo** | Several post-event photos in one image | 2+ photos (in polaroids), background texture | *TBD: needs a design* |
+| `graphic` | **Graphic** | Upcoming event with an event graphic | 1 graphic image, background texture | `GraphicPost.ai`, `graphic.png` |
+| `info` | **Info** | Upcoming event details. Usually slide 2 after Graphic. | Event number, title, body, date/time, location, background texture | `InfoPost.ai`, `text_preferred.png` |
+
+## Features and requirements
+
+### Session photo pool
+
+| Requirement | Acceptance criteria |
+|---|---|
+| Upload many photos at once via a file picker or drag-and-drop. | Selecting 20 photos adds all 20 to the pool as thumbnails within a few seconds. JPEG, PNG and WebP are accepted. HEIC: see [Open questions](#open-questions). |
+| Photos stay in the pool for the whole session. | After a post is added to the batch, all pool photos are still available for the next post. |
+| Indicate which photos have been used. | A photo used in any batch post shows a "used" marker and a count. It stays selectable. |
+| Remove a photo from the pool. | Removing a photo that a batch post uses asks for confirmation first, or the removal is blocked. |
+
+### Photo input modes
+
+| Requirement | Acceptance criteria |
+|---|---|
+| Each photo has a mode: **Regular photo** (default) or **Polaroid scan**. | The mode can be toggled per photo, in the pool or in the slot editor. |
+| **Regular photo:** the template draws the polaroid frame. | The photo fills the polaroid's image window, and the generated frame matches the reference designs. |
+| **Polaroid scan:** the user crops out the real polaroid with a four-corner crop. | Dragging four corner handles defines a quadrilateral, which is perspective-corrected into a rectangle. The result replaces the whole polaroid in the template, and no generated frame is drawn. |
+
+### Template selection and editing
+
+| Requirement | Acceptance criteria |
+|---|---|
+| Choose a template. | All five templates are selectable, each with a thumbnail. Switching template keeps compatible inputs (photo, texture). |
+| Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Multi-Photo lets him choose how many photos (range TBD in the Template Spec). |
+| Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
+| Optionally reposition and zoom a photo. | In the slot, he can drag to pan and use a slider or scroll to zoom. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
+| Optional polaroid grain. | A per-post toggle. Strength and filter values are TBD and will be tuned during the build. |
+| Fill text fields (Info template). | Fields: event number (numeric, rendered as `ch. N`), title, body, date/time, location. The preview updates as he types. Overflow behavior is defined in the Template Spec. |
+| Choose a background texture. | Pick from the bundled texture library, shown as thumbnails. |
+| Upload a one-off texture. | An uploaded image is added to the texture picker for this session only. It is never saved. |
+
+### Preview and render
+
+| Requirement | Acceptance criteria |
+|---|---|
+| Live preview. | The preview updates within about 100 ms of any input change and matches the exported PNG exactly. |
+| Brand-accurate render. | Output matches the reference PNGs in layout, type (Druk, Instrument Serif), colors and drop shadows when given the same inputs. |
+| Fonts always load. | Rendering waits for fonts to load, so no PNG is ever exported with fallback fonts. |
+
+### Batch list and export
+
+| Requirement | Acceptance criteria |
+|---|---|
+| Add the current post to the batch. | "Add to batch" stores a snapshot of the post's inputs. The editor then resets for a new post, and the photo pool and last texture are kept. |
+| View the batch. | A list or strip shows each post's thumbnail, template type, name and caption. |
+| Edit, duplicate or remove a batch post. | Clicking a post loads it back into the editor, and saving updates it in place. Duplicate and remove work as expected. Remove asks for confirmation. |
+| Reorder posts. | Drag to reorder. The order determines filename numbering. |
+| Name each post. | Editable name, defaulting to `{template}-{n}` (e.g. `photo-2`). Used as the filename. |
+| Write an Instagram caption for each post. | A multi-line caption field with a **Copy** button that copies it to the clipboard and confirms with "Copied". |
+| Download all. | "Download all" produces `chapter-posts-{YYYY-MM-DD}.zip` containing `{NN}-{slugified-name}.png` (NN is the zero-padded batch order) and `captions.txt` (each filename followed by its caption). |
+| Download a single post. | Each batch item can also be downloaded as a single PNG. |
+| Warn before losing work. | Closing or reloading the tab with a non-empty batch triggers the browser's "Leave site?" prompt. Nothing is persisted. |
+
+## App flow
+
+```mermaid
+flowchart TD
+    A[Open tool] --> B[Upload photos to session pool]
+    B --> C{Polaroid scans?}
+    C -- Yes --> D[Set mode: Polaroid scan<br/>4-corner crop]
+    C -- No --> E[Choose template]
+    D --> E
+    E --> F[Pick photo(s) from pool<br/>or upload graphic]
+    F --> G[Choose / upload texture]
+    G --> H[Fill text fields<br/>Info template only]
+    H --> I[Optional: reposition / zoom / grain]
+    I --> J[Live preview]
+    J --> K[Add to batch<br/>name + caption]
+    K --> L{Another post?}
+    L -- Yes --> E
+    L -- No --> M[Review batch<br/>reorder / edit / remove]
+    M --> N[Download all → ZIP]
+    M -. edit post .-> J
+```
+
+**Layout:** one screen with three regions:
+
+1. **Left:** the photo pool, with upload and thumbnails.
+2. **Center:** the large live preview and the template's controls (template picker, photo slots, text fields, texture picker, grain and zoom).
+3. **Right or bottom:** the batch list, with name, caption and copy for each post, plus **Download all**.
+
+## Generator UI notes
+
+- **The UI is a tool, not a template.** It should be clean, neutral and quiet so the preview is the most colorful thing on screen. Hints of the brand are welcome, such as the `ch.` mark in the header or the lavender accent from the Info badge, but the UI must not compete with the post.
+- **UI typography:** use **Druk for titles and headings** in the UI (app name, section headers such as "Photos", "Batch"). Druk is not used for body text, labels, inputs or buttons. The UI body typeface is TBD.
+- **Device:** designed for laptop and desktop first. Phone support is TBD (see [Open questions](#open-questions)).
+- **Errors in plain language:** for example "That file isn't an image" or "Photo is too small for a crisp export (min 1080px)". Show a warning, not a block, for low-resolution photos.
+- **Fast path by default:** sensible defaults everywhere, so he can make a good post by choosing a template, choosing a photo and clicking Add. Fine-tuning controls are there when wanted, never required.
+
+## Success criteria
+
+- He can produce a batch of 5 posts (mixed templates) and download the ZIP in **under 10 minutes**, without help.
+- Side by side, exported PNGs are visually indistinguishable from the Illustrator reference exports given the same inputs.
+- Every exported PNG is exactly 1080×1440 and uploads to Instagram without cropping.
+- Works in current Chrome and Safari on macOS.
+
+## Open questions
+
+| # | Question | Notes |
+|---|---|---|
+| 1 | **Multi-Photo layout** | Needs a design: how many photos (2–4?), arrangement, overlap and rotation of polaroids. To be resolved in the Template Spec. |
+| 2 | **Grain filter values** | To be tuned during the build. |
+| 3 | **UI body typeface** | Druk for UI titles; body, label and input face TBD. Decide during the build. |
+| 4 | **Phone support** | Will he use this on his phone? It affects layout and the four-corner crop interaction. Laptop is assumed for v1. |
+| 5 | **HEIC photos** | iPhone photos AirDropped to a Mac are often HEIC, and Chrome can't decode HEIC natively. Option: convert in the browser with a library such as `heic2any`. Decide in Technical Requirements. |
+| 6 | **Druk web embedding** | Confirm the license covers serving the font files from a public website. Druk is loaded as a web font for both the UI titles and the template rendering. |
+| 7 | **Public access** | The site will be public on GitHub Pages for now. Confirm with the founder whether that's OK. |
