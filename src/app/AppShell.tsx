@@ -1,6 +1,6 @@
 import { ChMark } from "@/components/ChMark";
 import { Panel, Placeholder } from "@/components/Panel";
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
+import { Preview } from "@/components/Preview";
 
 /**
  * The one-screen layout from docs/prd.md#app-flow:
@@ -29,15 +29,7 @@ export function AppShell() {
 
         <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-4">
           <Panel title="Preview">
-            <div className="flex h-full items-center justify-center">
-              <div
-                className="max-h-full rounded-sm bg-neutral-200 shadow-sm"
-                style={{ aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}`, height: "100%" }}
-                aria-label={`Post preview, ${CANVAS_WIDTH} by ${CANVAS_HEIGHT}`}
-              >
-                <Placeholder label="Live preview canvas" issue="#7 render core" />
-              </div>
-            </div>
+            <Preview />
           </Panel>
           <Panel title="Template" className="h-56">
             <Placeholder
