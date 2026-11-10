@@ -13,6 +13,7 @@ import {
   subscribePhotos,
   subscribeTextures,
 } from "./assetCache";
+import { ensureFrame, getFrameSnapshot, subscribeFrame } from "./frame";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
 import { getWordmark } from "./wordmark";
@@ -73,5 +74,10 @@ export function useRenderAssets(): RenderAssets {
   }, [entries, current]);
 
   const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
-  return useMemo(() => ({ textures, photos, wordmark: getWordmark() }), [textures, photos]);
+  const frame = useSyncExternalStore(subscribeFrame, getFrameSnapshot, getFrameSnapshot);
+  useEffect(() => void ensureFrame(), []);
+  return useMemo(
+    () => ({ textures, photos, wordmark: getWordmark(), ...(frame ? { frame } : {}) }),
+    [textures, photos, frame],
+  );
 }

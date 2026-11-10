@@ -1,0 +1,89 @@
+/**
+ * The polaroid primitive, regular mode: shadow, the photo cover-fit into the window, then
+ * the scanned frame on top. docs/template-spec.md#polaroid
+ *
+ * A polaroid is always 848×1021 in its own space. Where it lands on the canvas is a
+ * `PolaroidPlacement`: a centre, a rotation and a uniform scale. Cover and Photo use one
+ * unrotated polaroid at scale 1; Multi-Photo scatters several.
+ */
+
+import { POLAROID, type Rect } from "@/templates/constants";
+import { viewFit, type View } from "./fit";
+import { drawShadow } from "./shadow";
+
+export interface PolaroidPlacement {
+  /** Canvas position of the polaroid's centre. */
+  cx: number;
+  cy: number;
+  /** Clockwise, in degrees. */
+  rotation: number;
+  /** 1 = 848×1021. */
+  scale: number;
+}
+
+const SIZE = { w: POLAROID.rect.w, h: POLAROID.rect.h };
+
+/** The placement that makes an unrotated polaroid fill `rect` (its width sets the scale). */
+export const placementFromRect = (rect: Rect): PolaroidPlacement => ({
+  cx: rect.x + rect.w / 2,
+  cy: rect.y + rect.h / 2,
+  rotation: 0,
+  scale: rect.w / SIZE.w,
+});
+
+/** Where the photo is drawn, in the polaroid's own space, for a pan and zoom. */
+export const photoRectInPolaroid = (photo: { width: number; height: number }, view: View): Rect =>
+  viewFit({ w: photo.width, h: photo.height }, POLAROID.window, view);
+
+export interface PolaroidOptions {
+  placement: PolaroidPlacement;
+  /** The photo for the window. Without one the window is a flat grey. */
+  photo?: (CanvasImageSource & { width: number; height: number }) | undefined;
+  /** Pan and zoom of the photo inside the window. */
+  view: View;
+  /** The scanned frame with its window cut out. Without it a flat paper colour is drawn. */
+  frame?: CanvasImageSource | undefined;
+}
+
+export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOptions): void {
+  const { placement, photo, view, frame } = opts;
+  const win = POLAROID.window;
+
+  ctx.save();
+  ctx.translate(placement.cx, placement.cy);
+  ctx.rotate((placement.rotation * Math.PI) / 180);
+  ctx.scale(placement.scale, placement.scale);
+  ctx.translate(-SIZE.w / 2, -SIZE.h / 2);
+
+  drawShadow(ctx, { x: 0, y: 0, ...SIZE }, placement.scale);
+
+  // The photo, clipped to the window so nothing shows past the frame's cut.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(win.x, win.y, win.w, win.h);
+  ctx.clip();
+  if (photo) {
+    const r = photoRectInPolaroid(photo, view);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(photo, r.x, r.y, r.w, r.h);
+  } else {
+    ctx.fillStyle = POLAROID.emptyWindowColor;
+    ctx.fillRect(win.x, win.y, win.w, win.h);
+  }
+  ctx.restore();
+
+  if (frame) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(frame, 0, 0, SIZE.w, SIZE.h);
+  } else {
+    // Stand-in while frame.png loads: flat paper around the window.
+    ctx.fillStyle = POLAROID.paperColor;
+    ctx.beginPath();
+    ctx.rect(0, 0, SIZE.w, SIZE.h);
+    ctx.rect(win.x, win.y, win.w, win.h);
+    ctx.fill("evenodd");
+  }
+  ctx.restore();
+}

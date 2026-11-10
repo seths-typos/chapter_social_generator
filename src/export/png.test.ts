@@ -23,4 +23,16 @@ describe("missingAssets", () => {
     expect(missingAssets(graphic, assets(["library:plaster-white"], []))).toEqual(["image"]);
     expect(missingAssets(graphic, assets([], []))).toEqual(["texture", "image"]);
   });
+
+  it("needs the polaroid frame for a photo post, not for a graphic", () => {
+    const photo: Post = {
+      template: "photo",
+      slots: [{ photoId: "p1", panX: 0, panY: 0, zoom: 1 }],
+      texture: tile,
+      grain: false,
+    };
+    const loaded = assets(["library:plaster-white"], ["p1"]);
+    expect(missingAssets(photo, loaded)).toEqual(["polaroid frame"]);
+    expect(missingAssets(photo, { ...loaded, frame: bitmap })).toEqual([]);
+  });
 });

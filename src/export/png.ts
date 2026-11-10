@@ -7,7 +7,7 @@ import { createRenderCanvas } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
 import { textureKey, type RenderAssets } from "@/render/types";
 import type { Post } from "@/store/types";
-import { photoIdsInPost } from "@/templates/registry";
+import { photoIdsInPost, templateFor } from "@/templates/registry";
 
 /**
  * What the post needs that isn't loaded yet. Export must wait for these: a missing
@@ -17,6 +17,7 @@ export function missingAssets(post: Post, assets: RenderAssets): string[] {
   const missing: string[] = [];
   if (!assets.textures.has(textureKey(post.texture))) missing.push("texture");
   if (photoIdsInPost(post).some((id) => !assets.photos.has(id))) missing.push("image");
+  if (templateFor(post.template).slots && !assets.frame) missing.push("polaroid frame");
   return missing;
 }
 

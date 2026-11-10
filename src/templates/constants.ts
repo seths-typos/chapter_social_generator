@@ -57,6 +57,8 @@ export const POLAROID = {
   window: { x: 60, y: 57, w: 726, h: 753 } satisfies Rect,
   /** Placeholder paper colour while the frame asset isn't loaded. */
   paperColor: "#F2F5EE",
+  /** Fill of the photo window before a photo is chosen. Never exported. */
+  emptyWindowColor: "#C9CCD1",
 } as const;
 
 /** Cover template wordmark. docs/template-spec.md#cover-cover */
@@ -81,7 +83,11 @@ export const GRAPHIC = {
  * `docs/reference/fixtures/{name}.png`; the id is `fixture-{name}`.
  */
 export const FIXTURE_IMAGE_PREFIX = "fixture-";
-export const FIXTURE_IMAGE = { graphic: `${FIXTURE_IMAGE_PREFIX}graphic` } as const;
+export const FIXTURE_IMAGE = {
+  graphic: `${FIXTURE_IMAGE_PREFIX}graphic`,
+  cover: `${FIXTURE_IMAGE_PREFIX}cover`,
+  photo: `${FIXTURE_IMAGE_PREFIX}photo`,
+} as const;
 
 /** Template picker thumbnails: the real render, drawn small. */
 /** They use a flat mid-grey instead of a texture, so the template itself is what stands out. */
