@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
+import { BatchList } from "@/components/BatchList";
 import { ChMark } from "@/components/ChMark";
 import { Editor } from "@/components/Editor";
 import { FontNotice } from "@/components/FontNotice";
-import { Panel, Placeholder } from "@/components/Panel";
+import { Panel } from "@/components/Panel";
 import { PhotoPool } from "@/components/PhotoPool";
 import { Preview } from "@/components/Preview";
 import { TemplatePicker } from "@/components/TemplatePicker";
@@ -19,7 +20,6 @@ const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
  *   left   – session photo pool
  *   center – live preview, with the selected template's controls beside it
  *   right  – batch list and Download all
- * The batch panel is a placeholder until its issues land.
  */
 export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont[] }) {
   // The renderer is the only thing that knows whether text fits, so the preview reports
@@ -61,20 +61,7 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
           </Panel>
         </div>
 
-        <Panel
-          title="Batch"
-          actions={
-            <button
-              type="button"
-              disabled
-              className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Download all
-            </button>
-          }
-        >
-          <Placeholder label="Posts in this session" issue="#23 batch list · #25 ZIP export" />
-        </Panel>
+        <BatchList assets={assets} />
       </div>
     </div>
   );

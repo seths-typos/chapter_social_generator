@@ -101,9 +101,11 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 
 **Goal:** the full session workflow: build many posts, then download them all.
 
+**Order:** built before Phase 3, at the owner's request after the Phase 2 check-in ([decision 0007](decisions/0007-batch-before-scan-crop.md)).
+
 | # | Task | Acceptance criteria | Spec |
 |---|---|---|---|
-| 4.1 | **Batch list** (#23) | "Add to batch" snapshots the post, then resets the editor while keeping the pool and texture. The list shows a thumbnail (rendered at 270×360), template type, name and caption. Edit loads a post back into the editor, and saving updates it in place. Duplicate, remove (with confirmation), and drag to reorder. | [Batch list and export](prd.md#batch-list-and-export) |
+| 4.1 | **Batch list** (#23) | "Add to batch" snapshots the post, then resets the editor while keeping the pool and texture. The list shows a thumbnail (rendered at 270×360), template type, name and caption. Edit loads a post back into the editor, and saving updates it in place. Duplicate, remove (with confirmation), and reorder by dragging the handle or with the up/down buttons. | [Batch list and export](prd.md#batch-list-and-export) |
 | 4.2 | **Names, captions and copy** (#24) | Editable name, defaulting to `{template}-{n}`. Multi-line caption field. A Copy button using the clipboard API, with "Copied" feedback. | [Batch list and export](prd.md#batch-list-and-export) |
 | 4.3 | **ZIP export** (#25) | "Download all" produces `chapter-posts-{YYYY-MM-DD}.zip` with `{NN}-{slug}.png` (re-rendered from `Post` data) and `captions.txt`. Single-item download too. Filename and caption formatting have unit tests. | [Export](technical-requirements.md#export) |
 | 4.4 | **Leave-page guard** (#26) | A `beforeunload` prompt while the batch isn't empty. | [Batch list and export](prd.md#batch-list-and-export) |

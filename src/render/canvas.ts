@@ -28,3 +28,11 @@ export function createRenderCanvas(): HTMLCanvasElement {
   document.body.append(canvas);
   return canvas;
 }
+
+let scratch: HTMLCanvasElement | null = null;
+
+/** One full-size render canvas shared by every thumbnail (template picker, batch list). */
+export function scratchRenderCanvas(): HTMLCanvasElement {
+  scratch ??= createRenderCanvas();
+  return scratch;
+}

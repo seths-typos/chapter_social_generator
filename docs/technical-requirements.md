@@ -159,11 +159,13 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 |---|---|
 | PNG | `canvas.toBlob("image/png")` at 1080×1440, sRGB |
 | Single download | "Download PNG" in the editor: an `<a download>` link to an object URL, named `{slugified-name}.png` (the name the post would get in the batch, e.g. `info-1.png`). Disabled until the post is complete, has no blocking fit warning, and its texture and images are loaded. |
-| ZIP | `fflate.zipSync` → `chapter-posts-{YYYY-MM-DD}.zip` containing `{NN}-{slug}.png` (in batch order, zero-padded) and `captions.txt` |
-| `captions.txt` | UTF-8, LF line endings. For each post: `{filename}`, a newline, the caption, then a blank line. |
+| ZIP | `fflate.zipSync` (stored, not recompressed) → `chapter-posts-{YYYY-MM-DD}.zip` (local date) containing `{NN}-{slug}.png` (in batch order, zero-padded to at least two digits) and `captions.txt` |
+| `captions.txt` | UTF-8, LF line endings. For each post: `{filename}`, a newline, the caption (trimmed), then a blank line. A post with no caption is its filename and a blank line. |
 | Render at export | Each post is re-rendered from its stored `Post` data (not from cached preview pixels) |
 | Clipboard | `navigator.clipboard.writeText(caption)`, with a "Copied" confirmation |
 | Unload guard | A `beforeunload` handler is active while the batch isn't empty |
+| Batch thumbnails | Each stored `Post` drawn by `renderPost` on the shared scratch canvas, scaled to 270×360 |
+| Waiting for assets | "Download all" is disabled while any batch post's texture, image or the polaroid frame is still loading |
 
 ## Browser support
 

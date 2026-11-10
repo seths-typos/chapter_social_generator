@@ -105,8 +105,8 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 |---|---|
 | Add the current post to the batch. | "Add to batch" stores a snapshot of the post's inputs. The editor then returns to the template picker for the next post, and the photo pool and last-used texture are kept. |
 | View the batch. | A list or strip shows each post's thumbnail, template type, name and caption. |
-| Edit, duplicate or remove a batch post. | Clicking a post loads it back into the editor, and saving updates it in place. Duplicate and remove work as expected. Remove asks for confirmation. |
-| Reorder posts. | Drag to reorder. The order determines filename numbering. |
+| Edit, duplicate or remove a batch post. | "Edit" loads a post back into the editor (asking first if another post is in progress), and "Save changes" updates it in place. Duplicate and remove work as expected. Remove asks for confirmation. |
+| Reorder posts. | Drag a post by its handle, or use its up/down buttons. The order determines filename numbering. |
 | Name each post. | Editable name, defaulting to `{template}-{n}` (e.g. `photo-2`). Used as the filename. |
 | Write an Instagram caption for each post. | A multi-line caption field with a **Copy** button that copies it to the clipboard and confirms with "Copied". |
 | Download all. | "Download all" produces `chapter-posts-{YYYY-MM-DD}.zip` containing `{NN}-{slugified-name}.png` (NN is the zero-padded batch order) and `captions.txt` (each filename followed by its caption). |

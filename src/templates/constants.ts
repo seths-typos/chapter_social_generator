@@ -93,6 +93,9 @@ export const FIXTURE_IMAGE = {
   photo: `${FIXTURE_IMAGE_PREFIX}photo`,
 } as const;
 
+/** Batch list thumbnails: the real render of the stored post, drawn small. */
+export const BATCH_THUMBNAIL = { width: 270, height: 360 } as const;
+
 /** Template picker thumbnails: the real render, drawn small. */
 /** They use a flat mid-grey instead of a texture, so the template itself is what stands out. */
 export const THUMBNAIL = { width: 180, height: 240, background: "#808080" } as const;

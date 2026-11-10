@@ -26,6 +26,9 @@ export function Editor({ warnings, assets }: EditorProps) {
   const batch = useAppStore((s) => s.batch);
   const editDraft = useAppStore((s) => s.editDraft);
   const addToBatch = useAppStore((s) => s.addToBatch);
+  const editing = useAppStore((s) => s.batch.find((b) => b.id === s.editingId) ?? null);
+  const saveEdit = useAppStore((s) => s.saveEdit);
+  const cancelEdit = useAppStore((s) => s.cancelEdit);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   if (!draft) {
@@ -57,7 +60,7 @@ export function Editor({ warnings, assets }: EditorProps) {
     setDownloadError(null);
     try {
       const blob = await renderPostToPng(post, assets);
-      downloadBlob(blob, pngFilename(defaultName(post.template, batch)));
+      downloadBlob(blob, pngFilename(editing?.name ?? defaultName(post.template, batch)));
     } catch (err) {
       setDownloadError(err instanceof Error ? err.message : String(err));
     }
@@ -74,6 +77,11 @@ export function Editor({ warnings, assets }: EditorProps) {
 
   return (
     <div className="flex flex-col gap-3">
+      {editing && (
+        <p className="rounded-md bg-neutral-100 px-2.5 py-1.5 text-sm text-neutral-700">
+          Editing <strong>{editing.name}</strong>. Save changes to update it in the batch.
+        </p>
+      )}
       {template.Editor &&
         createElement(template.Editor, {
           draft,
@@ -110,13 +118,22 @@ export function Editor({ warnings, assets }: EditorProps) {
         >
           Download PNG
         </button>
+        {editing && (
+          <button
+            type="button"
+            onClick={cancelEdit}
+            className={`${buttonClass} border border-neutral-300 text-neutral-900 hover:bg-neutral-50`}
+          >
+            Cancel
+          </button>
+        )}
         <button
           type="button"
           disabled={!post}
-          onClick={() => addToBatch()}
+          onClick={() => (editing ? saveEdit() : addToBatch())}
           className={`${buttonClass} bg-neutral-900 text-white`}
         >
-          Add to batch
+          {editing ? "Save changes" : "Add to batch"}
         </button>
       </div>
     </div>
