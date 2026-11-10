@@ -1,6 +1,6 @@
 import { drawShadow } from "@/render/shadow";
 import type { RendererFor } from "@/render/types";
-import { GRAPHIC, LIBRARY_TEXTURE, type Rect } from "./constants";
+import { FIXTURE_IMAGE, GRAPHIC, LIBRARY_TEXTURE, type Rect } from "./constants";
 import type { TemplateDefinition } from "./definition";
 import { GraphicEditor } from "./GraphicEditor";
 
@@ -52,4 +52,6 @@ export const graphicTemplate: TemplateDefinition<"graphic"> = {
     draft.graphicId === photoId ? { ...draft, graphicId: null } : draft,
   render: renderGraphic,
   Editor: GraphicEditor,
+  // The graphic placed in GraphicPost.ai. The image itself is only loaded in dev builds.
+  fixture: (draft) => ({ ...draft, graphicId: FIXTURE_IMAGE.graphic }),
 };

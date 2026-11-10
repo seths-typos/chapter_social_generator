@@ -76,6 +76,13 @@ export const GRAPHIC = {
   placeholderColor: "#C9CCD1",
 } as const;
 
+/**
+ * Pool-photo ids the template fixtures refer to. In dev builds each one is loaded from
+ * `docs/reference/fixtures/{name}.png`; the id is `fixture-{name}`.
+ */
+export const FIXTURE_IMAGE_PREFIX = "fixture-";
+export const FIXTURE_IMAGE = { graphic: `${FIXTURE_IMAGE_PREFIX}graphic` } as const;
+
 /** Template picker thumbnails: the real render, drawn small. */
 export const THUMBNAIL = { width: 180, height: 240 } as const;
 

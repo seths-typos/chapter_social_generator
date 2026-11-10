@@ -97,8 +97,11 @@ export function convertDraft(
   return { ...next, grain: draft.grain, slots } as Draft;
 }
 
-/** The draft a template's picker thumbnail shows: its reference inputs if it has them, else empty. */
-export function thumbnailDraft(template: TemplateId): Draft {
+/**
+ * A template's draft filled with its reference inputs, or empty if it has none. Shown in
+ * the picker thumbnail and the dev comparison view.
+ */
+export function fixtureDraft(template: TemplateId): Draft {
   const t = templateFor(template);
   const draft = newDraft(template);
   return t.fixture ? t.fixture(draft) : draft;

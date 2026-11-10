@@ -4,7 +4,7 @@ import type { RenderAssets } from "@/render/types";
 import { useAppStore } from "@/store/store";
 import type { TemplateId } from "@/store/types";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, THUMBNAIL } from "@/templates/constants";
-import { losesTypedText, TEMPLATE_LIST, templateFor, thumbnailDraft } from "@/templates/registry";
+import { losesTypedText, TEMPLATE_LIST, templateFor, fixtureDraft } from "@/templates/registry";
 
 /** One full-size scratch canvas shared by every thumbnail. */
 let scratch: HTMLCanvasElement | null = null;
@@ -23,7 +23,7 @@ function Thumbnail({ template, assets }: { template: TemplateId; assets: RenderA
     }
     const ctx = scratch.getContext("2d");
     if (!ctx) return;
-    renderPost(ctx, thumbnailDraft(template), assets);
+    renderPost(ctx, fixtureDraft(template), assets);
     out.imageSmoothingQuality = "high";
     out.drawImage(scratch, 0, 0, THUMBNAIL.width, THUMBNAIL.height);
   }, [template, assets]);

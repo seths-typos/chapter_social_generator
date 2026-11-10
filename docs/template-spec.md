@@ -235,6 +235,7 @@ Adding a template means adding a variant to both unions and one definition file.
 | `ch.` mark | `src/assets/wordmark/ch.svg` | "ch." shaped in Druk Bold (matches `Secondary Wordmark (Black)@2x.png`) | ✅ Done. For the UI header and favicon |
 | Polaroid frame | `src/assets/polaroid/frame.png` | Scan in `CoverPost.ai`, with the window cut out, at 1696×2042 | ✅ Done |
 | Reference renders | `docs/reference/{cover,photo,graphic,info}.png` | `cover`, `graphic`, `info` rendered from the `.ai` files at 1080×1440 (stray swatch label removed from `cover`); `photo` scaled from `polaroidArtboard 3@2x.png` | ✅ Done. For visual review (dev comparison view) |
+| Fixture images | `docs/reference/fixtures/graphic.png` | The 958×974 event graphic embedded in `GraphicPost.ai` | ✅ Done. Input for the Graphic fixture (dev comparison view only) |
 
 ## Open items
 

@@ -118,8 +118,11 @@ Template-specific fields are edited through the store's `editDraft(template, fn)
 
 There are no automated visual tests. Visual review is done by eye with a dev-only comparison view:
 
-- `?compare={cover|photo|graphic|info}` renders the template with fixed fixture inputs and overlays `docs/reference/{template}.png`. It has an opacity slider and a difference-blend toggle.
-- This view is only available in dev builds (`import.meta.env.DEV`).
+- `?compare={cover|photo|graphic|info}` renders the template from its `fixture` inputs and lays `docs/reference/{template}.png` over it.
+- Controls: a reference **opacity slider**, a **Difference** toggle (the reference is blended with `mix-blend-mode: difference`, so identical pixels turn black), a zoom of Fit, 100% or 200%, and links to switch template.
+- Fixture images (for example the event graphic placed in `GraphicPost.ai`) live in `docs/reference/fixtures/{name}.png` and are referred to by the pool-photo id `fixture-{name}`. `?template={id}&fixture` opens the normal editor with the same inputs.
+- A template without a fixture renders empty. The reference backgrounds use textures that aren't in the library, so the background always differs.
+- This view is only available in dev builds. It and the fixture loader are imported on demand behind `import.meta.env.DEV`, so neither they nor the reference images reach the production bundle.
 - Reference PNGs are rendered once from the `.ai` files at 1080×1440 and committed. They're images of the designs, not font files.
 
 ## Image handling
@@ -172,6 +175,7 @@ The minimum required features are WebGL2, `createImageBitmap` with `imageOrienta
 /
 ├─ docs/                      planning docs, decisions, reference renders
 │  └─ reference/              cover.png, photo.png, graphic.png, info.png
+│     └─ fixtures/            images the template fixtures use (graphic.png)
 ├─ public/
 │  ├─ fonts/                  druk-*.woff2, instrument-serif-regular.woff2, geist-*.woff2
 │  └─ textures/               textures.json, *.jpg, *-thumb.jpg
@@ -185,7 +189,7 @@ The minimum required features are WebGL2, `createImageBitmap` with `imageOrienta
 │  ├─ image/                  import, heic, homography, warp
 │  ├─ export/                 png, zip, captions, filenames
 │  ├─ assets/                 wordmark/*.svg, polaroid/frame.png
-│  └─ dev/                    compare view (dev only)
+│  └─ dev/                    compare view, fixture loader, URL params (dev only)
 ├─ .github/workflows/ci.yml
 ├─ CLAUDE.md
 └─ package.json
