@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRenderAssets } from "@/render/assets";
+import { RENDER_CANVAS_CLASS } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
 import type { FitWarning } from "@/render/types";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
@@ -137,7 +138,7 @@ export function CompareView({ template }: { template: CompareId }) {
             height={CANVAS_HEIGHT}
             aria-label={`${definition.label} render`}
             {...size}
-            className={`block ${size.className}`}
+            className={`${RENDER_CANVAS_CLASS} block ${size.className}`}
           />
           {reference ? (
             <img

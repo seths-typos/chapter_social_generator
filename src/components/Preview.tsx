@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useRef } from "react";
+import { RENDER_CANVAS_CLASS } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
 import type { RenderAssets, RenderResult } from "@/render/types";
 import { useAppStore } from "@/store/store";
@@ -43,7 +44,7 @@ export function Preview({ assets, onResult }: PreviewProps) {
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        className={`max-h-full max-w-full rounded-sm ${draft ? "shadow-sm" : "bg-neutral-200"}`}
+        className={`${RENDER_CANVAS_CLASS} max-h-full max-w-full rounded-sm ${draft ? "shadow-sm" : "bg-neutral-200"}`}
         aria-label={`Post preview, ${CANVAS_WIDTH} by ${CANVAS_HEIGHT}`}
       />
       {!draft && (

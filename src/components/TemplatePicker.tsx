@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
+import { createRenderCanvas } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
 import type { RenderAssets } from "@/render/types";
 import { useAppStore } from "@/store/store";
 import type { TemplateId } from "@/store/types";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, THUMBNAIL } from "@/templates/constants";
+import { THUMBNAIL } from "@/templates/constants";
 import { losesTypedText, TEMPLATE_LIST, templateFor, fixtureDraft } from "@/templates/registry";
 
-/** One full-size scratch canvas shared by every thumbnail. */
+/** One full-size scratch canvas shared by every thumbnail, kept in the document (hidden). */
 let scratch: HTMLCanvasElement | null = null;
 
 /** A template's thumbnail: the real renderer, drawn at full size and scaled down. */
@@ -16,11 +17,7 @@ function Thumbnail({ template, assets }: { template: TemplateId; assets: RenderA
   useEffect(() => {
     const out = ref.current?.getContext("2d");
     if (!out) return;
-    if (!scratch) {
-      scratch = document.createElement("canvas");
-      scratch.width = CANVAS_WIDTH;
-      scratch.height = CANVAS_HEIGHT;
-    }
+    scratch ??= createRenderCanvas();
     const ctx = scratch.getContext("2d");
     if (!ctx) return;
     renderPost(ctx, fixtureDraft(template), assets);

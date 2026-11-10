@@ -76,9 +76,10 @@ function renderPost(ctx: CanvasRenderingContext2D, post: Post, assets: RenderAss
 ```
 
 - **Pure:** output depends only on `post` and `assets` (decoded images, frame, textures, wordmark paths). No reading from the store, the DOM or the clock.
-- **One code path:** the preview canvas is a real **1080×1440** canvas, scaled down with CSS (`width: 100%`). Export calls `renderPost` on a fresh 1080×1440 canvas and then `canvas.toBlob("image/png")`.
+- **One code path:** the preview canvas is a real **1080×1440** canvas, scaled down with CSS (`width: 100%`). Export calls `renderPost` on a fresh, hidden 1080×1440 canvas and then `canvas.toBlob("image/png")`.
 - **Template code** lives in `src/templates/{cover,photo,multiPhoto,graphic,info}.ts`, one definition per file (see [Template definitions](#template-definitions)). Every coordinate, size and color comes from `src/templates/constants.ts`, which mirrors the Template Spec one-to-one.
 - **Draws from a `Draft`:** templates render the editor's `Draft`, so a half-filled post can be previewed. `renderPost` loads a stored `Post` into a draft first, so preview and export still share one code path.
+- **Text smoothing:** canvas text takes its smoothing from the canvas element's CSS, and only while the element is in the document. Every canvas the renderer draws on (preview, export, thumbnails) is therefore in the document with `-webkit-font-smoothing: antialiased`; the export canvas is created hidden by `createRenderCanvas()` in `src/render/canvas.ts`. A detached canvas draws text heavier on macOS, which would make the PNG differ from the preview. Antialiased is also what matches the reference renders.
 - **Re-rendering:** the preview re-renders on input change, throttled with `requestAnimationFrame`. Target: under 50 ms per render on a recent MacBook.
 
 ### Template definitions

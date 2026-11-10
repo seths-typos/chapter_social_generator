@@ -3,10 +3,10 @@
  * canvas by the same `renderPost` the preview uses. docs/technical-requirements.md#export
  */
 
+import { createRenderCanvas } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
 import { textureKey, type RenderAssets } from "@/render/types";
 import type { Post } from "@/store/types";
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
 import { photoIdsInPost } from "@/templates/registry";
 
 /**
@@ -26,18 +26,20 @@ export function renderPostToPng(post: Post, assets: RenderAssets): Promise<Blob>
   if (missing.length > 0) {
     return Promise.reject(new Error(`Still loading: ${missing.join(", ")}`));
   }
-  const canvas = document.createElement("canvas");
-  canvas.width = CANVAS_WIDTH;
-  canvas.height = CANVAS_HEIGHT;
+  // Attached and smoothed like the preview, so the PNG's text is identical to what was shown.
+  const canvas = createRenderCanvas();
   const ctx = canvas.getContext("2d");
-  if (!ctx) return Promise.reject(new Error("Canvas isn’t available in this browser"));
+  if (!ctx) {
+    canvas.remove();
+    return Promise.reject(new Error("Canvas isn’t available in this browser"));
+  }
   renderPost(ctx, post, assets);
-  return new Promise((resolve, reject) =>
+  return new Promise<Blob>((resolve, reject) =>
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("The PNG couldn’t be created"))),
       "image/png",
     ),
-  );
+  ).finally(() => canvas.remove());
 }
 
 /** Save a blob to the user's downloads through a temporary `<a download>` link. */
