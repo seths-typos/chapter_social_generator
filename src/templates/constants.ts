@@ -61,7 +61,17 @@ export const GRAPHIC = {
   placeholderColor: "#C9CCD1",
 } as const;
 
-/** Info template card. docs/template-spec.md#info-info */
+/**
+ * Fonts the templates draw text with. Families match `src/app/fonts.css`, and each one
+ * is in the font loading gate (`REQUIRED_FONTS`). docs/template-spec.md#assets
+ */
+export const FONTS = {
+  drukMedium: { family: "Chapter Druk", weight: 500 },
+  drukBold: { family: "Chapter Druk", weight: 700 },
+  instrumentSerif: { family: "Instrument Serif", weight: 400 },
+} as const;
+
+/** Info template card.docs/template-spec.md#info-info */
 export const INFO_CARD = {
   rect: { x: 116, y: 120, w: 848, h: 1200 } satisfies Rect,
   fill: "#FDFFFD",

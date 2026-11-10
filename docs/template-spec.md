@@ -157,7 +157,7 @@ Reference: `InfoPost.ai`, `text_preferred.png`
 | Field | Input | Rule |
 |---|---|---|
 | Event number | Integer 1–999 | Renders `ch. {N}`. If it's wider than the circle's inner width (170 px), shrink to fit (minimum 72). |
-| Title | Text, 1 line by default | Shrink to fit within 772 px: 167 → minimum **120**. Still too wide at 120: wrap to 2 lines at 120 with line-height 0.95. Still overflowing: show a "Title too long" warning and block **Add to batch**. |
+| Title | Text, 1 line by default | Shrink to fit within 772 px: 167 → minimum **120**. Still too wide at 120: wrap to 2 lines at 120 with line-height 0.95, breaking where the two lines come out most even. Still overflowing: show a "Title too long" warning and block **Add to batch**. |
 | Body | Multi-line text | At 45/54: if the block is taller than **430 px** (the space between the rules minus padding), shrink in 1 px steps down to minimum **36** (line-height stays at 1.2×). Still overflowing: show a warning and block **Add to batch**. |
 | Date | Date picker + start time + optional end time | Formatted automatically as `TUESDAY, MARCH 10, 6:30 PM - 9:00 PM`: full weekday, full month, no leading zeros, ` - ` between times, uppercase. Shrink to fit 772 px down to minimum **48**. |
 | Location | Text, e.g. `Anew Café & Goods, New York, NY` | Shrink to fit 772 px down to minimum **48**. Still too wide: warn and block **Add to batch**. |
