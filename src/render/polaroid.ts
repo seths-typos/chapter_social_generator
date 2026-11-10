@@ -35,6 +35,38 @@ export const placementFromRect = (rect: Rect): PolaroidPlacement => ({
 export const photoRectInPolaroid = (photo: { width: number; height: number }, view: View): Rect =>
   viewFit({ w: photo.width, h: photo.height }, POLAROID.window, view);
 
+/** A point in the polaroid's own space, on the canvas. The inverse of `toPolaroidSpace`. */
+export function toCanvasSpace(
+  placement: PolaroidPlacement,
+  point: { x: number; y: number },
+): { x: number; y: number } {
+  const a = (placement.rotation * Math.PI) / 180;
+  const x = (point.x - SIZE.w / 2) * placement.scale;
+  const y = (point.y - SIZE.h / 2) * placement.scale;
+  return {
+    x: placement.cx + x * Math.cos(a) - y * Math.sin(a),
+    y: placement.cy + x * Math.sin(a) + y * Math.cos(a),
+  };
+}
+
+/** The polaroid's four corners on the canvas: TL, TR, BR, BL. */
+export const polaroidCorners = (placement: PolaroidPlacement): { x: number; y: number }[] =>
+  [
+    { x: 0, y: 0 },
+    { x: SIZE.w, y: 0 },
+    { x: SIZE.w, y: SIZE.h },
+    { x: 0, y: SIZE.h },
+  ].map((corner) => toCanvasSpace(placement, corner));
+
+/** True when a canvas point is on the polaroid (frame or photo). */
+export function isOverPolaroid(
+  placement: PolaroidPlacement,
+  point: { x: number; y: number },
+): boolean {
+  const p = toPolaroidSpace(placement, point);
+  return p.x >= 0 && p.x <= SIZE.w && p.y >= 0 && p.y <= SIZE.h;
+}
+
 /** A canvas point in the polaroid's own 848×1021 space. */
 export function toPolaroidSpace(
   placement: PolaroidPlacement,

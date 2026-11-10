@@ -65,6 +65,43 @@ export const POLAROID = {
   emptyWindowColor: "#C9CCD1",
 } as const;
 
+/**
+ * Multi-Photo layouts: one fixed preset per photo count. Each slot is a polaroid centre in
+ * canvas px and a rotation in degrees (clockwise positive); slot 1 is at the bottom.
+ * docs/template-spec.md#multi-photo-multi-photo
+ */
+export const MULTI_PHOTO_LAYOUT: Record<
+  MultiPhotoCount,
+  { scale: number; slots: readonly { cx: number; cy: number; rotation: number }[] }
+> = {
+  2: {
+    scale: 0.6,
+    slots: [
+      { cx: 390, cy: 470, rotation: -4 },
+      { cx: 690, cy: 960, rotation: 3 },
+    ],
+  },
+  3: {
+    scale: 0.5,
+    slots: [
+      { cx: 300, cy: 380, rotation: -5 },
+      { cx: 760, cy: 560, rotation: 4 },
+      { cx: 470, cy: 1030, rotation: -2 },
+    ],
+  },
+  4: {
+    scale: 0.46,
+    slots: [
+      { cx: 290, cy: 360, rotation: -4 },
+      { cx: 790, cy: 400, rotation: 3 },
+      { cx: 300, cy: 1050, rotation: 3 },
+      { cx: 780, cy: 1080, rotation: -5 },
+    ],
+  },
+};
+/** The part of a photo that must stay visible: the centre 60% of its window. */
+export const FACE_AREA_FRACTION = 0.6;
+
 /** Cover template wordmark. docs/template-spec.md#cover-cover */
 export const COVER_WORDMARK = {
   rect: { x: 190, y: 481, w: 700, h: 305 } satisfies Rect,

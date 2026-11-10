@@ -104,7 +104,7 @@ New template, not in the original designs. Concept: 2–4 polaroids scattered on
 | Property | Value |
 |---|---|
 | Photo count | **2, 3, or 4**, chosen by the user |
-| Polaroid | Same construction as above (each slot can be regular or scan), uniformly scaled |
+| Polaroid | Same construction as above (each slot can be regular or scan), uniformly scaled. The shadow's blur and offset scale with it. |
 | Z-order | Slot 1 at the bottom, last slot on top |
 | Layout | A fixed preset per count (below). Center points are in canvas px, rotation in degrees (clockwise is positive). *tune* |
 
@@ -114,7 +114,9 @@ New template, not in the original designs. Concept: 2–4 polaroids scattered on
 | 3 | 0.50 (424×511) | (300, 380) −5° | (760, 560) +4° | (470, 1030) −2° | — |
 | 4 | 0.46 (390×470) | (290, 360) −4° | (790, 400) +3° | (300, 1050) +3° | (780, 1080) −5° |
 
-**Acceptance:** at every count, every polaroid (including its shadow) stays fully inside the canvas, and each photo's face area (the center 60% of its window) is not covered by another polaroid.
+**Acceptance:** at every count, every polaroid (including its shadow) stays fully inside the canvas, and each photo's face area (the center 60% of its window) is not covered by another polaroid. Both are unit-tested against the presets (`src/templates/multiPhoto.test.ts`), so a retuned value that breaks either fails the tests. The values above are the starting presets, unchanged after the first build.
+
+**Editing:** changing the count keeps the photos already placed (fewer drops the last slots). A photo clicked in the pool goes to the first empty slot. Each photo is dragged and zoomed in the preview on its own; the zoom slider acts on the slot selected in the controls.
 
 **Parameters:** photo count, 2–4 photo slots (pan and zoom per slot), texture, grain. Swapping two slots' photos is a nice-to-have.
 
