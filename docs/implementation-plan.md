@@ -134,7 +134,7 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 |---|---|---|---|
 | 6.1 | **Grain** (#30) | `grain.ts` with seeded noise in overlay blend, applied to the photo area only. Strength tuned by eye with the owner. Values recorded in the Template Spec. | [Grain](template-spec.md#grain) |
 | 6.2 | **Shadow fine-tune** (#31) | Blur, offset and opacity confirmed against all references in the comparison view. Final values recorded in the Template Spec. | [Drop shadow](template-spec.md#drop-shadow) |
-| 6.3 | **Real texture library** (#32) | 10 textures supplied by the owner, processed (JPEG, around 85 quality, under 1.5 MB, plus 240×320 thumbnails) and added to the manifest. Placeholders removed. Template defaults point to real textures. | [Texture library](template-spec.md#texture-library) |
+| 6.3 | **Real texture library** (#32) | *Largely done early in #8 with 16 Unsplash textures (decision 0002).* Remaining: swap in or add textures photographed at real venues if the founder wants them. | [Texture library](template-spec.md#texture-library) |
 | 6.4 | **UX/UI pass (owner)** (#33) | The owner reviews and restyles the tool UI. Claude Code implements the resulting issues. | [Generator UI notes](prd.md#generator-ui-notes) |
 | 6.5 | **MVP feedback fixes** (#34) | All issues from the MVP test are triaged and the v1 ones are fixed. | — |
 | 6.6 | **Cross-browser check and README** (#35) | Full flow verified in current Chrome and Safari on macOS. The README covers what the tool is, the URL, how to run it locally, how to add a texture, and how to adjust template constants. | [Browser support](technical-requirements.md#browser-support) |
@@ -151,7 +151,7 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 | `.ai` template files and reference PNGs | Phase 0 | ✅ Supplied |
 | Founder availability for check-in #1 | End of Phase 2 | |
 | Founder availability for the MVP test (a real event) | End of Phase 4 | |
-| 10 texture images (including terrazzo) | Phase 6 | At least 1080×1440, ideally 2160×2880 |
+| ~~10 texture images~~ | ~~Phase 6~~ | ✅ 16 Unsplash textures supplied during #8 |
 | UX/UI pass | Phase 6 | |
 
 ## Risks

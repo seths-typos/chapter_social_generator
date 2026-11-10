@@ -11,17 +11,20 @@ export const TEMPLATES: readonly { id: TemplateId; label: string }[] = [
 
 export const TEMPLATE_IDS: readonly TemplateId[] = TEMPLATES.map((t) => t.id);
 
-/** Bundled texture ids. See docs/template-spec.md#texture-library */
+/**
+ * Library textures the code refers to by id (the template defaults).
+ * Ids must exist in public/textures/textures.json. docs/template-spec.md#texture-library
+ */
 export const LIBRARY_TEXTURE = {
-  woodParquet: { kind: "library", id: "wood-parquet" },
-  tileWhite: { kind: "library", id: "tile-white" },
+  woodDarkWorn: { kind: "library", id: "wood-dark-worn" },
+  plasterWhite: { kind: "library", id: "plaster-white" },
 } as const satisfies Record<string, TextureRef>;
 
 /** Per-template default texture, used until a texture has been chosen in the session. */
 export const DEFAULT_TEXTURE: Record<TemplateId, TextureRef> = {
-  cover: LIBRARY_TEXTURE.woodParquet,
-  photo: LIBRARY_TEXTURE.woodParquet,
-  "multi-photo": LIBRARY_TEXTURE.woodParquet,
-  graphic: LIBRARY_TEXTURE.tileWhite,
-  info: LIBRARY_TEXTURE.tileWhite,
+  cover: LIBRARY_TEXTURE.woodDarkWorn,
+  photo: LIBRARY_TEXTURE.woodDarkWorn,
+  "multi-photo": LIBRARY_TEXTURE.woodDarkWorn,
+  graphic: LIBRARY_TEXTURE.plasterWhite,
+  info: LIBRARY_TEXTURE.plasterWhite,
 };

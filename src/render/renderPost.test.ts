@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { newDraft } from "@/store/draft";
 import type { Post } from "@/store/types";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, INFO_CARD, POLAROID } from "@/templates/constants";
-import { placeholderAssets } from "./assets";
+import type { RenderAssets } from "./types";
 import { renderPost, toRenderInput } from "./renderPost";
 
 /** A minimal CanvasRenderingContext2D stand-in that records fillRect calls in order. */
@@ -44,7 +44,18 @@ class DOMMatrixStub {
 // drawShadow uses `new DOMMatrix()`; provide it in the node test environment.
 (globalThis as { DOMMatrix?: unknown }).DOMMatrix ??= DOMMatrixStub;
 
-const tile = { kind: "library", id: "tile-white" } as const;
+const tile = { kind: "library", id: "plaster-white" } as const;
+
+/** Colour stand-ins for the two default textures, so the test has no image decoding. */
+function placeholderAssets(): RenderAssets {
+  return {
+    textures: new Map([
+      ["library:wood-dark-worn", { kind: "color", color: "#A0602E" }],
+      ["library:plaster-white", { kind: "color", color: "#D9DCE0" }],
+    ]),
+    photos: new Map(),
+  };
+}
 
 describe("toRenderInput", () => {
   it("flattens an Info draft and a complete Info post to the same shape", () => {

@@ -208,14 +208,15 @@ While a post is being built, the editor holds a `Draft`: the same per-template s
 
 | Property | Value |
 |---|---|
-| Count | **10** bundled textures, supplied during the build |
-| Placeholders (until textures are supplied) | Solid-color entries using the real IDs, so template defaults work unchanged: `wood-parquet` → **`#A0602E`**, `tile-white` → **`#D9DCE0`**. A manifest entry can have `"color"` in place of `"file"`/`"thumb"`, and the renderer fills the canvas with it. |
-| Real textures | Supplied by the user during the build (10 in total, including terrazzo). The tile (2330×3106) and parquet (3206×3557) images in the `.ai` files can also be extracted. |
+| Count | **16** bundled textures (Unsplash photos supplied by the owner; see `public/textures/ATTRIBUTION.md`). The brief prefers photos of floors and tables from real events, so these can be swapped or added to later with no code change. |
+| Ids | `wood-dark-worn`, `wood-planks-burnt`, `plywood-weathered`, `osb-board`, `plaster-white`, `paper-white`, `marble-white`, `linen-white`, `paper-tissue-white`, `paper-crumpled-kraft`, `concrete-stained`, `brick-herringbone-grey`, `mesh-grey`, `chalkboard-black`, `linen-burgundy`, `tile-encaustic-red` |
 | Location | `public/textures/{id}.jpg` plus `public/textures/{id}-thumb.jpg` (240×320) |
-| Manifest | `public/textures/textures.json`: `[{ "id": "tile-white", "name": "White tile", "file": "tile-white.jpg", "thumb": "tile-white-thumb.jpg" }]`, or for a placeholder `{ "id": "tile-white", "name": "White tile (placeholder)", "color": "#D9DCE0" }` |
-| Spec | At least 1080×1440 (2160×2880 preferred), JPEG quality around 85, sRGB, under 1.5 MB each |
-| Template defaults | Cover and Photo: `wood-parquet`. Graphic and Info: `tile-white`. Multi-Photo: `wood-parquet`. After the first post, the last-used texture carries over within the session. |
-| Session uploads | Added to the picker with an "Uploaded" tag. Never persisted. |
+| Manifest | `public/textures/textures.json`: `[{ "id": "plaster-white", "name": "White plaster", "file": "plaster-white.jpg", "thumb": "plaster-white-thumb.jpg", "width": 2160, "height": 2880 }]`. Ids are kebab-case and unique; the loader validates this. |
+| Processing | Centre-cropped to 3:4, resized to **2160×2880**, converted to sRGB, progressive JPEG at quality 85, stepped down (to a floor of 70) toward 1.5 MB. Most land at 0.7–1.5 MB; two fine-grained textures (`linen-white`, `concrete-stained`) are 1.6–1.8 MB at quality 70. Thumbnails JPEG quality 80. |
+| Template defaults | Cover, Photo and Multi-Photo: `wood-dark-worn`. Graphic and Info: `plaster-white`. After the first post, the last-used texture carries over within the session. (See [decision 0002](decisions/0002-texture-library-set.md).) |
+| Loading | The manifest is fetched once. Each texture image is fetched and decoded the first time it's needed (the two defaults up front), then cached in memory for the session. |
+| Session uploads | Decoded in the browser, added to the picker with an "Uploaded" tag, selectable like library textures. Never persisted. Below 1080×1440 a low-resolution notice is shown. |
+| Colour fallback | The renderer still accepts a `{ "kind": "color" }` texture asset (used in tests and as a stand-in while an image loads). |
 
 ## Assets
 

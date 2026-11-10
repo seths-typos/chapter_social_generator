@@ -11,8 +11,8 @@ import {
 } from "./draft";
 import type { Post } from "./types";
 
-const wood = { kind: "library", id: "wood-parquet" } as const;
-const tile = { kind: "library", id: "tile-white" } as const;
+const wood = { kind: "library", id: "wood-dark-worn" } as const;
+const tile = { kind: "library", id: "plaster-white" } as const;
 const upload = { kind: "upload", id: "u1" } as const;
 
 describe("newDraft", () => {

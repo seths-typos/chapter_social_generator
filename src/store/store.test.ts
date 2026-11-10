@@ -11,8 +11,8 @@ const photo = (id: string): PoolPhoto => ({
   mode: "regular",
 });
 
-const wood = { kind: "library", id: "wood-parquet" } as const;
-const tile = { kind: "library", id: "tile-white" } as const;
+const wood = { kind: "library", id: "wood-dark-worn" } as const;
+const tile = { kind: "library", id: "plaster-white" } as const;
 const upload = { kind: "upload", id: "u1" } as const;
 
 let store: ReturnType<typeof createAppStore>;

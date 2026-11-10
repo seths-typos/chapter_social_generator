@@ -1,23 +1,70 @@
 /**
- * Render asset loading. For now the texture "library" is two solid-colour placeholders
- * (docs/template-spec.md#texture-library); #8 replaces this with the manifest loader.
+ * React side of asset loading: the manifest, the texture cache, and making sure the
+ * texture the current draft uses is loaded. docs/template-spec.md#texture-library
  */
 
-import { useMemo } from "react";
-import { LIBRARY_TEXTURE } from "@/templates/meta";
-import { textureKey, type RenderAssets, type TextureAsset } from "./types";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useAppStore } from "@/store/store";
+import { DEFAULT_TEXTURE } from "@/templates/meta";
+import { ensureLibraryTexture, getTexturesSnapshot, subscribeTextures } from "./assetCache";
+import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
+import type { RenderAssets } from "./types";
 
-/** Placeholder colours standing in for the real textures until they're supplied. */
-export const PLACEHOLDER_TEXTURES: ReadonlyMap<string, TextureAsset> = new Map([
-  [textureKey(LIBRARY_TEXTURE.woodParquet), { kind: "color", color: "#A0602E" }],
-  [textureKey(LIBRARY_TEXTURE.tileWhite), { kind: "color", color: "#D9DCE0" }],
-]);
-
-export function placeholderAssets(): RenderAssets {
-  return { textures: PLACEHOLDER_TEXTURES, photos: new Map() };
+export interface TextureLibraryState {
+  entries: TextureManifestEntry[];
+  error: string | null;
+  loading: boolean;
 }
 
-/** The assets the preview renders with. Stable identity so renders aren't retriggered. */
+/** The bundled texture manifest, fetched once per page load. */
+export function useTextureLibrary(): TextureLibraryState {
+  const [state, setState] = useState<TextureLibraryState>({
+    entries: [],
+    error: null,
+    loading: true,
+  });
+  useEffect(() => {
+    let cancelled = false;
+    fetchManifest().then(
+      (entries) => !cancelled && setState({ entries, error: null, loading: false }),
+      (err: unknown) =>
+        !cancelled &&
+        setState({
+          entries: [],
+          error: err instanceof Error ? err.message : String(err),
+          loading: false,
+        }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return state;
+}
+
+/** The decoded textures, as a stable snapshot that changes when one finishes loading. */
+export function useTextureAssets() {
+  return useSyncExternalStore(subscribeTextures, getTexturesSnapshot, getTexturesSnapshot);
+}
+
+/**
+ * Everything the renderer needs. Also kicks off loading for the draft's current texture
+ * and, up front, the two template defaults so the first preview isn't grey.
+ */
 export function useRenderAssets(): RenderAssets {
-  return useMemo(() => placeholderAssets(), []);
+  const { entries } = useTextureLibrary();
+  const textures = useTextureAssets();
+  const current = useAppStore((s) => s.draft?.texture ?? null);
+
+  useEffect(() => {
+    if (entries.length === 0) return;
+    const wanted = new Set<string>(Object.values(DEFAULT_TEXTURE).map((t) => t.id));
+    if (current?.kind === "library") wanted.add(current.id);
+    for (const entry of entries) {
+      if (wanted.has(entry.id)) void ensureLibraryTexture(entry);
+    }
+  }, [entries, current]);
+
+  const photos = useMemo(() => new Map<string, ImageBitmap>(), []);
+  return useMemo(() => ({ textures, photos }), [textures, photos]);
 }

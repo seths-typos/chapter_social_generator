@@ -76,6 +76,8 @@ export interface SessionTexture {
   file: Blob;
   width: number;
   height: number;
+  /** Object URL for the picker thumbnail. Revoked when the page unloads. */
+  previewUrl?: string;
 }
 
 /** Every pool photo id a post references (photo slots or the graphic). */

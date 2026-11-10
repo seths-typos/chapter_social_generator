@@ -16,7 +16,7 @@ interface PanelProps {
 export function Panel({ title, actions, children, className = "" }: PanelProps) {
   return (
     <section
-      className={`flex min-h-0 flex-col rounded-lg border border-neutral-200 bg-white ${className}`}
+      className={`flex min-h-0 min-w-0 flex-col rounded-lg border border-neutral-200 bg-white ${className}`}
     >
       <header className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
         <h2 className="font-display text-xl leading-none font-bold tracking-wide">{title}</h2>

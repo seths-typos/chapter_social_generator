@@ -1,6 +1,7 @@
 import { ChMark } from "@/components/ChMark";
 import { Panel, Placeholder } from "@/components/Panel";
 import { Preview } from "@/components/Preview";
+import { TexturePicker } from "@/components/TexturePicker";
 
 /**
  * The one-screen layout from docs/prd.md#app-flow:
@@ -27,15 +28,15 @@ export function AppShell() {
           <Placeholder label="Session photo pool" issue="#14 import · #15 pool panel" />
         </Panel>
 
-        <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-4">
+        <div className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_auto] gap-4">
           <Panel title="Preview">
             <Preview />
           </Panel>
-          <Panel title="Template" className="h-56">
-            <Placeholder
-              label="Template picker and controls"
-              issue="#12 picker · #8 textures · #10 Info fields"
-            />
+          <Panel title="Template">
+            <div className="flex flex-col gap-3">
+              <Placeholder label="Template picker" issue="#12" />
+              <TexturePicker />
+            </div>
           </Panel>
         </div>
 
