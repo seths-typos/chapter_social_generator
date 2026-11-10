@@ -84,7 +84,8 @@ export const FIXTURE_IMAGE_PREFIX = "fixture-";
 export const FIXTURE_IMAGE = { graphic: `${FIXTURE_IMAGE_PREFIX}graphic` } as const;
 
 /** Template picker thumbnails: the real render, drawn small. */
-export const THUMBNAIL = { width: 180, height: 240 } as const;
+/** They use a flat mid-grey instead of a texture, so the template itself is what stands out. */
+export const THUMBNAIL = { width: 180, height: 240, background: "#808080" } as const;
 
 /**
  * What Druk text falls back to on a computer where Druk isn't installed: the closest

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createRenderCanvas } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
-import type { RenderAssets } from "@/render/types";
+import { textureKey, type RenderAssets } from "@/render/types";
 import { useAppStore } from "@/store/store";
 import type { TemplateId } from "@/store/types";
 import { THUMBNAIL } from "@/templates/constants";
@@ -10,7 +10,7 @@ import { losesTypedText, TEMPLATE_LIST, templateFor, fixtureDraft } from "@/temp
 /** One full-size scratch canvas shared by every thumbnail, kept in the document (hidden). */
 let scratch: HTMLCanvasElement | null = null;
 
-/** A template's thumbnail: the real renderer, drawn at full size and scaled down. */
+/** A template's thumbnail: the real renderer on a plain grey background, drawn at full size and scaled down. */
 function Thumbnail({ template, assets }: { template: TemplateId; assets: RenderAssets }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -20,7 +20,12 @@ function Thumbnail({ template, assets }: { template: TemplateId; assets: RenderA
     scratch ??= createRenderCanvas();
     const ctx = scratch.getContext("2d");
     if (!ctx) return;
-    renderPost(ctx, fixtureDraft(template), assets);
+    const draft = fixtureDraft(template);
+    // A flat grey stands in for whichever texture the draft names.
+    const textures = new Map([
+      [textureKey(draft.texture), { kind: "color", color: THUMBNAIL.background } as const],
+    ]);
+    renderPost(ctx, draft, { ...assets, textures });
     out.imageSmoothingQuality = "high";
     out.drawImage(scratch, 0, 0, THUMBNAIL.width, THUMBNAIL.height);
   }, [template, assets]);

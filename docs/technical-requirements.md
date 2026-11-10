@@ -141,7 +141,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 | Downscale on import | Long edge capped at **3000 px**, enough for the largest slot (848 px) with room for zoom and scan cropping. The downscaled bitmap is kept and the original blob is released. |
 | Low-resolution warning | A photo whose short edge is under 1080 px is flagged in the pool. It isn't blocked. |
 | Thumbnails | 240 px-wide bitmaps for the pool and texture picker |
-| Template picker thumbnails | Drawn by the real renderer (`renderPost` on a scratch 1080×1440 canvas, scaled to 180×240), using the template's `fixture` inputs when it has them |
+| Template picker thumbnails | Drawn by the real renderer (`renderPost` on a scratch 1080×1440 canvas, scaled to 180×240), using the template's `fixture` inputs when it has them. The background is a flat mid-grey (`#808080`) rather than a texture. |
 | Memory | A target of 50 photos per session without the tab crashing. Bitmaps are `.close()`d when removed. |
 
 ### Perspective crop (Polaroid scan mode)
