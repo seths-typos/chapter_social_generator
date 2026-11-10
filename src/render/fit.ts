@@ -65,6 +65,39 @@ export function viewFit(src: Size, slot: Rect, view: View): Rect {
   };
 }
 
+/**
+ * The view that draws the photo with its top-left at (`x`, `y`) at `zoom`, clamped so the
+ * slot stays covered. The inverse of `viewFit`.
+ */
+export function viewForOrigin(src: Size, slot: Rect, x: number, y: number, zoom: number): View {
+  const z = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+  const base = coverFit(src, slot);
+  const overflowX = (base.w * z - slot.w) / 2;
+  const overflowY = (base.h * z - slot.h) / 2;
+  // Below a hundredth of a pixel there is nothing to pan across.
+  const pan = (origin: number, start: number, overflow: number) =>
+    overflow < 0.01 ? 0 : clamp((start - overflow - origin) / overflow, -1, 1);
+  return { panX: pan(x, slot.x, overflowX), panY: pan(y, slot.y, overflowY), zoom: z };
+}
+
+/** Drag the photo by (`dx`, `dy`) slot pixels. It stops at the slot's edges. */
+export function panByPixels(src: Size, slot: Rect, view: View, dx: number, dy: number): View {
+  const r = viewFit(src, slot, view);
+  return viewForOrigin(src, slot, r.x + dx, r.y + dy, view.zoom);
+}
+
+/** Change the zoom, keeping the part of the photo at the slot's centre where it is (when it can). */
+export function zoomTo(src: Size, slot: Rect, view: View, zoom: number): View {
+  const r = viewFit(src, slot, view);
+  const cx = slot.x + slot.w / 2;
+  const cy = slot.y + slot.h / 2;
+  const u = (cx - r.x) / r.w;
+  const v = (cy - r.y) / r.h;
+  const z = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+  const base = coverFit(src, slot);
+  return viewForOrigin(src, slot, cx - u * base.w * z, cy - v * base.h * z, z);
+}
+
 /** True when `inner` lies entirely within `outer` (with a small tolerance for float error). */
 export function covers(inner: Rect, outer: Rect, eps = 1e-6): boolean {
   return (

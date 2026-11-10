@@ -35,6 +35,40 @@ export const placementFromRect = (rect: Rect): PolaroidPlacement => ({
 export const photoRectInPolaroid = (photo: { width: number; height: number }, view: View): Rect =>
   viewFit({ w: photo.width, h: photo.height }, POLAROID.window, view);
 
+/** A canvas point in the polaroid's own 848×1021 space. */
+export function toPolaroidSpace(
+  placement: PolaroidPlacement,
+  point: { x: number; y: number },
+): { x: number; y: number } {
+  const d = deltaToPolaroidSpace(placement, point.x - placement.cx, point.y - placement.cy);
+  return { x: d.x + SIZE.w / 2, y: d.y + SIZE.h / 2 };
+}
+
+/** A canvas-space movement expressed in the polaroid's own space (undoing rotation and scale). */
+export function deltaToPolaroidSpace(
+  placement: PolaroidPlacement,
+  dx: number,
+  dy: number,
+): { x: number; y: number } {
+  const a = (-placement.rotation * Math.PI) / 180;
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  return {
+    x: (dx * cos - dy * sin) / placement.scale,
+    y: (dx * sin + dy * cos) / placement.scale,
+  };
+}
+
+/** True when a canvas point is over the polaroid's photo window. */
+export function isOverWindow(
+  placement: PolaroidPlacement,
+  point: { x: number; y: number },
+): boolean {
+  const p = toPolaroidSpace(placement, point);
+  const w = POLAROID.window;
+  return p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h;
+}
+
 export interface PolaroidOptions {
   placement: PolaroidPlacement;
   /** The photo for the window. Without one the window is a flat grey. */

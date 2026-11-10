@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { POLAROID } from "@/templates/constants";
 import { covers } from "./fit";
-import { drawPolaroid, photoRectInPolaroid, placementFromRect } from "./polaroid";
+import {
+  deltaToPolaroidSpace,
+  drawPolaroid,
+  isOverWindow,
+  photoRectInPolaroid,
+  placementFromRect,
+  toPolaroidSpace,
+} from "./polaroid";
 
 /** A fake 2D context that records the calls drawPolaroid makes. */
 function recorder() {
@@ -105,5 +112,30 @@ describe("drawPolaroid", () => {
     drawPolaroid(ctx, { placement, view, photo, frame });
     const n = names(calls);
     expect(n.filter((c) => c === "save").length).toBe(n.filter((c) => c === "restore").length);
+  });
+});
+
+describe("pointer mapping", () => {
+  const straight = placementFromRect(POLAROID.rect);
+
+  it("maps canvas points into the polaroid's own space", () => {
+    expect(toPolaroidSpace(straight, { x: 116, y: 210 })).toEqual({ x: 0, y: 0 });
+    const half = { cx: 500, cy: 500, rotation: 0, scale: 0.5 };
+    expect(toPolaroidSpace(half, { x: 500, y: 500 })).toEqual({ x: 424, y: 510.5 });
+    expect(toPolaroidSpace(half, { x: 288, y: 244.75 })).toEqual({ x: 0, y: 0 });
+  });
+
+  it("undoes rotation and scale for a drag", () => {
+    const turned = { cx: 0, cy: 0, rotation: 90, scale: 2 };
+    // Dragging down the canvas moves along the +x axis of a polaroid turned 90° clockwise.
+    const d = deltaToPolaroidSpace(turned, 0, 20);
+    expect(d.x).toBeCloseTo(10);
+    expect(d.y).toBeCloseTo(0);
+  });
+
+  it("knows when a point is over the photo window", () => {
+    expect(isOverWindow(straight, { x: 540, y: 600 })).toBe(true);
+    expect(isOverWindow(straight, { x: 540, y: 1150 })).toBe(false); // the wide bottom border
+    expect(isOverWindow(straight, { x: 50, y: 600 })).toBe(false);
   });
 });

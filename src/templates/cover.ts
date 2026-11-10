@@ -2,7 +2,7 @@ import type { RendererFor } from "@/render/types";
 import { drawWordmark } from "@/render/wordmark";
 import { COVER_WORDMARK, FIXTURE_IMAGE, LIBRARY_TEXTURE, SINGLE_PHOTO_SLOTS } from "./constants";
 import type { TemplateDefinition } from "./definition";
-import { renderPhoto } from "./photo";
+import { renderPhoto, singlePhotoTargets } from "./photo";
 import { slotDraftOps } from "./slots";
 
 /**
@@ -23,6 +23,7 @@ export const coverTemplate: TemplateDefinition<"cover"> = {
   defaultTexture: LIBRARY_TEXTURE.woodDarkWorn,
   ...slotDraftOps("cover", SINGLE_PHOTO_SLOTS),
   render: renderCover,
+  photoTargets: singlePhotoTargets,
   // The photo inside the polaroid scan in CoverPost.ai. Only loaded in dev builds.
   fixture: (draft) => coverTemplate.acceptPhoto(draft, FIXTURE_IMAGE.cover),
 };

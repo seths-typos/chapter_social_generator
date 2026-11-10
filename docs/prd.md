@@ -85,7 +85,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Choose a template. | The editor opens on the template picker. All five templates are selectable, each with a thumbnail. Switching template mid-post keeps compatible inputs: the texture, and photos between Cover, Photo and Multi-Photo. Info text and a graphic don't carry over, and switching away from typed text asks for confirmation. |
 | Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Multi-Photo lets him choose how many photos (range TBD in the Template Spec). |
 | Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
-| Optionally reposition and zoom a photo. | In the slot, he can drag to pan and use a slider or scroll to zoom. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
+| Optionally reposition and zoom a photo. | He drags the photo in the preview to pan, and zooms with a slider in the controls or by scrolling over the photo. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
 | Optional polaroid grain. | A per-post toggle. Strength and filter values are TBD and will be tuned during the build. |
 | Fill text fields (Info template). | Fields: event number (numeric, rendered as `ch. N`), title, body, date/time, location. The preview updates as he types. Overflow behavior is defined in the Template Spec. |
 | Choose a background texture. | Pick from the bundled texture library, shown as thumbnails. |

@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { clampView, containFit, coverFit, covers, viewFit } from "./fit";
+import {
+  clampView,
+  containFit,
+  coverFit,
+  covers,
+  panByPixels,
+  viewFit,
+  viewForOrigin,
+  zoomTo,
+} from "./fit";
 
 const slot = { x: 100, y: 200, w: 400, h: 300 };
 
@@ -70,5 +79,73 @@ describe("viewFit", () => {
   it("an axis with no overflow ignores pan on that axis", () => {
     const r = viewFit({ w: 4, h: 3 }, slot, { panX: 1, panY: 1, zoom: 1 });
     expect(r).toEqual(coverFit({ w: 4, h: 3 }, slot));
+  });
+});
+
+describe("pan and zoom", () => {
+  const src = { w: 1000, h: 1000 };
+  const centred = { panX: 0, panY: 0, zoom: 2 };
+
+  it("viewForOrigin is the inverse of viewFit", () => {
+    for (const view of [
+      centred,
+      { panX: 0.4, panY: -0.9, zoom: 1.5 },
+      { panX: -1, panY: 1, zoom: 3 },
+    ]) {
+      const r = viewFit(src, slot, view);
+      const back = viewForOrigin(src, slot, r.x, r.y, view.zoom);
+      expect(back.panX).toBeCloseTo(view.panX);
+      expect(back.panY).toBeCloseTo(view.panY);
+      expect(back.zoom).toBe(view.zoom);
+    }
+  });
+
+  it("dragging moves the photo by that many pixels", () => {
+    const before = viewFit(src, slot, centred);
+    const after = viewFit(src, slot, panByPixels(src, slot, centred, 30, -20));
+    expect(after.x - before.x).toBeCloseTo(30);
+    expect(after.y - before.y).toBeCloseTo(-20);
+  });
+
+  it("dragging stops at the edges, so no gap can show", () => {
+    for (const [dx, dy] of [
+      [5000, 0],
+      [-5000, 5000],
+      [0, -5000],
+    ] as const) {
+      const view = panByPixels(src, slot, centred, dx, dy);
+      expect(Math.abs(view.panX)).toBeLessThanOrEqual(1);
+      expect(Math.abs(view.panY)).toBeLessThanOrEqual(1);
+      expect(covers(viewFit(src, slot, view), slot)).toBe(true);
+    }
+    const right = viewFit(src, slot, panByPixels(src, slot, centred, 5000, 0));
+    expect(right.x).toBeCloseTo(slot.x);
+  });
+
+  it("an axis with nothing spare doesn't pan", () => {
+    const fits = panByPixels({ w: 4, h: 3 }, slot, { panX: 0, panY: 0, zoom: 1 }, 50, 50);
+    expect(fits).toEqual({ panX: 0, panY: 0, zoom: 1 });
+  });
+
+  it("zooming keeps the photo point at the slot centre", () => {
+    const view = { panX: 0.5, panY: -0.25, zoom: 2 };
+    const centreOf = (v: typeof view) => {
+      const r = viewFit(src, slot, v);
+      return { u: (slot.x + slot.w / 2 - r.x) / r.w, v: (slot.y + slot.h / 2 - r.y) / r.h };
+    };
+    const zoomed = zoomTo(src, slot, view, 2.6);
+    expect(zoomed.zoom).toBe(2.6);
+    expect(centreOf(zoomed).u).toBeCloseTo(centreOf(view).u);
+    expect(centreOf(zoomed).v).toBeCloseTo(centreOf(view).v);
+  });
+
+  it("zooming out clamps the zoom and never leaves a gap", () => {
+    const edge = { panX: 1, panY: -1, zoom: 3 };
+    for (const zoom of [0.2, 1, 1.3, 9]) {
+      const view = zoomTo(src, slot, edge, zoom);
+      expect(view.zoom).toBeGreaterThanOrEqual(1);
+      expect(view.zoom).toBeLessThanOrEqual(3);
+      expect(covers(viewFit(src, slot, view), slot)).toBe(true);
+    }
   });
 });

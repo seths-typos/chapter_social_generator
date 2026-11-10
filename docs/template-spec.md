@@ -55,7 +55,7 @@ A polaroid is an **848×1021** object (about the 88×107 mm Polaroid 600 ratio).
 | Frame asset | `src/assets/polaroid/frame.png`: the scanned polaroid from `CoverPost.ai` with its photo window cut out (transparent), stored at 2× output size (1696×2042, ~1.1 MB). Keeps real paper texture and edges. Can be replaced later with a dedicated blank scan. |
 | Frame size | 848×1021 |
 | Photo window (relative to the frame) | x **60**, y **57**, w **726**, h **753** (ratio ≈ 0.964). Measured from the scan's dark photo area, rounded outward so the transparent cut covers it fully. The cut in `frame.png` is exactly this rectangle, so the photo drawn behind it must fill it exactly. |
-| Photo fit | Cover-fit into the window, centered by default. Optional pan and zoom (zoom 1.0–3.0×). Panning can never expose an empty gap. |
+| Photo fit | Cover-fit into the window, centered by default. Optional pan and zoom (zoom 1.0–3.0×). Pan is stored as −1..1 per axis, a fraction of the spare photo on that axis, so no stored value can expose an empty gap. Zooming keeps the part of the photo at the window's centre in place. |
 | Draw order | Shadow on the full 848×1021 rect, then the photo clipped to the window, then the frame on top |
 | Empty state | Before a photo is chosen the window is a flat `#C9CCD1`. It is never exported. |
 | Placement | A polaroid is drawn in its own 848×1021 space and placed by a centre, a rotation and a uniform scale (`PolaroidPlacement`). Cover and Photo use centre (540, 720.5), no rotation, scale 1. The shadow's blur and offset scale with it. |

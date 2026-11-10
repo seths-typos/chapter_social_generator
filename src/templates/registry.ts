@@ -4,10 +4,11 @@
  * instead of switching on the template id. docs/decisions/0003-template-definitions.md
  */
 
+import type { RenderAssets } from "@/render/types";
 import { emptySlot, hasSlots, type Draft } from "@/store/draft";
 import type { Post, TemplateId, TextureRef } from "@/store/types";
 import { coverTemplate } from "./cover";
-import type { AnyTemplateDefinition, TemplateDefinition } from "./definition";
+import type { AnyTemplateDefinition, PhotoTarget, TemplateDefinition } from "./definition";
 import { graphicTemplate } from "./graphic";
 import { infoTemplate } from "./info";
 import { multiPhotoTemplate } from "./multiPhoto";
@@ -82,6 +83,11 @@ export function acceptPhotoInDraft(draft: Draft, photoId: string): Draft {
 /** True when the draft's template uses pool images at all. */
 export const takesPhotos = (draft: Draft): boolean =>
   acceptPhotoInDraft(draft, "\u0000probe") !== draft;
+
+/** The draft's adjustable photos (see `TemplateDefinition.photoTargets`), bottom to top. */
+export function photoTargets(draft: Draft, assets: RenderAssets): PhotoTarget[] {
+  return templateFor(draft.template).photoTargets?.(draft, assets) ?? [];
+}
 
 /** The draft with a pool photo taken out of wherever it was used. */
 export function clearPhotoFromDraft(draft: Draft, photoId: string): Draft {

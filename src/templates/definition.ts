@@ -13,7 +13,8 @@
  */
 
 import type { ComponentType } from "react";
-import type { RendererFor } from "@/render/types";
+import type { PolaroidPlacement } from "@/render/polaroid";
+import type { RenderAssets, RendererFor } from "@/render/types";
 import type { DraftBase, DraftFor } from "@/store/draft";
 import type { PoolPhoto, PostFor, TemplateId, TextureRef } from "@/store/types";
 
@@ -57,6 +58,12 @@ export interface TemplateDefinition<K extends TemplateId> {
   /** Draw everything above the background texture. Returns fit warnings. */
   render: RendererFor<K>;
 
+  /**
+   * The photos that can be dragged and zoomed in the preview, bottom to top. Templates
+   * without adjustable photos omit it.
+   */
+  photoTargets?(draft: DraftFor<K>, assets: RenderAssets): PhotoTarget[];
+
   /** The template's own form fields. Templates with nothing beyond the shared controls omit it. */
   Editor?: ComponentType<EditorProps<K>>;
   /**
@@ -64,6 +71,14 @@ export interface TemplateDefinition<K extends TemplateId> {
    * against `docs/reference/{id}.png` (dev only).
    */
   fixture?: (draft: DraftFor<K>) => DraftFor<K>;
+}
+
+/** One adjustable photo in the preview: which slot it is and where its polaroid sits. */
+export interface PhotoTarget {
+  slot: number;
+  placement: PolaroidPlacement;
+  /** Size of the photo in the slot, in px. */
+  photo: { width: number; height: number };
 }
 
 /**

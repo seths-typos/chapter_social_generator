@@ -115,11 +115,11 @@ Template-specific fields are edited through the store's `editDraft(template, fn)
 | `texture.ts` | Cover-fit an image (or a solid placeholder color) to the canvas |
 | `shadow.ts` | Draw the standard shadow for a rectangle: `shadowColor rgba(0,0,0,0.75)`, `shadowBlur 12`, `shadowOffsetY 6`, scaled by a factor. Draw the shape with the shadow, then draw the content on top without it. |
 | `polaroid.ts` | `drawPolaroid(ctx, { placement, photo, view, frame })`. Regular mode: shadow, clip to the window, draw the photo with pan and zoom, draw `frame.png`. Placed by centre, rotation and scale (for Multi-Photo). Scan mode (Phase 3): draw the warped scan, contain-fit. |
+| `fit.ts` | Pure fit math: cover/contain fit, `viewFit` (pan and zoom → draw rect), and its inverses `panByPixels` and `zoomTo`, which the preview drag, scroll and zoom slider use. Unit tested. |
 | `frame.ts` | Loads `frame.png` once when the app starts. Export of a polaroid post waits for it. |
 | `grain.ts` | Seeded noise tile (`mulberry32`, fixed seed), composited with `globalCompositeOperation = "overlay"` inside the photo clip. Strength is a constant, tuned during the build. |
 | `text.ts` | Measuring, word-wrapping and shrink-to-fit, following the Template Spec rules. Draws text by baseline, using the baselines measured from the design files. |
 | `wordmark.ts` | The `chapter` wordmark as `Path2D` vector paths read from `chapter.svg`, filled in any colour and scaled to a rectangle. |
-| `fit.ts` | Cover/contain math, and clamping pan and zoom so a photo never leaves a gap |
 
 ### Visual review aid
 

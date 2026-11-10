@@ -36,6 +36,10 @@ export const LIBRARY_TEXTURE = {
 /** Photo slot pan/zoom limits. See docs/template-spec.md#polaroid */
 export const ZOOM_MIN = 1.0;
 export const ZOOM_MAX = 3.0;
+/** Scroll-to-zoom speed: the zoom is multiplied by e^(−deltaY × this) per wheel event. */
+export const WHEEL_ZOOM_RATE = 0.002;
+/** Step of the zoom slider. */
+export const ZOOM_STEP = 0.01;
 
 /**
  * Standard drop shadow for every content object. docs/template-spec.md#drop-shadow
