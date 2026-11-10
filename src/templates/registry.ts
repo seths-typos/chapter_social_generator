@@ -1,15 +1,98 @@
-import type { RendererFor } from "@/render/types";
-import type { TemplateId } from "@/store/types";
-import { renderCover } from "./cover";
-import { renderGraphic } from "./graphic";
-import { renderInfo } from "./info";
-import { renderMultiPhoto } from "./multiPhoto";
-import { renderPhoto } from "./photo";
+/**
+ * The template registry, and the template-agnostic operations built on it. Everything
+ * outside `src/templates/` that needs to act on "whichever template this is" calls these
+ * instead of switching on the template id. docs/decisions/0003-template-definitions.md
+ */
 
-export const TEMPLATE_RENDERERS: { [K in TemplateId]: RendererFor<K> } = {
-  cover: renderCover,
-  photo: renderPhoto,
-  "multi-photo": renderMultiPhoto,
-  graphic: renderGraphic,
-  info: renderInfo,
+import { emptySlot, hasSlots, type Draft } from "@/store/draft";
+import type { Post, TemplateId, TextureRef } from "@/store/types";
+import { coverTemplate } from "./cover";
+import type { AnyTemplateDefinition, TemplateDefinition } from "./definition";
+import { graphicTemplate } from "./graphic";
+import { infoTemplate } from "./info";
+import { multiPhotoTemplate } from "./multiPhoto";
+import { photoTemplate } from "./photo";
+
+/** Every template. Key order is the template picker's display order. */
+export const TEMPLATES: { readonly [K in TemplateId]: TemplateDefinition<K> } = {
+  cover: coverTemplate,
+  photo: photoTemplate,
+  "multi-photo": multiPhotoTemplate,
+  graphic: graphicTemplate,
+  info: infoTemplate,
 };
+
+/** The definition for a template id, typed for code that doesn't know which one it is. */
+export const templateFor = (id: TemplateId): AnyTemplateDefinition =>
+  TEMPLATES[id] as unknown as AnyTemplateDefinition;
+
+export const TEMPLATE_IDS = Object.keys(TEMPLATES) as readonly TemplateId[];
+
+/** All definitions in picker order. */
+export const TEMPLATE_LIST: readonly AnyTemplateDefinition[] = TEMPLATE_IDS.map(templateFor);
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/** A fresh, empty draft for a template. Uses the template's default texture unless one is given. */
+export function newDraft(template: TemplateId, texture?: TextureRef): Draft {
+  const t = templateFor(template);
+  return t.newDraft({ texture: texture ?? t.defaultTexture, textureChosen: false });
+}
+
+/** Which required inputs are still missing. Empty when the draft is complete. */
+export function missingInputs(draft: Draft): string[] {
+  return templateFor(draft.template).missingInputs(draft);
+}
+
+/** A complete, renderable Post, or null if any required input is missing. */
+export function toPost(draft: Draft): Post | null {
+  if (missingInputs(draft).length > 0) return null;
+  return templateFor(draft.template).toPost(draft);
+}
+
+/** Load a stored Post back into an editable Draft. Its texture counts as chosen. */
+export function fromPost(post: Post): Draft {
+  return templateFor(post.template).fromPost(post, { texture: post.texture, textureChosen: true });
+}
+
+/** Every pool photo id a post references (photo slots or the graphic). */
+export function photoIdsInPost(post: Post): string[] {
+  return templateFor(post.template).photoIds(post);
+}
+
+/** The draft with a pool photo taken out of wherever it was used. */
+export function clearPhotoFromDraft(draft: Draft, photoId: string): Draft {
+  return templateFor(draft.template).clearPhoto(draft, photoId);
+}
+
+/** Give a slot-based draft `count` slots (clamped to its template's range), keeping existing photos. */
+export function withPhotoCount(draft: Draft, count: number): Draft {
+  const range = templateFor(draft.template).slots;
+  if (!hasSlots(draft) || !range) return draft;
+  const n = clamp(count, range.min, range.max);
+  if (n === draft.slots.length) return draft;
+  const slots = Array.from({ length: n }, (_, i) => draft.slots[i] ?? emptySlot());
+  return { ...draft, slots } as Draft;
+}
+
+/**
+ * Switch an in-progress draft to another template. Carries the texture (when chosen or
+ * carried over from the session) and photos between the slot-based templates; drops the
+ * rest. See docs/decisions/0001-draft-per-template.md
+ */
+export function convertDraft(
+  draft: Draft,
+  template: TemplateId,
+  opts: { lastUsedTexture: TextureRef | null },
+): Draft {
+  if (draft.template === template) return draft;
+  const keepTexture = draft.textureChosen || opts.lastUsedTexture !== null;
+  const next = newDraft(template, keepTexture ? draft.texture : undefined);
+  next.textureChosen = draft.textureChosen;
+  const range = templateFor(template).slots;
+  if (!hasSlots(draft) || !hasSlots(next) || !range) return next;
+  const carried = draft.slots.filter((s) => s.photoId !== null).map((s) => ({ ...s }));
+  const n = clamp(carried.length, range.min, range.max);
+  const slots = Array.from({ length: n }, (_, i) => carried[i] ?? emptySlot());
+  return { ...next, grain: draft.grain, slots } as Draft;
+}

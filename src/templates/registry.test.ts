@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { hasSlots, slotCount } from "@/store/draft";
+import type { Post } from "@/store/types";
 import {
+  clearPhotoFromDraft,
   convertDraft,
   fromPost,
-  hasSlots,
   missingInputs,
   newDraft,
-  slotCount,
+  photoIdsInPost,
+  TEMPLATE_IDS,
+  TEMPLATE_LIST,
+  TEMPLATES,
   toPost,
   withPhotoCount,
-} from "./draft";
-import type { Post } from "./types";
+} from "./registry";
 
 const wood = { kind: "library", id: "wood-dark-worn" } as const;
 const tile = { kind: "library", id: "plaster-white" } as const;
@@ -239,3 +243,85 @@ describe("fromPost", () => {
     }
   });
 });
+
+describe("registry", () => {
+  it("keys every definition by its own id, in picker order", () => {
+    for (const id of TEMPLATE_IDS) expect(TEMPLATES[id].id).toBe(id);
+    expect(TEMPLATE_LIST.map((t) => t.id)).toEqual([
+      "cover",
+      "photo",
+      "multi-photo",
+      "graphic",
+      "info",
+    ]);
+  });
+
+  it("gives every template a unique label and a library default texture", () => {
+    const labels = TEMPLATE_LIST.map((t) => t.label);
+    expect(new Set(labels).size).toBe(labels.length);
+    for (const t of TEMPLATE_LIST) expect(t.defaultTexture.kind).toBe("library");
+  });
+
+  it("starts every template with an incomplete draft of its own kind", () => {
+    for (const id of TEMPLATE_IDS) {
+      const d = newDraft(id);
+      expect(d.template).toBe(id);
+      expect(missingInputs(d).length).toBeGreaterThan(0);
+      expect(toPost(d)).toBeNull();
+    }
+  });
+});
+
+describe("photoIdsInPost", () => {
+  it("lists slot photos, the graphic, or nothing", () => {
+    const slot = (photoId: string) => ({ photoId, panX: 0, panY: 0, zoom: 1 });
+    expect(
+      photoIdsInPost({ template: "photo", slots: [slot("a")], texture: tile, grain: false }),
+    ).toEqual(["a"]);
+    expect(
+      photoIdsInPost({
+        template: "multi-photo",
+        slots: [slot("a"), slot("b")],
+        texture: tile,
+        grain: false,
+      }),
+    ).toEqual(["a", "b"]);
+    expect(photoIdsInPost({ template: "graphic", graphicId: "g", texture: tile })).toEqual(["g"]);
+    expect(photoIdsInPost(toPost(fromPost(infoPost))!)).toEqual([]);
+  });
+});
+
+describe("clearPhotoFromDraft", () => {
+  it("empties the slots that used the photo and resets their view", () => {
+    let d = withPhotoCount(newDraft("multi-photo"), 3);
+    if (!hasSlots(d)) throw new Error();
+    d.slots[0] = { photoId: "a", panX: 0.5, panY: 0, zoom: 2 };
+    d.slots[1] = { photoId: "b", panX: 0, panY: 0, zoom: 1 };
+    d.slots[2] = { photoId: "a", panX: 0, panY: 0, zoom: 1 };
+    d = clearPhotoFromDraft(d, "a");
+    expect(hasSlots(d) && d.slots).toEqual([
+      { photoId: null, panX: 0, panY: 0, zoom: 1 },
+      { photoId: "b", panX: 0, panY: 0, zoom: 1 },
+      { photoId: null, panX: 0, panY: 0, zoom: 1 },
+    ]);
+  });
+
+  it("clears the graphic, and leaves an Info draft alone", () => {
+    const g = { ...newDraft("graphic"), graphicId: "g" };
+    expect(clearPhotoFromDraft(g, "g")).toMatchObject({ graphicId: null });
+    expect(clearPhotoFromDraft(g, "other")).toBe(g);
+    const info = newDraft("info");
+    expect(clearPhotoFromDraft(info, "g")).toBe(info);
+  });
+});
+
+const infoPost: Post = {
+  template: "info",
+  eventNumber: 1,
+  title: "T",
+  body: "",
+  date: "2026-01-01",
+  startTime: "18:00",
+  location: "L",
+  texture: tile,
+};

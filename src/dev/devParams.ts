@@ -6,7 +6,7 @@
  */
 
 import { appStore } from "@/store/store";
-import { TEMPLATE_IDS } from "@/templates/meta";
+import { TEMPLATE_IDS } from "@/templates/registry";
 import type { TemplateId } from "@/store/types";
 
 export function applyDevParams(search = window.location.search): void {

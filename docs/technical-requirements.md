@@ -72,8 +72,32 @@ function renderPost(ctx: CanvasRenderingContext2D, post: Post, assets: RenderAss
 
 - **Pure:** output depends only on `post` and `assets` (decoded images, frame, textures, wordmark). No reading from the store, the DOM or the clock.
 - **One code path:** the preview canvas is a real **1080×1440** canvas, scaled down with CSS (`width: 100%`). Export calls `renderPost` on a fresh 1080×1440 canvas and then `canvas.toBlob("image/png")`.
-- **Template code** lives in `src/templates/{cover,photo,multiPhoto,graphic,info}.ts`. Every coordinate, size and color comes from `src/templates/constants.ts`, which mirrors the Template Spec one-to-one.
+- **Template code** lives in `src/templates/{cover,photo,multiPhoto,graphic,info}.ts`, one definition per file (see [Template definitions](#template-definitions)). Every coordinate, size and color comes from `src/templates/constants.ts`, which mirrors the Template Spec one-to-one.
+- **Draws from a `Draft`:** templates render the editor's `Draft`, so a half-filled post can be previewed. `renderPost` loads a stored `Post` into a draft first, so preview and export still share one code path.
 - **Re-rendering:** the preview re-renders on input change, throttled with `requestAnimationFrame`. Target: under 50 ms per render on a recent MacBook.
+
+### Template definitions
+
+Each template file exports one `TemplateDefinition` (`src/templates/definition.ts`), and `src/templates/registry.ts` lists them. The store, renderer and UI go through the registry, so nothing outside `src/templates/` switches on a template id. See [decision 0003](decisions/0003-template-definitions.md).
+
+| Member | Purpose |
+|---|---|
+| `id`, `label`, `defaultTexture` | Identity, picker name, and the texture used until one is chosen |
+| `slots` (optional) | `{ min, max }` photo slots. Present on Cover, Photo and Multi-Photo, which share their draft operations through `slotDraftOps`. |
+| `newDraft`, `missingInputs`, `toPost`, `fromPost` | The template's `Draft`: create it, check it, convert it to and from a `Post` |
+| `photoIds`, `clearPhoto` | Which pool photos a post uses, and removing one from a draft |
+| `render` | Draws everything above the background texture and returns fit warnings |
+| `Editor` (with #10), `fixture` (with #13) | The template's form, and sample inputs for the comparison view |
+
+**To add a template:**
+
+1. Write its section in the Template Spec and add its values to `constants.ts`.
+2. Add its variant to the `Post` union (`src/store/types.ts`) and the `Draft` union (`src/store/draft.ts`).
+3. Create `src/templates/{name}.ts` exporting its definition.
+4. Add it to `TEMPLATES` in `registry.ts`. Its position there is its position in the picker.
+5. Add a reference render to `docs/reference/` if there is a design to match.
+
+Template-specific fields are edited through the store's `editDraft(template, fn)`.
 
 ### Primitives (`src/render/`)
 
@@ -150,8 +174,8 @@ The minimum required features are WebGL2, `createImageBitmap` with `imageOrienta
 │  ├─ app/                    App shell, layout, font-loading gate
 │  ├─ components/             PhotoPool, TemplatePicker, Editor, SlotEditor,
 │  │                          PerspectiveCrop, TexturePicker, BatchList, ...
-│  ├─ store/                  Zustand store + types (Post, BatchItem, PoolPhoto)
-│  ├─ templates/              constants.ts + one file per template
+│  ├─ store/                  Zustand store + types (Post, Draft, BatchItem, PoolPhoto)
+│  ├─ templates/              constants.ts, definition.ts, registry.ts + one file per template
 │  ├─ render/                 renderPost + primitives
 │  ├─ image/                  import, heic, homography, warp
 │  ├─ export/                 png, zip, captions, filenames

@@ -5,45 +5,23 @@
  * Pure: output depends only on `input` and `assets`. No store, DOM or clock access.
  */
 
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
-import { TEMPLATE_RENDERERS } from "@/templates/registry";
-import type { Draft } from "@/store/draft";
+import { isDraft, type Draft } from "@/store/draft";
 import type { Post } from "@/store/types";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
+import { fromPost, templateFor } from "@/templates/registry";
 import { drawTexture } from "./texture";
-import { textureKey, type RenderAssets, type RenderInput, type RenderResult } from "./types";
+import { textureKey, type RenderAssets, type RenderResult } from "./types";
 
-/** Both a complete Post and an in-progress Draft render; a Draft just has blanks. */
-export function toRenderInput(x: Post | Draft): RenderInput {
-  switch (x.template) {
-    case "cover":
-    case "photo":
-    case "multi-photo":
-      return { template: x.template, slots: x.slots, texture: x.texture, grain: x.grain };
-    case "graphic":
-      return { template: "graphic", graphicId: x.graphicId, texture: x.texture };
-    case "info": {
-      const i = "info" in x ? x.info : x;
-      return {
-        template: "info",
-        eventNumber: i.eventNumber,
-        title: i.title,
-        body: i.body,
-        date: i.date,
-        startTime: i.startTime,
-        endTime: i.endTime ?? "",
-        location: i.location,
-        texture: x.texture,
-      };
-    }
-  }
-}
-
+/**
+ * Templates draw from a Draft, so a half-filled post can be previewed. A stored Post is
+ * loaded into a Draft first; both routes reach the same drawing code.
+ */
 export function renderPost(
   ctx: CanvasRenderingContext2D,
   post: Post | Draft,
   assets: RenderAssets,
 ): RenderResult {
-  const input = toRenderInput(post);
+  const draft = isDraft(post) ? post : fromPost(post);
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -51,13 +29,8 @@ export function renderPost(
   ctx.imageSmoothingQuality = "high";
 
   // Layer 1: texture. Layers 2+ belong to the template.
-  drawTexture(ctx, assets.textures.get(textureKey(input.texture)));
-  const render = TEMPLATE_RENDERERS[input.template] as (
-    c: CanvasRenderingContext2D,
-    i: RenderInput,
-    a: RenderAssets,
-  ) => RenderResult["warnings"];
-  const warnings = render(ctx, input, assets);
+  drawTexture(ctx, assets.textures.get(textureKey(draft.texture)));
+  const warnings = templateFor(draft.template).render(ctx, draft, assets);
 
   ctx.restore();
   return { warnings };

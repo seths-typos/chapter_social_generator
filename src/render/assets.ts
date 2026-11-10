@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAppStore } from "@/store/store";
-import { DEFAULT_TEXTURE } from "@/templates/meta";
+import { TEMPLATE_LIST } from "@/templates/registry";
 import { ensureLibraryTexture, getTexturesSnapshot, subscribeTextures } from "./assetCache";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
@@ -58,7 +58,7 @@ export function useRenderAssets(): RenderAssets {
 
   useEffect(() => {
     if (entries.length === 0) return;
-    const wanted = new Set<string>(Object.values(DEFAULT_TEXTURE).map((t) => t.id));
+    const wanted = new Set<string>(TEMPLATE_LIST.map((t) => t.defaultTexture.id));
     if (current?.kind === "library") wanted.add(current.id);
     for (const entry of entries) {
       if (wanted.has(entry.id)) void ensureLibraryTexture(entry);

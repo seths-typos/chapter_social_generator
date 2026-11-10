@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { newDraft } from "@/store/draft";
 import type { Post } from "@/store/types";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, INFO_CARD, POLAROID } from "@/templates/constants";
+import { newDraft } from "@/templates/registry";
 import type { RenderAssets } from "./types";
-import { renderPost, toRenderInput } from "./renderPost";
+import { renderPost } from "./renderPost";
 
 /** A minimal CanvasRenderingContext2D stand-in that records fillRect calls in order. */
 function fakeCtx() {
@@ -57,28 +57,6 @@ function placeholderAssets(): RenderAssets {
   };
 }
 
-describe("toRenderInput", () => {
-  it("flattens an Info draft and a complete Info post to the same shape", () => {
-    const draft = newDraft("info");
-    if (draft.template !== "info") throw new Error();
-    draft.info.title = "T";
-    const fromDraft = toRenderInput(draft);
-    const post: Post = {
-      template: "info",
-      eventNumber: 1,
-      title: "T",
-      body: "",
-      date: "2026-01-01",
-      startTime: "18:00",
-      location: "L",
-      texture: tile,
-    };
-    const fromPost = toRenderInput(post);
-    expect(fromDraft).toMatchObject({ template: "info", title: "T", eventNumber: null });
-    expect(fromPost).toMatchObject({ template: "info", title: "T", eventNumber: 1, endTime: "" });
-  });
-});
-
 describe("renderPost", () => {
   it("paints the texture over the whole canvas first, then the template's content", () => {
     const { ctx, fills } = fakeCtx();
@@ -111,5 +89,23 @@ describe("renderPost", () => {
     const draft = { ...newDraft("photo"), texture: { kind: "upload", id: "gone" } as const };
     renderPost(ctx, draft, placeholderAssets());
     expect(fills[0]!.style).toBe("#BFBFBF");
+  });
+
+  it("draws a stored Post exactly as it draws the equivalent Draft", () => {
+    const post: Post = {
+      template: "info",
+      eventNumber: 1,
+      title: "T",
+      body: "",
+      date: "2026-01-01",
+      startTime: "18:00",
+      location: "L",
+      texture: tile,
+    };
+    const fromPost = fakeCtx();
+    const fromDraft = fakeCtx();
+    renderPost(fromPost.ctx, post, placeholderAssets());
+    renderPost(fromDraft.ctx, newDraft("info"), placeholderAssets());
+    expect(fromPost.fills).toEqual(fromDraft.fills);
   });
 });

@@ -60,6 +60,9 @@ export type Post =
       texture: TextureRef;
     };
 
+/** The Post variant for one template. */
+export type PostFor<K extends TemplateId> = Post & { template: K };
+
 export interface BatchItem {
   id: string;
   /** Editable; becomes the export filename. Defaults to `{template}-{n}`. */
@@ -78,18 +81,4 @@ export interface SessionTexture {
   height: number;
   /** Object URL for the picker thumbnail. Revoked when the page unloads. */
   previewUrl?: string;
-}
-
-/** Every pool photo id a post references (photo slots or the graphic). */
-export function photoIdsInPost(post: Post): string[] {
-  switch (post.template) {
-    case "cover":
-    case "photo":
-    case "multi-photo":
-      return post.slots.map((s) => s.photoId);
-    case "graphic":
-      return [post.graphicId];
-    case "info":
-      return [];
-  }
 }

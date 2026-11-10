@@ -3,6 +3,8 @@
  * Change the spec and this file together.
  */
 
+import type { TextureRef } from "@/store/types";
+
 export const CANVAS_WIDTH = 1080;
 export const CANVAS_HEIGHT = 1440;
 
@@ -17,6 +19,19 @@ export interface Rect {
 export const MULTI_PHOTO_MIN = 2;
 export const MULTI_PHOTO_MAX = 4;
 export type MultiPhotoCount = 2 | 3 | 4;
+
+/** How many photo slots a slot-based template holds. Cover and Photo: exactly one. */
+export const SINGLE_PHOTO_SLOTS = { min: 1, max: 1 } as const;
+export const MULTI_PHOTO_SLOTS = { min: MULTI_PHOTO_MIN, max: MULTI_PHOTO_MAX } as const;
+
+/**
+ * Library textures the code refers to by id (the template defaults).
+ * Ids must exist in public/textures/textures.json. docs/template-spec.md#texture-library
+ */
+export const LIBRARY_TEXTURE = {
+  woodDarkWorn: { kind: "library", id: "wood-dark-worn" },
+  plasterWhite: { kind: "library", id: "plaster-white" },
+} as const satisfies Record<string, TextureRef>;
 
 /** Photo slot pan/zoom limits. See docs/template-spec.md#polaroid */
 export const ZOOM_MIN = 1.0;

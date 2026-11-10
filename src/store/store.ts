@@ -11,20 +11,24 @@ import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { ZOOM_MAX, ZOOM_MIN, type MultiPhotoCount } from "@/templates/constants";
 import {
+  clearPhotoFromDraft,
   convertDraft,
-  emptySlot,
   fromPost,
-  hasSlots,
   newDraft,
+  photoIdsInPost,
   toPost,
   withPhotoCount,
+} from "@/templates/registry";
+import {
+  emptySlot,
+  hasSlots,
   type Draft,
+  type DraftFor,
   type DraftSlot,
   type InfoFields,
   type PhotoDraft,
 } from "./draft";
 import {
-  photoIdsInPost,
   type BatchItem,
   type PhotoMode,
   type PoolPhoto,
@@ -66,6 +70,11 @@ export interface AppState {
   setSlotPhoto: (index: number, photoId: string | null) => void;
   setSlotView: (index: number, view: { panX?: number; panY?: number; zoom?: number }) => void;
   resetSlotView: (index: number) => void;
+  /**
+   * Edit the draft's template-specific fields. A no-op unless the draft is for `template`.
+   * New templates use this rather than adding their own store action.
+   */
+  editDraft: <K extends TemplateId>(template: K, fn: (draft: DraftFor<K>) => DraftFor<K>) => void;
   setGraphic: (photoId: string | null) => void;
   setInfo: (patch: Partial<InfoFields>) => void;
   /** Snapshot the draft into the batch and return to the picker. Null if the draft is incomplete. */
@@ -95,10 +104,7 @@ export function defaultName(template: TemplateId, batch: readonly BatchItem[]): 
 
 /** Replace one slot of a photo draft, preserving the draft's template shape. */
 function mapSlot(d: PhotoDraft, index: number, fn: (slot: DraftSlot) => DraftSlot): Draft {
-  const slots = d.slots.map((sl, i) => (i === index ? fn(sl) : sl));
-  return d.template === "multi-photo"
-    ? { ...d, slots }
-    : { ...d, slots: [slots[0] ?? emptySlot()] };
+  return { ...d, slots: d.slots.map((sl, i) => (i === index ? fn(sl) : sl)) } as PhotoDraft;
 }
 
 export function createAppStore(): StoreApi<AppState> {
@@ -117,17 +123,7 @@ export function createAppStore(): StoreApi<AppState> {
       removePhoto: (id) => {
         if (get().usageCount(id) > 0) return false;
         set((s) => ({ pool: s.pool.filter((p) => p.id !== id) }));
-        updateDraft((d) => {
-          if (hasSlots(d)) {
-            let out: Draft = d;
-            d.slots.forEach((sl, i) => {
-              if (sl.photoId === id) out = mapSlot(out as PhotoDraft, i, () => emptySlot());
-            });
-            return out;
-          }
-          if (d.template === "graphic" && d.graphicId === id) return { ...d, graphicId: null };
-          return d;
-        });
+        updateDraft((d) => clearPhotoFromDraft(d, id));
         return true;
       },
       setPhotoMode: (id, mode, scanCorners) =>
@@ -180,10 +176,10 @@ export function createAppStore(): StoreApi<AppState> {
         ),
       resetSlotView: (index) =>
         updatePhotoDraft((d) => mapSlot(d, index, (sl) => ({ ...sl, panX: 0, panY: 0, zoom: 1 }))),
-      setGraphic: (photoId) =>
-        updateDraft((d) => (d.template === "graphic" ? { ...d, graphicId: photoId } : d)),
-      setInfo: (patch) =>
-        updateDraft((d) => (d.template === "info" ? { ...d, info: { ...d.info, ...patch } } : d)),
+      editDraft: <K extends TemplateId>(template: K, fn: (d: DraftFor<K>) => DraftFor<K>) =>
+        updateDraft((d) => (d.template === template ? fn(d as DraftFor<K>) : d)),
+      setGraphic: (photoId) => get().editDraft("graphic", (d) => ({ ...d, graphicId: photoId })),
+      setInfo: (patch) => get().editDraft("info", (d) => ({ ...d, info: { ...d.info, ...patch } })),
 
       addToBatch: () => {
         const { draft, batch } = get();

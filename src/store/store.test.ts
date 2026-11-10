@@ -170,6 +170,18 @@ describe("choosing and switching templates", () => {
     s().setInfo({ title: "Hi", eventNumber: 3 });
     expect(s().draft).toMatchObject({ info: { title: "Hi", eventNumber: 3, body: "" } });
   });
+
+  it("editDraft edits only a draft of the named template", () => {
+    s().setTemplate("graphic");
+    const before = s().draft;
+    s().editDraft("info", (d) => ({ ...d, info: { ...d.info, title: "nope" } }));
+    expect(s().draft).toBe(before);
+    s().editDraft("graphic", (d) => ({ ...d, graphicId: "g1" }));
+    expect(s().draft).toMatchObject({ template: "graphic", graphicId: "g1" });
+    s().clearDraft();
+    s().editDraft("graphic", (d) => ({ ...d, graphicId: "g2" }));
+    expect(s().draft).toBeNull();
+  });
 });
 
 describe("batch", () => {

@@ -1,4 +1,5 @@
 import type { Rect } from "@/templates/constants";
+import type { Draft, DraftFor } from "@/store/draft";
 import type { TemplateId, TextureRef } from "@/store/types";
 
 /** A bundled or uploaded texture ready to draw, or a solid-colour placeholder. */
@@ -32,50 +33,17 @@ export interface RenderResult {
   warnings: FitWarning[];
 }
 
-/** Common shape of a pool photo slot as the renderer sees it (a Draft's slot may be empty). */
-export interface SlotInput {
-  photoId: string | null;
-  panX: number;
-  panY: number;
-  zoom: number;
-}
-
-/**
- * What the renderer draws from. Both a complete `Post` and an in-progress `Draft`
- * normalise to this, so the live preview can show a half-filled post.
- */
-export type RenderInput =
-  | {
-      template: "cover" | "photo";
-      slots: readonly SlotInput[];
-      texture: TextureRef;
-      grain: boolean;
-    }
-  | { template: "multi-photo"; slots: readonly SlotInput[]; texture: TextureRef; grain: boolean }
-  | { template: "graphic"; graphicId: string | null; texture: TextureRef }
-  | {
-      template: "info";
-      eventNumber: number | null;
-      title: string;
-      body: string;
-      date: string;
-      startTime: string;
-      endTime: string;
-      location: string;
-      texture: TextureRef;
-    };
-
-/** The RenderInput variant for a template (or set of templates). */
-export type InputFor<K extends TemplateId> = RenderInput & { template: K };
-
 /** One template's drawing routine. The texture is already drawn when this runs. */
-export type TemplateRenderer<T extends RenderInput = RenderInput> = (
+export type TemplateRenderer<D extends Draft = Draft> = (
   ctx: CanvasRenderingContext2D,
-  input: T,
+  draft: D,
   assets: RenderAssets,
 ) => FitWarning[];
 
-/** Renderer typed to one template's input variant. */
-export type RendererFor<K extends TemplateId> = TemplateRenderer<InputFor<K>>;
+/**
+ * Renderer typed to one template's Draft variant. Templates draw from a Draft (a Post is
+ * loaded into one first), so the live preview can show a half-filled post.
+ */
+export type RendererFor<K extends TemplateId> = TemplateRenderer<DraftFor<K>>;
 
 export type { Rect };

@@ -9,6 +9,7 @@ Vite · React 19 · TypeScript (strict) · Tailwind v4 · Zustand (in-memory onl
 ## Key conventions
 
 - **One renderer:** `renderPost(ctx, post, assets)` is pure and drives both the preview and the export at 1080×1440.
+- **One definition per template:** each file in `src/templates/` exports a `TemplateDefinition`, listed in `registry.ts`. Nothing outside `src/templates/` switches on a template id. To add a template, follow the steps at the top of `src/templates/definition.ts`.
 - **No magic numbers:** every layout value lives in `src/templates/constants.ts` and mirrors `docs/template-spec.md`. Change the spec and the constants together.
 - **No persistence:** no `localStorage`, `sessionStorage`, IndexedDB or cookies.
 - **Fonts are self-hosted** in `public/fonts/`: Druk (templates and UI titles), Instrument Serif (Info body), Geist (UI body). Never export a PNG before fonts are confirmed loaded.
