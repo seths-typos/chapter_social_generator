@@ -14,7 +14,7 @@ import {
   subscribeTextures,
 } from "./assetCache";
 import { ensureFrame, getFrameSnapshot, subscribeFrame } from "./frame";
-import { getGrainField } from "./grain";
+import { getGrain, subscribeGrain } from "./grain";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
 import { getWordmark } from "./wordmark";
@@ -77,14 +77,15 @@ export function useRenderAssets(): RenderAssets {
   const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
   const frame = useSyncExternalStore(subscribeFrame, getFrameSnapshot, getFrameSnapshot);
   useEffect(() => void ensureFrame(), []);
+  const grain = useSyncExternalStore(subscribeGrain, getGrain, getGrain);
   return useMemo(
     () => ({
       textures,
       photos,
       wordmark: getWordmark(),
-      grain: getGrainField(),
+      grain,
       ...(frame ? { frame } : {}),
     }),
-    [textures, photos, frame],
+    [textures, photos, frame, grain],
   );
 }

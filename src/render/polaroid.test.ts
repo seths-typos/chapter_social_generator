@@ -103,11 +103,12 @@ describe("drawPolaroid", () => {
   });
 
   it("blends grain over the photo, under the frame, and only when asked", () => {
-    const grain = { grain: true } as unknown as CanvasImageSource;
+    const field = { grain: true } as unknown as CanvasImageSource;
+    const grain = { field, opacity: 0.3 };
     const { ctx, calls } = recorder();
     drawPolaroid(ctx, { placement, view, photo, frame, grain });
     const sources = calls.filter((c) => c[0] === "drawImage").map((c) => c[1]);
-    expect(sources).toEqual([photo, grain, frame]);
+    expect(sources).toEqual([photo, field, frame]);
 
     const empty = recorder();
     drawPolaroid(empty.ctx, { placement, view, frame, grain });

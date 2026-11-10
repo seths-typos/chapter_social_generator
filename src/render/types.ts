@@ -1,4 +1,5 @@
 import type { Rect } from "@/templates/constants";
+import type { GrainAsset } from "./grain";
 import type { Draft, DraftFor } from "@/store/draft";
 import type { TemplateId, TextureRef } from "@/store/types";
 
@@ -15,8 +16,8 @@ export interface RenderAssets {
   photos: ReadonlyMap<string, ImageBitmap>;
   /** The polaroid frame with its window cut out. */
   frame?: CanvasImageSource;
-  /** The film-grain noise field, one value per canvas pixel. Absent outside a browser. */
-  grain?: CanvasImageSource | undefined;
+  /** The film-grain noise field and its strength. Absent outside a browser. */
+  grain?: GrainAsset | undefined;
   /** The `chapter` wordmark as vector paths. Absent outside a browser (unit tests). */
   wordmark?: WordmarkAsset | undefined;
 }

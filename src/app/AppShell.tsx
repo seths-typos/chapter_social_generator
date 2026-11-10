@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { BatchList } from "@/components/BatchList";
+import { GrainTuner } from "@/components/GrainTuner";
 import { ChMark } from "@/components/ChMark";
 import { Editor } from "@/components/Editor";
 import { FontNotice } from "@/components/FontNotice";
@@ -57,6 +58,7 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
               <TemplatePicker assets={assets} />
               <TexturePicker />
               <Editor warnings={warnings} assets={assets} />
+              <GrainTuner />
             </div>
           </Panel>
         </div>

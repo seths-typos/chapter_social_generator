@@ -35,18 +35,47 @@ export function grainLevels(
   return levels;
 }
 
-let field: HTMLCanvasElement | undefined;
+/** The grain ready to draw: the noise field and how strongly to overlay it. */
+export interface GrainAsset {
+  field: CanvasImageSource;
+  opacity: number;
+}
 
-/** The grain field, one noise value per canvas pixel, built once. Undefined outside a browser. */
-export function getGrainField(): CanvasImageSource | undefined {
-  if (field || typeof document === "undefined") return field;
+export interface GrainSettings {
+  /** How far a grain can sit from mid-grey, 0–127. */
+  amplitude: number;
+  /** How strongly the noise is overlaid, 0–1. */
+  opacity: number;
+}
+
+// The values in use. They start as the constants; the temporary tuning panel
+// (`?tune=grain`) changes them live so the final numbers can be chosen by eye.
+let settings: GrainSettings = { amplitude: GRAIN.amplitude, opacity: GRAIN.opacity };
+let asset: GrainAsset | undefined;
+const listeners = new Set<() => void>();
+
+export const getGrainSettings = (): GrainSettings => settings;
+
+export function subscribeGrain(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+/** Change the grain values for this page load and redraw everything that uses them. */
+export function setGrainSettings(next: Partial<GrainSettings>): void {
+  settings = { ...settings, ...next };
+  asset = undefined;
+  for (const l of listeners) l();
+}
+
+function buildField(amplitude: number): HTMLCanvasElement | undefined {
   const canvas = document.createElement("canvas");
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
   const ctx = canvas.getContext("2d");
   if (!ctx) return undefined;
   const image = ctx.createImageData(CANVAS_WIDTH, CANVAS_HEIGHT);
-  const levels = grainLevels(CANVAS_WIDTH * CANVAS_HEIGHT);
+  const levels = grainLevels(CANVAS_WIDTH * CANVAS_HEIGHT, GRAIN.seed, amplitude);
   for (let i = 0; i < levels.length; i++) {
     const v = levels[i]!;
     image.data[i * 4] = v;
@@ -55,8 +84,15 @@ export function getGrainField(): CanvasImageSource | undefined {
     image.data[i * 4 + 3] = 255;
   }
   ctx.putImageData(image, 0, 0);
-  field = canvas;
-  return field;
+  return canvas;
+}
+
+/** The grain asset, one noise value per canvas pixel, built once per setting. Undefined outside a browser. */
+export function getGrain(): GrainAsset | undefined {
+  if (asset || typeof document === "undefined") return asset;
+  const field = buildField(settings.amplitude);
+  asset = field && { field, opacity: settings.opacity };
+  return asset;
 }
 
 /**
@@ -64,12 +100,12 @@ export function getGrainField(): CanvasImageSource | undefined {
  * ignoring the current transform, so the grain is the same size on a small, rotated
  * polaroid as on a large one.
  */
-export function drawGrain(ctx: CanvasRenderingContext2D, grain: CanvasImageSource): void {
+export function drawGrain(ctx: CanvasRenderingContext2D, grain: GrainAsset): void {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalCompositeOperation = "overlay";
-  ctx.globalAlpha = GRAIN.opacity;
+  ctx.globalAlpha = grain.opacity;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(grain, 0, 0);
+  ctx.drawImage(grain.field, 0, 0);
   ctx.restore();
 }

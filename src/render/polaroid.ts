@@ -9,7 +9,7 @@
 
 import { POLAROID, type Rect } from "@/templates/constants";
 import { viewFit, type View } from "./fit";
-import { drawGrain } from "./grain";
+import { drawGrain, type GrainAsset } from "./grain";
 import { drawShadow } from "./shadow";
 
 export interface PolaroidPlacement {
@@ -109,7 +109,7 @@ export interface PolaroidOptions {
   /** Pan and zoom of the photo inside the window. */
   view: View;
   /** The grain field to blend over the photo (not the frame). Omit for no grain. */
-  grain?: CanvasImageSource | undefined;
+  grain?: GrainAsset | undefined;
   /** The scanned frame with its window cut out. Without it a flat paper colour is drawn. */
   frame?: CanvasImageSource | undefined;
 }
