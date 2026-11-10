@@ -13,6 +13,8 @@ export interface TextFont {
   /** CSS font-family as declared in fonts.css */
   family: string;
   weight: number;
+  /** CSS family list used when `family` isn't available (a font that is only used if installed). */
+  fallback?: string;
 }
 
 /** The slice of a 2D context the fit functions use. Tests pass a fake. */
@@ -66,7 +68,7 @@ export interface TextFit {
 
 /** CSS font shorthand for canvas `ctx.font`. */
 export const fontString = (font: TextFont, size: number): string =>
-  `${font.weight} ${size}px "${font.family}"`;
+  `${font.weight} ${size}px "${font.family}"${font.fallback ? `, ${font.fallback}` : ""}`;
 
 /** Unify line endings and drop leading/trailing whitespace (including blank lines). */
 const normalize = (text: string): string => text.replace(/\r\n?/g, "\n").trim();

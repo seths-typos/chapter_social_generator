@@ -9,7 +9,7 @@ How the Chapter Social Generator is built. Read with the [PRD](prd.md) (what it 
 | **Consistent, pixel-accurate output** is the reason the tool exists. | One deterministic renderer drives both the preview and the export. No randomness that isn't seeded. |
 | **Static and client-only.** | No server, API, database or serverless functions. The build output is a static `dist/` folder. |
 | **No persistence.** | All state lives in memory. No `localStorage`, `sessionStorage`, IndexedDB, cookies or service-worker caches of user content. |
-| **Fonts must always be correct.** | Druk, Instrument Serif and Geist are bundled and self-hosted with the site. Rendering waits for them to load. See [Fonts](#fonts). |
+| **Fonts are never silently wrong.** | Instrument Serif and Geist are bundled and self-hosted, and rendering waits for them. Druk is used from the computer when installed; when it isn't, a system fallback is used and the app says so. See [Fonts](#fonts). |
 | **Simple hosting.** | Public GitHub repo, deployed to GitHub Pages. No login gate. |
 | **Ad hoc maintenance.** The owner maintains it occasionally, on demand. | Prefer boring, well-known tools. Keep dependencies few, code readable, and template constants in one place. |
 
@@ -32,26 +32,31 @@ No other runtime dependencies without a reason recorded in `docs/decisions/`.
 
 ## Fonts
 
-All fonts are **self-hosted** in `public/fonts/` and declared with `@font-face` (`url()` sources, `font-display: block`). Nothing is loaded from a third-party font CDN.
+Instrument Serif and Geist are **self-hosted** in `public/fonts/` and declared with `@font-face` (`url()` sources, `font-display: block`). **Druk is never shipped with the site**: it is licensed, so it is used only when it is installed on the user's computer. Nothing is loaded from a third-party font CDN. See [decision 0005](decisions/0005-druk-local-only.md).
 
 | Font | Use | Files | Source |
 |---|---|---|---|
-| **Druk** Medium (500), Bold (700) | Templates (headlines, badge, date/location); UI titles and headings | `druk-medium.woff2`, `druk-bold.woff2` | Chapter's Druk license (OTFs supplied, converted to WOFF2) |
+| **Druk** Medium (500), Bold (700) | Templates (headlines, badge, date/location); UI titles and headings | None. `local()` only. | The copy installed on the computer (Chapter's Druk license) |
 | **Instrument Serif** Regular | Templates (Info body) | `instrument-serif-regular.woff2` | Google Fonts (OFL) |
 | **Geist** Regular (400), Medium (500) | UI body: labels, inputs, buttons, help text | `geist-regular.woff2`, `geist-medium.woff2` | [Geist by Vercel](https://vercel.com/font) (OFL). Self-hosted, not loaded from npm or a CDN at runtime. |
 
 ```css
-@font-face { font-family: "Chapter Druk"; font-weight: 500; font-display: block; src: url("/fonts/druk-medium.woff2") format("woff2"); }
-@font-face { font-family: "Chapter Druk"; font-weight: 700; font-display: block; src: url("/fonts/druk-bold.woff2") format("woff2"); }
-/* likewise for Instrument Serif and Geist */
+@font-face { font-family: "Chapter Druk"; font-weight: 500; src: local("Druk Medium"), local("Druk-Medium"); }
+@font-face { font-family: "Chapter Druk"; font-weight: 700; src: local("Druk Bold"), local("Druk-Bold"); }
+/* Instrument Serif and Geist use url("/fonts/…") sources */
 ```
 
-- **Loading gate:**
-  1. Before the first render, `await Promise.all([...].map(f => document.fonts.load(f)))` for Druk 500, Druk 700 and Instrument Serif 400.
-  2. Then confirm with `document.fonts.check()`.
-  3. Until that resolves, show a short loading state.
-  4. If any font fails to load, show an error and disable export. **A PNG must never be exported with a fallback font.**
-- **UI fallback stack:** `"Geist", system-ui, sans-serif` for body text and `"Chapter Druk", "Geist", sans-serif` for titles. Swapping the UI body font later (e.g. to Favorit, if licensed for this use) means replacing the two files and changing one font-family token.
+- **Loading gate (bundled fonts):**
+  1. Before the first render, `document.fonts.load()` Instrument Serif 400, then confirm with `document.fonts.check()`.
+  2. Until that resolves, show a short loading state.
+  3. If it fails to load, show an error and nothing can be rendered or exported.
+- **Druk (local font):**
+  1. After the gate, each Druk `FontFace` is loaded. A `local()`-only face ends as `loaded` when the font is installed and `error` when it isn't.
+  2. **Installed:** templates render in Druk, identical to the designs.
+  3. **Not installed:** Druk text falls back to `Impact, "Arial Narrow", sans-serif` (`DRUK_FALLBACK` in `constants.ts`, appended to every Druk font string). The shrink-to-fit rules still apply, so nothing overflows, but the post is off-brand. A notice under the header says which weights are missing and to install them and reload. Rendering and export are **not** blocked.
+  4. `?nodruk` (dev builds) simulates a computer without Druk.
+- **Safari:** WebKit doesn't expose user-installed fonts to web pages, so `local()` can't find Druk there and Safari always gets the fallback. On-brand posts need Chrome (or Firefox or Edge).
+- **UI fallback stack:** `"Geist", system-ui, sans-serif` for body text and `"Chapter Druk", Impact, "Arial Narrow", "Geist", sans-serif` for titles. Swapping the UI body font later (e.g. to Favorit, if licensed for this use) means replacing the two files and changing one font-family token.
 - **Paths:** use Vite's `import.meta.env.BASE_URL` (or relative URLs) so fonts resolve under the GitHub Pages project subpath.
 
 ### Brand marks
@@ -163,7 +168,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 |---|---|
 | **Chrome** (current), macOS | **Primary target.** Must be fully working. |
 | Edge (current) | Should work (same engine as Chrome). Not actively tested. |
-| **Safari** (current), macOS | **Supported.** Must be fully working. |
+| **Safari** (current), macOS | **Supported, with the fallback headline typeface.** Everything must work, but Safari can't see an installed Druk (see [Fonts](#fonts)), so on-brand posts need Chrome. |
 | Firefox (current) | Should work. Not actively tested. |
 | Mobile | Not a v1 target. The layout is designed for a laptop. Nothing actively prevents use on a phone, but the four-corner crop and the three-panel layout aren't optimized for it. |
 
@@ -177,7 +182,7 @@ The minimum required features are WebGL2, `createImageBitmap` with `imageOrienta
 │  └─ reference/              cover.png, photo.png, graphic.png, info.png
 │     └─ fixtures/            images the template fixtures use (graphic.png)
 ├─ public/
-│  ├─ fonts/                  druk-*.woff2, instrument-serif-regular.woff2, geist-*.woff2
+│  ├─ fonts/                  instrument-serif-regular.woff2, geist-*.woff2 (Druk is not shipped)
 │  └─ textures/               textures.json, *.jpg, *-thumb.jpg
 ├─ src/
 │  ├─ app/                    App shell, layout, font-loading gate

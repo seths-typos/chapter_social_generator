@@ -1,22 +1,26 @@
 /*
- * Self-hosted fonts. See docs/technical-requirements.md#fonts
- * Absolute /fonts/ URLs point at public/fonts/; Vite rewrites them under `base` at build time.
+ * Fonts. See docs/technical-requirements.md#fonts
+ * Instrument Serif and Geist are self-hosted: absolute /fonts/ URLs point at public/fonts/,
+ * and Vite rewrites them under `base` at build time.
  */
 
-/* Druk: templates (headlines, badge, date/location) and UI titles */
+/*
+ * Druk: templates (headlines, badge, date/location) and UI titles.
+ * Licensed, so it is never shipped with the site. It is used only when it is installed on
+ * the computer (matched by full name, then PostScript name). When it isn't, text falls
+ * back to the stack in FONTS (src/templates/constants.ts) and the app says so.
+ */
 @font-face {
   font-family: "Chapter Druk";
   font-weight: 500;
   font-style: normal;
-  font-display: block;
-  src: url("/fonts/druk-medium.woff2") format("woff2");
+  src: local("Druk Medium"), local("Druk-Medium");
 }
 @font-face {
   font-family: "Chapter Druk";
   font-weight: 700;
   font-style: normal;
-  font-display: block;
-  src: url("/fonts/druk-bold.woff2") format("woff2");
+  src: local("Druk Bold"), local("Druk-Bold");
 }
 
 /* Instrument Serif: Info template body copy */

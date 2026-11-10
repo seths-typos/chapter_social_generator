@@ -148,7 +148,7 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 
 | Needed | By | Notes |
 |---|---|---|
-| Druk Medium/Bold OTFs | Phase 0 | ✅ Supplied (`~/Downloads/Druk`) |
+| Druk Medium/Bold installed on the founder's computer | Before the founder uses it | Needed for on-brand headlines (the fonts are not bundled). Use Chrome. |
 | `.ai` template files and reference PNGs | Phase 0 | ✅ Supplied |
 | Founder availability for check-in #1 | End of Phase 2 | |
 | Founder availability for the MVP test (a real event) | End of Phase 4 | |

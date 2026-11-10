@@ -87,12 +87,19 @@ export const FIXTURE_IMAGE = { graphic: `${FIXTURE_IMAGE_PREFIX}graphic` } as co
 export const THUMBNAIL = { width: 180, height: 240 } as const;
 
 /**
- * Fonts the templates draw text with. Families match `src/app/fonts.css`, and each one
- * is in the font loading gate (`REQUIRED_FONTS`). docs/template-spec.md#assets
+ * What Druk text falls back to on a computer where Druk isn't installed: the closest
+ * heavy condensed faces that ship with macOS and Windows. docs/technical-requirements.md#fonts
+ */
+export const DRUK_FALLBACK = 'Impact, "Arial Narrow", sans-serif';
+
+/**
+ * Fonts the templates draw text with. Families match `src/app/fonts.css`. Instrument Serif
+ * is bundled and gated (`REQUIRED_FONTS`); Druk is used from the computer when installed
+ * (`LOCAL_FONTS`). docs/template-spec.md#assets
  */
 export const FONTS = {
-  drukMedium: { family: "Chapter Druk", weight: 500 },
-  drukBold: { family: "Chapter Druk", weight: 700 },
+  drukMedium: { family: "Chapter Druk", weight: 500, fallback: DRUK_FALLBACK },
+  drukBold: { family: "Chapter Druk", weight: 700, fallback: DRUK_FALLBACK },
   instrumentSerif: { family: "Instrument Serif", weight: 400 },
 } as const;
 

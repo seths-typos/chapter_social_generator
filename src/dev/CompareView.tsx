@@ -57,7 +57,7 @@ export function CompareView({ template }: { template: CompareId }) {
         };
 
   return (
-    <div className="flex h-screen flex-col bg-neutral-100 text-neutral-900">
+    <div className="flex min-h-0 flex-1 flex-col bg-neutral-100 text-neutral-900">
       <header className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-2 border-b border-neutral-200 bg-white px-5 py-3">
         <h1 className="font-display text-2xl leading-none font-bold tracking-wide">Compare</h1>
         <nav className="flex gap-1" aria-label="Template">

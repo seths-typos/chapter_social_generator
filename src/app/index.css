@@ -9,7 +9,7 @@
   /* UI body: Geist. Templates draw with their own families on canvas. */
   --font-sans: "Geist", system-ui, sans-serif;
   /* UI titles and headings: Druk. */
-  --font-display: "Chapter Druk", "Geist", sans-serif;
+  --font-display: "Chapter Druk", Impact, "Arial Narrow", "Geist", sans-serif;
   --font-serif: "Instrument Serif", Georgia, serif;
 }
 

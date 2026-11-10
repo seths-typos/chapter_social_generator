@@ -12,7 +12,7 @@ Vite · React 19 · TypeScript (strict) · Tailwind v4 · Zustand (in-memory onl
 - **One definition per template:** each file in `src/templates/` exports a `TemplateDefinition`, listed in `registry.ts`. Nothing outside `src/templates/` switches on a template id. To add a template, follow the steps at the top of `src/templates/definition.ts`.
 - **No magic numbers:** every layout value lives in `src/templates/constants.ts` and mirrors `docs/template-spec.md`. Change the spec and the constants together.
 - **No persistence:** no `localStorage`, `sessionStorage`, IndexedDB or cookies.
-- **Fonts are self-hosted** in `public/fonts/`: Druk (templates and UI titles), Instrument Serif (Info body), Geist (UI body). Never export a PNG before fonts are confirmed loaded.
+- **Fonts:** Instrument Serif (Info body) and Geist (UI body) are self-hosted in `public/fonts/`. **Druk is licensed and must never be committed or served**: it is used via `local()` when installed, with a system fallback and a notice when it isn't. Never render before the bundled fonts are confirmed loaded.
 - **Asset paths must respect Vite `base`** (`/chapter_social_generator/`).
 - **Template changes are checked by eye** in the dev comparison view (`?compare={template}`) against `docs/reference/*.png`. There are no automated visual tests.
 - Unit tests cover pure logic only (formatting, fit math, homography, layout bounds).

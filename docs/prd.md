@@ -97,7 +97,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 |---|---|
 | Live preview. | The preview updates within about 100 ms of any input change and matches the exported PNG exactly. |
 | Brand-accurate render. | Output matches the reference PNGs in layout, type (Druk, Instrument Serif), colors and drop shadows when given the same inputs. |
-| Fonts always load. | Fonts are bundled with the site. Rendering waits for them to load, so no PNG is ever exported with fallback fonts. |
+| Fonts are never silently wrong. | Instrument Serif is bundled, and rendering waits for it. Druk is licensed and is not bundled: it is used when installed on the computer. Without it, headlines use a system fallback and a notice says the posts are off-brand. |
 
 ### Batch list and export
 
@@ -165,7 +165,7 @@ flowchart TD
 - He can produce a batch of 5 posts (mixed templates) and download the ZIP in **under 10 minutes**, without help.
 - Side by side, exported PNGs are visually indistinguishable from the Illustrator reference exports given the same inputs.
 - Every exported PNG is exactly 1080×1440 and uploads to Instagram without cropping.
-- Works in current Chrome and Safari on macOS.
+- Works in current Chrome and Safari on macOS. On-brand headlines need Chrome with Druk installed (Safari can't see installed fonts).
 
 ## Open questions
 
@@ -176,5 +176,5 @@ flowchart TD
 | 3 | ~~UI typeface~~ | **Resolved:** Druk for UI titles, Geist for UI body. |
 | 4 | ~~Phone support~~ | **Resolved:** not a v1 target. Laptop-first. |
 | 5 | **HEIC photos** | iPhone photos AirDropped to a Mac are often HEIC, and Chrome can't decode HEIC natively. Option: convert in the browser with a library such as `heic2any`. Decide in Technical Requirements. |
-| 6 | ~~Druk licensing~~ | **Resolved:** treated as a private internal tool under Chapter's Druk license. The font is bundled with the site. |
+| 6 | ~~Druk licensing~~ | **Resolved:** Druk is not bundled or downloadable. The tool uses the copy installed on the computer, with a system fallback. See [decision 0005](decisions/0005-druk-local-only.md). |
 | 7 | ~~Hosting and access~~ | **Resolved:** GitHub Pages from a public repo, no login. |

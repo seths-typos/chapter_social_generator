@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { REQUIRED_FONTS } from "@/app/fonts";
+import { LOCAL_FONTS, REQUIRED_FONTS } from "@/app/fonts";
 import { FONTS } from "@/templates/constants";
 import {
   drawLines,
@@ -51,9 +51,18 @@ describe("fontString", () => {
     );
   });
 
-  it("every template font is covered by the font loading gate", () => {
+  it("appends the fallback families of a font that is only used when installed", () => {
+    expect(
+      fontString({ family: "Chapter Druk", weight: 500, fallback: "Impact, sans-serif" }, 65),
+    ).toBe('500 65px "Chapter Druk", Impact, sans-serif');
+  });
+
+  it("every template font is either bundled and gated, or a local font with a fallback", () => {
     for (const f of Object.values(FONTS)) {
-      expect(REQUIRED_FONTS).toContainEqual(expect.objectContaining(f));
+      const key = { family: f.family, weight: f.weight };
+      const local = LOCAL_FONTS.some((l) => l.family === f.family && l.weight === f.weight);
+      if (local) expect("fallback" in f && f.fallback).toBeTruthy();
+      else expect(REQUIRED_FONTS).toContainEqual(expect.objectContaining(key));
     }
   });
 });

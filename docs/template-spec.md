@@ -229,7 +229,7 @@ Adding a template means adding a variant to both unions and one definition file.
 
 | Asset | Path | Source | Status |
 |---|---|---|---|
-| Druk Medium, Druk Bold | `public/fonts/druk-medium.woff2`, `public/fonts/druk-bold.woff2` | Chapter's license (OTFs supplied: `Druk-Medium.otf`, `Druk-Bold.otf`) | ✅ Done |
+| Druk Medium, Druk Bold | Not in the repo. Used from the computer via `local("Druk Medium")` / `local("Druk Bold")`. | Chapter's license; installed by each user | ✅ Done. Falls back to Impact when not installed. |
 | Instrument Serif Regular | `public/fonts/instrument-serif-regular.woff2` | Google Fonts (OFL), self-hosted | ✅ Done |
 | `chapter` wordmark | `src/assets/wordmark/chapter.svg` | The 7 vector glyph paths in `CoverPost.ai` (viewBox 700.66×304.79, `fill="currentColor"`) | ✅ Done |
 | `ch.` mark | `src/assets/wordmark/ch.svg` | "ch." shaped in Druk Bold (matches `Secondary Wordmark (Black)@2x.png`) | ✅ Done. For the UI header and favicon |

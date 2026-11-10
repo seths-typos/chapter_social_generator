@@ -1,12 +1,14 @@
 import { useCallback, useState } from "react";
 import { ChMark } from "@/components/ChMark";
 import { Editor } from "@/components/Editor";
+import { FontNotice } from "@/components/FontNotice";
 import { Panel, Placeholder } from "@/components/Panel";
 import { Preview } from "@/components/Preview";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import { TexturePicker } from "@/components/TexturePicker";
 import { useRenderAssets } from "@/render/assets";
 import type { FitWarning, RenderResult } from "@/render/types";
+import type { RequiredFont } from "./fonts";
 
 const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
   a.length === b.length && a.every((w, i) => w.field === b[i]?.field && w.message === b[i].message);
@@ -18,7 +20,7 @@ const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
  *   right  – batch list and Download all
  * The photo pool and batch panels are placeholders until their issues land.
  */
-export function AppShell() {
+export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont[] }) {
   // The renderer is the only thing that knows whether text fits, so the preview reports
   // its warnings here and the editor uses them to block Add to batch.
   const assets = useRenderAssets();
@@ -40,6 +42,7 @@ export function AppShell() {
           Nothing is saved. Download before closing.
         </span>
       </header>
+      <FontNotice missing={missingFonts} />
 
       <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_300px] gap-4 p-4">
         <Panel title="Photos">
