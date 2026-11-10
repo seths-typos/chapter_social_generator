@@ -1,11 +1,14 @@
 /**
- * The editor's working state. Unlike `Post`, a Draft may be incomplete (no photo chosen
- * yet, empty title). It carries the inputs for every template at once so switching
- * templates keeps compatible inputs (docs/prd.md#template-selection-and-editing).
- * `toPost` turns a complete Draft into a `Post`; `fromPost` loads a batch item for editing.
+ * The editor's working state: one post in progress, shaped like the `Post` it will
+ * become but with required inputs still allowed to be empty. A Draft exists only after
+ * a template has been chosen (`null` in the store means "at the template picker").
+ *
+ * `toPost` turns a complete Draft into a `Post`; `fromPost` loads a batch item for
+ * editing; `convertDraft` switches template, carrying over only compatible inputs
+ * (texture, and photos between the photo templates). See docs/decisions/0001-*.md
  */
 
-import { MULTI_PHOTO_MAX, type MultiPhotoCount } from "@/templates/constants";
+import { MULTI_PHOTO_MAX, MULTI_PHOTO_MIN, type MultiPhotoCount } from "@/templates/constants";
 import { DEFAULT_TEXTURE } from "@/templates/meta";
 import type { PhotoSlot, Post, TemplateId, TextureRef } from "./types";
 
@@ -26,18 +29,19 @@ export interface InfoFields {
   location: string;
 }
 
-export interface Draft {
-  template: TemplateId;
-  /** Always MULTI_PHOTO_MAX long; templates read the first `slotCount(draft)` entries. */
-  slots: DraftSlot[];
-  photoCount: MultiPhotoCount;
+interface DraftBase {
   texture: TextureRef;
   /** True once the user has picked a texture for this draft (stops template defaults overriding it). */
   textureChosen: boolean;
-  grain: boolean;
-  graphicId: string | null;
-  info: InfoFields;
 }
+
+export type Draft =
+  | (DraftBase & { template: "cover" | "photo"; slots: [DraftSlot]; grain: boolean })
+  | (DraftBase & { template: "multi-photo"; slots: DraftSlot[] /* 2–4 */; grain: boolean })
+  | (DraftBase & { template: "graphic"; graphicId: string | null })
+  | (DraftBase & { template: "info"; info: InfoFields });
+
+export type PhotoDraft = Extract<Draft, { slots: DraftSlot[] }>;
 
 export const emptySlot = (): DraftSlot => ({ photoId: null, panX: 0, panY: 0, zoom: 1 });
 
@@ -51,30 +55,62 @@ export const emptyInfo = (): InfoFields => ({
   location: "",
 });
 
-export function newDraft(template: TemplateId = "photo", texture?: TextureRef): Draft {
-  return {
-    template,
-    slots: Array.from({ length: MULTI_PHOTO_MAX }, emptySlot),
-    photoCount: 2,
-    texture: texture ?? DEFAULT_TEXTURE[template],
-    textureChosen: texture !== undefined,
-    grain: false,
-    graphicId: null,
-    info: emptyInfo(),
-  };
+export function hasSlots(draft: Draft): draft is PhotoDraft {
+  return "slots" in draft;
+}
+
+/** A fresh, empty draft for a template. Uses the template's default texture unless one is given. */
+export function newDraft(template: TemplateId, texture?: TextureRef): Draft {
+  const base: DraftBase = { texture: texture ?? DEFAULT_TEXTURE[template], textureChosen: false };
+  switch (template) {
+    case "cover":
+    case "photo":
+      return { ...base, template, slots: [emptySlot()], grain: false };
+    case "multi-photo":
+      return { ...base, template, slots: [emptySlot(), emptySlot()], grain: false };
+    case "graphic":
+      return { ...base, template, graphicId: null };
+    case "info":
+      return { ...base, template, info: emptyInfo() };
+  }
+}
+
+/**
+ * Switch an in-progress draft to another template. Carries the texture (when chosen or
+ * carried over from the session) and photos between the photo templates; drops the rest.
+ */
+export function convertDraft(
+  draft: Draft,
+  template: TemplateId,
+  opts: { lastUsedTexture: TextureRef | null },
+): Draft {
+  if (draft.template === template) return draft;
+  const keepTexture = draft.textureChosen || opts.lastUsedTexture !== null;
+  const next = newDraft(template, keepTexture ? draft.texture : undefined);
+  next.textureChosen = draft.textureChosen;
+  if (hasSlots(draft) && hasSlots(next)) {
+    next.grain = draft.grain;
+    const carried = draft.slots.filter((s) => s.photoId !== null).map((s) => ({ ...s }));
+    if (next.template === "multi-photo") {
+      const n = Math.min(MULTI_PHOTO_MAX, Math.max(MULTI_PHOTO_MIN, carried.length));
+      next.slots = Array.from({ length: n }, (_, i) => carried[i] ?? emptySlot());
+    } else if (carried[0]) {
+      next.slots = [carried[0]];
+    }
+  }
+  return next;
 }
 
 /** How many photo slots the draft's template uses. */
-export function slotCount(draft: Pick<Draft, "template" | "photoCount">): number {
-  switch (draft.template) {
-    case "cover":
-    case "photo":
-      return 1;
-    case "multi-photo":
-      return draft.photoCount;
-    default:
-      return 0;
-  }
+export function slotCount(draft: Draft): number {
+  return hasSlots(draft) ? draft.slots.length : 0;
+}
+
+/** Resize a Multi-Photo draft's slots, keeping existing photos. */
+export function withPhotoCount(draft: Draft, count: MultiPhotoCount): Draft {
+  if (draft.template !== "multi-photo") return draft;
+  const n = Math.min(MULTI_PHOTO_MAX, Math.max(MULTI_PHOTO_MIN, count));
+  return { ...draft, slots: Array.from({ length: n }, (_, i) => draft.slots[i] ?? emptySlot()) };
 }
 
 function toSlot(s: DraftSlot): PhotoSlot | null {
@@ -90,8 +126,8 @@ export function missingInputs(draft: Draft): string[] {
     case "cover":
     case "photo":
     case "multi-photo": {
-      const n = slotCount(draft);
-      const empty = draft.slots.slice(0, n).filter((s) => s.photoId === null).length;
+      const n = draft.slots.length;
+      const empty = draft.slots.filter((s) => s.photoId === null).length;
       if (empty > 0) missing.push(n === 1 ? "photo" : `${empty} of ${n} photos`);
       break;
     }
@@ -117,7 +153,7 @@ export function toPost(draft: Draft): Post | null {
   switch (draft.template) {
     case "cover":
     case "photo": {
-      const slot = toSlot(draft.slots[0]!);
+      const slot = toSlot(draft.slots[0]);
       if (!slot) return null;
       return {
         template: draft.template,
@@ -127,7 +163,7 @@ export function toPost(draft: Draft): Post | null {
       };
     }
     case "multi-photo": {
-      const slots = draft.slots.slice(0, draft.photoCount).map(toSlot);
+      const slots = draft.slots.map(toSlot);
       if (slots.some((s) => s === null)) return null;
       return {
         template: "multi-photo",
@@ -155,35 +191,35 @@ export function toPost(draft: Draft): Post | null {
   }
 }
 
-/** Load a stored Post back into an editable Draft. */
+/** Load a stored Post back into an editable Draft. Its texture counts as chosen. */
 export function fromPost(post: Post): Draft {
-  const draft = newDraft(post.template, post.texture);
+  const base: DraftBase = { texture: post.texture, textureChosen: true };
   switch (post.template) {
     case "cover":
     case "photo":
+      return { ...base, template: post.template, slots: [{ ...post.slots[0] }], grain: post.grain };
     case "multi-photo":
-      post.slots.forEach((s, i) => {
-        draft.slots[i] = { ...s };
-      });
-      if (post.template === "multi-photo") {
-        draft.photoCount = post.slots.length as MultiPhotoCount;
-      }
-      draft.grain = post.grain;
-      break;
-    case "graphic":
-      draft.graphicId = post.graphicId;
-      break;
-    case "info":
-      draft.info = {
-        eventNumber: post.eventNumber,
-        title: post.title,
-        body: post.body,
-        date: post.date,
-        startTime: post.startTime,
-        endTime: post.endTime ?? "",
-        location: post.location,
+      return {
+        ...base,
+        template: "multi-photo",
+        slots: post.slots.map((s) => ({ ...s })),
+        grain: post.grain,
       };
-      break;
+    case "graphic":
+      return { ...base, template: "graphic", graphicId: post.graphicId };
+    case "info":
+      return {
+        ...base,
+        template: "info",
+        info: {
+          eventNumber: post.eventNumber,
+          title: post.title,
+          body: post.body,
+          date: post.date,
+          startTime: post.startTime,
+          endTime: post.endTime ?? "",
+          location: post.location,
+        },
+      };
   }
-  return draft;
 }

@@ -81,7 +81,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 | Requirement | Acceptance criteria |
 |---|---|
-| Choose a template. | All five templates are selectable, each with a thumbnail. Switching template keeps compatible inputs (photo, texture). |
+| Choose a template. | The editor opens on the template picker. All five templates are selectable, each with a thumbnail. Switching template mid-post keeps compatible inputs: the texture, and photos between Cover, Photo and Multi-Photo. Info text and a graphic don't carry over, and switching away from typed text asks for confirmation. |
 | Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Multi-Photo lets him choose how many photos (range TBD in the Template Spec). |
 | Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
 | Optionally reposition and zoom a photo. | In the slot, he can drag to pan and use a slider or scroll to zoom. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
@@ -102,7 +102,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 | Requirement | Acceptance criteria |
 |---|---|
-| Add the current post to the batch. | "Add to batch" stores a snapshot of the post's inputs. The editor then resets for a new post, and the photo pool and last texture are kept. |
+| Add the current post to the batch. | "Add to batch" stores a snapshot of the post's inputs. The editor then returns to the template picker for the next post, and the photo pool and last-used texture are kept. |
 | View the batch. | A list or strip shows each post's thumbnail, template type, name and caption. |
 | Edit, duplicate or remove a batch post. | Clicking a post loads it back into the editor, and saving updates it in place. Duplicate and remove work as expected. Remove asks for confirmation. |
 | Reorder posts. | Drag to reorder. The order determines filename numbering. |

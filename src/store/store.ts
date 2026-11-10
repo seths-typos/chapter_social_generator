@@ -9,15 +9,20 @@
 
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { ZOOM_MAX, ZOOM_MIN, type MultiPhotoCount } from "@/templates/constants";
 import {
-  MULTI_PHOTO_MAX,
-  MULTI_PHOTO_MIN,
-  ZOOM_MAX,
-  ZOOM_MIN,
-  type MultiPhotoCount,
-} from "@/templates/constants";
-import { DEFAULT_TEXTURE } from "@/templates/meta";
-import { emptySlot, fromPost, newDraft, toPost, type Draft, type InfoFields } from "./draft";
+  convertDraft,
+  emptySlot,
+  fromPost,
+  hasSlots,
+  newDraft,
+  toPost,
+  withPhotoCount,
+  type Draft,
+  type DraftSlot,
+  type InfoFields,
+  type PhotoDraft,
+} from "./draft";
 import {
   photoIdsInPost,
   type BatchItem,
@@ -47,10 +52,14 @@ export interface AppState {
   lastUsedTexture: TextureRef | null;
 
   // ── Editor draft ────────────────────────────────────────────────────────────
-  draft: Draft;
+  /** The post in progress. `null` = no template chosen yet (editor shows the template picker). */
+  draft: Draft | null;
   /** Batch item currently loaded for editing, if any. */
   editingId: string | null;
+  /** Choose a template: starts a draft, or converts the current one keeping compatible inputs. */
   setTemplate: (template: TemplateId) => void;
+  /** Discard the draft and return to the template picker. */
+  clearDraft: () => void;
   setTexture: (texture: TextureRef) => void;
   setGrain: (grain: boolean) => void;
   setPhotoCount: (count: MultiPhotoCount) => void;
@@ -59,7 +68,7 @@ export interface AppState {
   resetSlotView: (index: number) => void;
   setGraphic: (photoId: string | null) => void;
   setInfo: (patch: Partial<InfoFields>) => void;
-  /** Snapshot the draft into the batch. Returns the new item's id, or null if the draft is incomplete. */
+  /** Snapshot the draft into the batch and return to the picker. Null if the draft is incomplete. */
   addToBatch: () => string | null;
   loadForEdit: (id: string) => void;
   /** Write the draft back to the item being edited. Returns false if incomplete or not editing. */
@@ -84,13 +93,22 @@ export function defaultName(template: TemplateId, batch: readonly BatchItem[]): 
   return `${template}-${n}`;
 }
 
+/** Replace one slot of a photo draft, preserving the draft's template shape. */
+function mapSlot(d: PhotoDraft, index: number, fn: (slot: DraftSlot) => DraftSlot): Draft {
+  const slots = d.slots.map((sl, i) => (i === index ? fn(sl) : sl));
+  return d.template === "multi-photo"
+    ? { ...d, slots }
+    : { ...d, slots: [slots[0] ?? emptySlot()] };
+}
+
 export function createAppStore(): StoreApi<AppState> {
   return createStore<AppState>()((set, get) => {
-    const updateDraft = (fn: (d: Draft) => Draft) => set((s) => ({ draft: fn(s.draft) }));
-    const freshDraft = (template: TemplateId): Draft => {
-      const last = get().lastUsedTexture;
-      return newDraft(template, last ?? undefined);
-    };
+    /** Apply `fn` to the current draft, if there is one. */
+    const updateDraft = (fn: (d: Draft) => Draft) =>
+      set((s) => (s.draft ? { draft: fn(s.draft) } : {}));
+    /** Apply `fn` to the current draft only if it has photo slots. */
+    const updatePhotoDraft = (fn: (d: PhotoDraft) => Draft) =>
+      updateDraft((d) => (hasSlots(d) ? fn(d) : d));
 
     return {
       // ── Photo pool
@@ -98,14 +116,18 @@ export function createAppStore(): StoreApi<AppState> {
       addPhotos: (photos) => set((s) => ({ pool: [...s.pool, ...photos] })),
       removePhoto: (id) => {
         if (get().usageCount(id) > 0) return false;
-        set((s) => ({
-          pool: s.pool.filter((p) => p.id !== id),
-          draft: {
-            ...s.draft,
-            slots: s.draft.slots.map((sl) => (sl.photoId === id ? emptySlot() : sl)),
-            graphicId: s.draft.graphicId === id ? null : s.draft.graphicId,
-          },
-        }));
+        set((s) => ({ pool: s.pool.filter((p) => p.id !== id) }));
+        updateDraft((d) => {
+          if (hasSlots(d)) {
+            let out: Draft = d;
+            d.slots.forEach((sl, i) => {
+              if (sl.photoId === id) out = mapSlot(out as PhotoDraft, i, () => emptySlot());
+            });
+            return out;
+          }
+          if (d.template === "graphic" && d.graphicId === id) return { ...d, graphicId: null };
+          return d;
+        });
         return true;
       },
       setPhotoMode: (id, mode, scanCorners) =>
@@ -133,52 +155,39 @@ export function createAppStore(): StoreApi<AppState> {
       lastUsedTexture: null,
 
       // ── Editor draft
-      draft: newDraft("photo"),
+      draft: null,
       editingId: null,
       setTemplate: (template) =>
-        updateDraft((d) => ({
-          ...d,
-          template,
-          // Keep a texture the user chose (or carried over); otherwise use the template default.
-          texture: d.textureChosen || get().lastUsedTexture ? d.texture : DEFAULT_TEXTURE[template],
+        set((s) => ({
+          draft: s.draft
+            ? convertDraft(s.draft, template, { lastUsedTexture: s.lastUsedTexture })
+            : newDraft(template, s.lastUsedTexture ?? undefined),
         })),
+      clearDraft: () => set({ draft: null, editingId: null }),
       setTexture: (texture) => updateDraft((d) => ({ ...d, texture, textureChosen: true })),
-      setGrain: (grain) => updateDraft((d) => ({ ...d, grain })),
-      setPhotoCount: (count) =>
-        updateDraft((d) => ({
-          ...d,
-          photoCount: clamp(count, MULTI_PHOTO_MIN, MULTI_PHOTO_MAX) as MultiPhotoCount,
-        })),
+      setGrain: (grain) => updatePhotoDraft((d) => ({ ...d, grain })),
+      setPhotoCount: (count) => updateDraft((d) => withPhotoCount(d, count)),
       setSlotPhoto: (index, photoId) =>
-        updateDraft((d) => ({
-          ...d,
-          slots: d.slots.map((sl, i) => (i === index ? { ...emptySlot(), photoId } : sl)),
-        })),
+        updatePhotoDraft((d) => mapSlot(d, index, () => ({ ...emptySlot(), photoId }))),
       setSlotView: (index, view) =>
-        updateDraft((d) => ({
-          ...d,
-          slots: d.slots.map((sl, i) =>
-            i === index
-              ? {
-                  ...sl,
-                  panX: clamp(view.panX ?? sl.panX, -1, 1),
-                  panY: clamp(view.panY ?? sl.panY, -1, 1),
-                  zoom: clamp(view.zoom ?? sl.zoom, ZOOM_MIN, ZOOM_MAX),
-                }
-              : sl,
-          ),
-        })),
+        updatePhotoDraft((d) =>
+          mapSlot(d, index, (sl) => ({
+            ...sl,
+            panX: clamp(view.panX ?? sl.panX, -1, 1),
+            panY: clamp(view.panY ?? sl.panY, -1, 1),
+            zoom: clamp(view.zoom ?? sl.zoom, ZOOM_MIN, ZOOM_MAX),
+          })),
+        ),
       resetSlotView: (index) =>
-        updateDraft((d) => ({
-          ...d,
-          slots: d.slots.map((sl, i) => (i === index ? { ...sl, panX: 0, panY: 0, zoom: 1 } : sl)),
-        })),
-      setGraphic: (photoId) => updateDraft((d) => ({ ...d, graphicId: photoId })),
-      setInfo: (patch) => updateDraft((d) => ({ ...d, info: { ...d.info, ...patch } })),
+        updatePhotoDraft((d) => mapSlot(d, index, (sl) => ({ ...sl, panX: 0, panY: 0, zoom: 1 }))),
+      setGraphic: (photoId) =>
+        updateDraft((d) => (d.template === "graphic" ? { ...d, graphicId: photoId } : d)),
+      setInfo: (patch) =>
+        updateDraft((d) => (d.template === "info" ? { ...d, info: { ...d.info, ...patch } } : d)),
 
       addToBatch: () => {
         const { draft, batch } = get();
-        const post = toPost(draft);
+        const post = draft && toPost(draft);
         if (!post) return null;
         const item: BatchItem = {
           id: newId(),
@@ -189,9 +198,9 @@ export function createAppStore(): StoreApi<AppState> {
         set({
           batch: [...batch, item],
           lastUsedTexture: post.texture,
+          draft: null,
           editingId: null,
         });
-        set({ draft: freshDraft(post.template) });
         return item.id;
       },
       loadForEdit: (id) => {
@@ -201,21 +210,18 @@ export function createAppStore(): StoreApi<AppState> {
       },
       saveEdit: () => {
         const { draft, editingId, batch } = get();
-        if (!editingId) return false;
+        if (!editingId || !draft) return false;
         const post = toPost(draft);
         if (!post) return false;
         set({
           batch: batch.map((b) => (b.id === editingId ? { ...b, post } : b)),
           lastUsedTexture: post.texture,
+          draft: null,
           editingId: null,
         });
-        set({ draft: freshDraft(post.template) });
         return true;
       },
-      cancelEdit: () => {
-        const { draft } = get();
-        set({ editingId: null, draft: freshDraft(draft.template) });
-      },
+      cancelEdit: () => set({ draft: null, editingId: null }),
 
       // ── Batch
       batch: [],
@@ -224,7 +230,7 @@ export function createAppStore(): StoreApi<AppState> {
       removeItem: (id) =>
         set((s) => ({
           batch: s.batch.filter((b) => b.id !== id),
-          ...(s.editingId === id ? { editingId: null } : {}),
+          ...(s.editingId === id ? { editingId: null, draft: null } : {}),
         })),
       duplicateItem: (id) => {
         const { batch } = get();

@@ -202,6 +202,8 @@ type Post =
 interface BatchItem { id: string; name: string; caption: string; post: Post; }
 ```
 
+While a post is being built, the editor holds a `Draft`: the same per-template shape with required inputs allowed to be empty. It becomes a `Post` only when complete. See `src/store/draft.ts` and [decision 0001](decisions/0001-draft-per-template.md).
+
 ## Texture library
 
 | Property | Value |
