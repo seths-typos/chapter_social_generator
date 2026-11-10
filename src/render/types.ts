@@ -15,6 +15,8 @@ export interface RenderAssets {
   photos: ReadonlyMap<string, ImageBitmap>;
   /** The polaroid frame with its window cut out. */
   frame?: CanvasImageSource;
+  /** The film-grain noise field, one value per canvas pixel. Absent outside a browser. */
+  grain?: CanvasImageSource | undefined;
   /** The `chapter` wordmark as vector paths. Absent outside a browser (unit tests). */
   wordmark?: WordmarkAsset | undefined;
 }

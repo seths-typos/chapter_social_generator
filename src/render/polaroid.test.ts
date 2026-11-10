@@ -30,6 +30,8 @@ function recorder() {
     fill: log("fill"),
     fillRect: log("fillRect"),
     drawImage: log("drawImage"),
+    globalAlpha: 1,
+    globalCompositeOperation: "source-over",
     getTransform: () => ({}),
     setTransform: log("setTransform"),
   };
@@ -98,6 +100,18 @@ describe("drawPolaroid", () => {
     expect(calls).toContainEqual(["rect", w.x, w.y, w.w, w.h]);
     const order = names(calls);
     expect(order.indexOf("clip")).toBeLessThan(order.indexOf("drawImage"));
+  });
+
+  it("blends grain over the photo, under the frame, and only when asked", () => {
+    const grain = { grain: true } as unknown as CanvasImageSource;
+    const { ctx, calls } = recorder();
+    drawPolaroid(ctx, { placement, view, photo, frame, grain });
+    const sources = calls.filter((c) => c[0] === "drawImage").map((c) => c[1]);
+    expect(sources).toEqual([photo, grain, frame]);
+
+    const empty = recorder();
+    drawPolaroid(empty.ctx, { placement, view, frame, grain });
+    expect(empty.calls.filter((c) => c[0] === "drawImage").map((c) => c[1])).toEqual([frame]);
   });
 
   it("fills the window grey and the paper flat when there is no photo or frame yet", () => {

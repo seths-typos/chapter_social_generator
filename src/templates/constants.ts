@@ -53,6 +53,13 @@ export const SHADOW = {
   blur: 12,
 } as const;
 
+/**
+ * Film grain on photos. docs/template-spec.md#grain
+ * `amplitude` is how far a grain can sit from mid-grey (0–127); `opacity` is how strongly
+ * the noise is overlaid. Marked *tune* in the spec.
+ */
+export const GRAIN = { seed: 1986, amplitude: 127, opacity: 0.3 } as const;
+
 /** Polaroid object and its photo window. docs/template-spec.md#polaroid */
 export const POLAROID = {
   /** Full polaroid size, and its position in Cover and Photo. */

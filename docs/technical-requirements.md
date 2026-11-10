@@ -117,7 +117,7 @@ Template-specific fields are edited through the store's `editDraft(template, fn)
 | `polaroid.ts` | `drawPolaroid(ctx, { placement, photo, view, frame })`. Regular mode: shadow, clip to the window, draw the photo with pan and zoom, draw `frame.png`. Placed by centre, rotation and scale (for Multi-Photo). Scan mode (Phase 3): draw the warped scan, contain-fit. |
 | `fit.ts` | Pure fit math: cover/contain fit, `viewFit` (pan and zoom → draw rect), and its inverses `panByPixels` and `zoomTo`, which the preview drag, scroll and zoom slider use. Unit tested. |
 | `frame.ts` | Loads `frame.png` once when the app starts. Export of a polaroid post waits for it. |
-| `grain.ts` | Seeded noise tile (`mulberry32`, fixed seed), composited with `globalCompositeOperation = "overlay"` inside the photo clip. Strength is a constant, tuned during the build. |
+| `grain.ts` | A seeded noise field the size of the canvas (`mulberry32`, fixed seed), built once and passed in `RenderAssets.grain`. `drawGrain` composites it with `globalCompositeOperation = "overlay"` inside the photo clip, in canvas pixels. Strength is the `GRAIN` constant. |
 | `text.ts` | Measuring, word-wrapping and shrink-to-fit, following the Template Spec rules. Draws text by baseline, using the baselines measured from the design files. |
 | `wordmark.ts` | The `chapter` wordmark as `Path2D` vector paths read from `chapter.svg`, filled in any colour and scaled to a rectangle. |
 

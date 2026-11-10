@@ -9,6 +9,7 @@
 
 import { POLAROID, type Rect } from "@/templates/constants";
 import { viewFit, type View } from "./fit";
+import { drawGrain } from "./grain";
 import { drawShadow } from "./shadow";
 
 export interface PolaroidPlacement {
@@ -107,12 +108,14 @@ export interface PolaroidOptions {
   photo?: (CanvasImageSource & { width: number; height: number }) | undefined;
   /** Pan and zoom of the photo inside the window. */
   view: View;
+  /** The grain field to blend over the photo (not the frame). Omit for no grain. */
+  grain?: CanvasImageSource | undefined;
   /** The scanned frame with its window cut out. Without it a flat paper colour is drawn. */
   frame?: CanvasImageSource | undefined;
 }
 
 export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOptions): void {
-  const { placement, photo, view, frame } = opts;
+  const { placement, photo, view, frame, grain } = opts;
   const win = POLAROID.window;
 
   ctx.save();
@@ -133,6 +136,7 @@ export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOption
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(photo, r.x, r.y, r.w, r.h);
+    if (grain) drawGrain(ctx, grain);
   } else {
     ctx.fillStyle = POLAROID.emptyWindowColor;
     ctx.fillRect(win.x, win.y, win.w, win.h);

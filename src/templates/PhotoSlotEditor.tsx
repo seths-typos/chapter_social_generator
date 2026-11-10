@@ -168,6 +168,18 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
         </p>
       )}
 
+      <label className="flex items-center gap-2 text-sm text-neutral-700">
+        <input
+          type="checkbox"
+          checked={draft.grain}
+          onChange={(e) => onChange((d) => ({ ...d, grain: e.target.checked }))}
+        />
+        Film grain
+        <span className="text-xs text-neutral-400">
+          {draft.slots.length > 1 ? "on every photo in this post" : "on the photo"}
+        </span>
+      </label>
+
       {error && <p className="text-xs text-red-600">{error}</p>}
       {current && isLowResolution(current) && (
         <p className="text-xs text-amber-700">

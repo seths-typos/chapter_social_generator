@@ -86,7 +86,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Multi-Photo lets him choose how many photos (range TBD in the Template Spec). |
 | Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
 | Optionally reposition and zoom a photo. | He drags the photo in the preview to pan, and zooms with a slider in the controls or by scrolling over the photo. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
-| Optional polaroid grain. | A per-post toggle. Strength and filter values are TBD and will be tuned during the build. |
+| Optional polaroid grain. | A per-post "Film grain" toggle, off by default, that applies to every photo in the post (not the frame, texture or text). The strength is fixed in code. |
 | Fill text fields (Info template). | Fields: event number (numeric, rendered as `ch. N`), title, body, date/time, location. The preview updates as he types. Overflow behavior is defined in the Template Spec. |
 | Choose a background texture. | Pick from the bundled texture library, shown as thumbnails. |
 | Upload a one-off texture. | An uploaded image is added to the texture picker for this session only. It is never saved. |
@@ -172,7 +172,7 @@ flowchart TD
 | # | Question | Notes |
 |---|---|---|
 | 1 | **Multi-Photo layout** | Needs a design: how many photos (2–4?), arrangement, overlap and rotation of polaroids. To be resolved in the Template Spec. |
-| 2 | **Grain filter values** | To be tuned during the build. |
+| 2 | **Grain filter values** | Built with starting values (see [Grain](template-spec.md#grain)). Final strength to be tuned by eye. |
 | 3 | ~~UI typeface~~ | **Resolved:** Druk for UI titles, Geist for UI body. |
 | 4 | ~~Phone support~~ | **Resolved:** not a v1 target. Laptop-first. |
 | 5 | ~~HEIC photos~~ | **Resolved:** HEIC is accepted. Chrome can't decode it, so it is converted in the browser with `heic2any`, loaded only when needed. See [Image handling](technical-requirements.md#image-handling). |

@@ -13,6 +13,7 @@ export const renderPhoto: RendererFor<"photo" | "cover"> = (ctx, draft, assets) 
     photo: slot?.photoId ? assets.photos.get(slot.photoId) : undefined,
     view: slot ?? { panX: 0, panY: 0, zoom: 1 },
     frame: assets.frame,
+    grain: draft.grain ? assets.grain : undefined,
   });
   return [];
 };
