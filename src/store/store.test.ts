@@ -5,7 +5,8 @@ import type { PoolPhoto } from "./types";
 
 const photo = (id: string): PoolPhoto => ({
   id,
-  file: new Blob(["x"], { type: "image/jpeg" }),
+  name: `${id}.jpg`,
+  thumbnail: new Blob(["x"], { type: "image/webp" }),
   width: 3000,
   height: 2000,
   mode: "regular",

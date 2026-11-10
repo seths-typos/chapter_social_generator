@@ -1,10 +1,9 @@
 import { createElement, useState } from "react";
 import { downloadBlob, missingAssets, renderPostToPng } from "@/export/png";
 import { pngFilename } from "@/export/filenames";
-import { importImage } from "@/image/importImage";
-import { setPhotoAsset } from "@/render/assetCache";
+import { importToPool } from "@/image/importToPool";
 import type { FitWarning, RenderAssets } from "@/render/types";
-import { defaultName, newId, useAppStore } from "@/store/store";
+import { defaultName, useAppStore } from "@/store/store";
 import type { ImportOutcome } from "@/templates/definition";
 import { missingInputs, templateFor, toPost } from "@/templates/registry";
 
@@ -26,7 +25,6 @@ export function Editor({ warnings, assets }: EditorProps) {
   const pool = useAppStore((s) => s.pool);
   const batch = useAppStore((s) => s.batch);
   const editDraft = useAppStore((s) => s.editDraft);
-  const addPhotos = useAppStore((s) => s.addPhotos);
   const addToBatch = useAppStore((s) => s.addToBatch);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
@@ -47,11 +45,11 @@ export function Editor({ warnings, assets }: EditorProps) {
   const loading = post ? missingAssets(post, assets) : [];
 
   async function addImage(file: File): Promise<ImportOutcome> {
-    const result = await importImage(file, newId);
-    if (!result.ok) return result;
-    setPhotoAsset(result.photo.id, result.bitmap);
-    addPhotos([result.photo]);
-    return { ok: true, photoId: result.photo.id };
+    const { added, failures } = await importToPool([file]);
+    const photoId = added[0];
+    return photoId
+      ? { ok: true, photoId }
+      : { ok: false, message: failures[0] ?? "That file couldn’t be opened." };
   }
 
   async function downloadPng() {

@@ -132,7 +132,8 @@ export function createAppStore(): StoreApi<AppState> {
             if (p.id !== id) return p;
             const next: PoolPhoto = {
               id: p.id,
-              file: p.file,
+              name: p.name,
+              thumbnail: p.thumbnail,
               width: p.width,
               height: p.height,
               mode,

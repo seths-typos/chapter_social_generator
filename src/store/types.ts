@@ -15,8 +15,11 @@ export type PhotoMode = "regular" | "scan";
 
 export interface PoolPhoto {
   id: string;
-  /** Original upload (HEIC converted to JPEG on import). */
-  file: Blob;
+  /** Original file name, for labels. May be empty. */
+  name: string;
+  /** Small encoded preview (240 px wide) for the UI. The full image is a cached bitmap, keyed by `id`. */
+  thumbnail: Blob;
+  /** Size of the kept bitmap, after downscaling on import. */
   width: number;
   height: number;
   mode: PhotoMode;

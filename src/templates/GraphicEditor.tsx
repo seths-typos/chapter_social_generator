@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import { PHOTO_ACCEPT } from "@/image/limits";
 import { previewUrl } from "@/image/previewUrl";
 import { GRAPHIC } from "./constants";
 import type { EditorProps } from "./definition";
@@ -40,7 +41,7 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept={PHOTO_ACCEPT}
           className="hidden"
           onChange={(e) => void onUpload(e)}
         />
@@ -63,7 +64,11 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
                     : "border-neutral-200 hover:border-neutral-400"
                 }`}
               >
-                <img src={previewUrl(photo.file)} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={previewUrl(photo.thumbnail)}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
               </button>
             );
           })}

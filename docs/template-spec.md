@@ -180,8 +180,9 @@ type PhotoMode = "regular" | "scan";
 
 interface PoolPhoto {
   id: string;
-  file: Blob;              // original upload (HEIC converted to JPEG on import)
-  width: number;
+  name: string;            // original file name, for labels
+  thumbnail: Blob;         // 240 px-wide preview; the full image is a cached ImageBitmap keyed by id
+  width: number;           // size of the kept bitmap, after downscaling on import
   height: number;
   mode: PhotoMode;
   scanCorners?: [Pt, Pt, Pt, Pt]; // TL, TR, BR, BL in source px; required when mode = "scan"

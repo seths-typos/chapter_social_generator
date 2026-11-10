@@ -33,11 +33,16 @@ export function loadFixtureImages(opts: { addToPool?: boolean } = {}): Promise<v
       const bitmap = await decodeImage(blob);
       setPhotoAsset(id, bitmap);
       if (opts.addToPool && !appStore.getState().pool.some((p) => p.id === id)) {
-        appStore
-          .getState()
-          .addPhotos([
-            { id, file: blob, width: bitmap.width, height: bitmap.height, mode: "regular" },
-          ]);
+        appStore.getState().addPhotos([
+          {
+            id,
+            name: id,
+            thumbnail: blob,
+            width: bitmap.width,
+            height: bitmap.height,
+            mode: "regular",
+          },
+        ]);
       }
     }),
   ).then(() => undefined);

@@ -135,12 +135,13 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 
 | Step | Requirement |
 |---|---|
-| Accepted types | JPEG, PNG, WebP, HEIC/HEIF. Anything else gets a friendly error. |
-| HEIC | Converted to JPEG (quality 0.92) with `heic2any`, lazy-loaded, before decoding |
+| Accepted types | JPEG, PNG, WebP, HEIC/HEIF, decided by MIME type, or by extension when the browser gives no type. Anything else gets a friendly error that names the file. |
+| Adding files | A multi-file picker, or files dropped anywhere on the window (which also stops the browser opening a dropped file in place of the app). Files are processed three at a time and appear in the pool in the order given. |
+| HEIC | The browser decodes it if it can (Safari). Otherwise it is converted to JPEG (quality 0.92) with `heic2any`, lazy-loaded, then decoded. |
 | Decode | `createImageBitmap(blob, { imageOrientation: "from-image" })` to respect EXIF rotation |
-| Downscale on import | Long edge capped at **3000 px**, enough for the largest slot (848 px) with room for zoom and scan cropping. The downscaled bitmap is kept and the original blob is released. |
+| Downscale on import | Long edge capped at **3000 px**, enough for the largest slot (848 px) with room for zoom and scan cropping. The downscaled bitmap is kept and the original file is released ([decision 0006](decisions/0006-pool-photos-keep-no-original.md)). |
 | Low-resolution warning | A photo whose short edge is under 1080 px is flagged in the pool. It isn't blocked. |
-| Thumbnails | 240 px-wide bitmaps for the pool and texture picker |
+| Thumbnails | A 240 px-wide WebP blob per pool photo (`PoolPhoto.thumbnail`), shown through an object URL |
 | Template picker thumbnails | Drawn by the real renderer (`renderPost` on a scratch 1080×1440 canvas, scaled to 180×240), using the template's `fixture` inputs when it has them. The background is a flat mid-grey (`#808080`) rather than a texture. |
 | Memory | A target of 50 photos per session without the tab crashing. Bitmaps are `.close()`d when removed. |
 

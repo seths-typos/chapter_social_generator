@@ -3,6 +3,7 @@ import { ChMark } from "@/components/ChMark";
 import { Editor } from "@/components/Editor";
 import { FontNotice } from "@/components/FontNotice";
 import { Panel, Placeholder } from "@/components/Panel";
+import { PhotoPool } from "@/components/PhotoPool";
 import { Preview } from "@/components/Preview";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import { TexturePicker } from "@/components/TexturePicker";
@@ -18,7 +19,7 @@ const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
  *   left   – session photo pool
  *   center – live preview, with the selected template's controls beside it
  *   right  – batch list and Download all
- * The photo pool and batch panels are placeholders until their issues land.
+ * The batch panel is a placeholder until its issues land.
  */
 export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont[] }) {
   // The renderer is the only thing that knows whether text fits, so the preview reports
@@ -45,9 +46,7 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
       <FontNotice missing={missingFonts} />
 
       <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_300px] gap-4 p-4">
-        <Panel title="Photos">
-          <Placeholder label="Session photo pool" issue="#14 import · #15 pool panel" />
-        </Panel>
+        <PhotoPool />
 
         <div className="grid min-h-0 min-w-0 grid-cols-[minmax(0,1fr)_minmax(340px,400px)] gap-4">
           <Panel title="Preview">

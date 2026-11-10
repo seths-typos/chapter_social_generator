@@ -64,7 +64,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 | Requirement | Acceptance criteria |
 |---|---|
-| Upload many photos at once via a file picker or drag-and-drop. | Selecting 20 photos adds all 20 to the pool as thumbnails within a few seconds. JPEG, PNG and WebP are accepted. HEIC: see [Open questions](#open-questions). |
+| Upload many photos at once via a file picker or drag-and-drop. | Selecting 20 photos adds all 20 to the pool as thumbnails within a few seconds. JPEG, PNG, WebP and HEIC are accepted. |
 | Photos stay in the pool for the whole session. | After a post is added to the batch, all pool photos are still available for the next post. |
 | Indicate which photos have been used. | A photo used in any batch post shows a "used" marker and a count. It stays selectable. |
 | Remove a photo from the pool. | Removing a photo that a batch post uses asks for confirmation first, or the removal is blocked. |
@@ -175,6 +175,6 @@ flowchart TD
 | 2 | **Grain filter values** | To be tuned during the build. |
 | 3 | ~~UI typeface~~ | **Resolved:** Druk for UI titles, Geist for UI body. |
 | 4 | ~~Phone support~~ | **Resolved:** not a v1 target. Laptop-first. |
-| 5 | **HEIC photos** | iPhone photos AirDropped to a Mac are often HEIC, and Chrome can't decode HEIC natively. Option: convert in the browser with a library such as `heic2any`. Decide in Technical Requirements. |
+| 5 | ~~HEIC photos~~ | **Resolved:** HEIC is accepted. Chrome can't decode it, so it is converted in the browser with `heic2any`, loaded only when needed. See [Image handling](technical-requirements.md#image-handling). |
 | 6 | ~~Druk licensing~~ | **Resolved:** Druk is not bundled or downloadable. The tool uses the copy installed on the computer, with a system fallback. See [decision 0005](decisions/0005-druk-local-only.md). |
 | 7 | ~~Hosting and access~~ | **Resolved:** GitHub Pages from a public repo, no login. |
