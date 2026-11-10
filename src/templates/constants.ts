@@ -68,7 +68,9 @@ export const POLAROID = {
 /** Cover template wordmark. docs/template-spec.md#cover-cover */
 export const COVER_WORDMARK = {
   rect: { x: 190, y: 481, w: 700, h: 305 } satisfies Rect,
-  fill: "#F4F6F9",
+  /** Light is the reference design. Dark is for photos too light for it to read. */
+  fill: { light: "#F4F6F9", dark: "#000000" },
+  defaultTone: "light",
 } as const;
 
 /** Graphic template. docs/template-spec.md#graphic-graphic */

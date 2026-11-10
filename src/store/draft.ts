@@ -9,7 +9,7 @@
  * and `src/templates/registry.ts` dispatches to it. See docs/decisions/0003-*.md
  */
 
-import type { Post, TemplateId, TextureRef } from "./types";
+import type { Post, TemplateId, TextureRef, WordmarkTone } from "./types";
 
 export interface DraftSlot {
   photoId: string | null;
@@ -35,7 +35,8 @@ export interface DraftBase {
 }
 
 export type Draft =
-  | (DraftBase & { template: "cover" | "photo"; slots: [DraftSlot]; grain: boolean })
+  | (DraftBase & { template: "cover"; slots: [DraftSlot]; grain: boolean; wordmark: WordmarkTone })
+  | (DraftBase & { template: "photo"; slots: [DraftSlot]; grain: boolean })
   | (DraftBase & { template: "multi-photo"; slots: DraftSlot[] /* 2–4 */; grain: boolean })
   | (DraftBase & { template: "graphic"; graphicId: string | null })
   | (DraftBase & { template: "info"; info: InfoFields });

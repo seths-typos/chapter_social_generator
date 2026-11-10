@@ -42,10 +42,21 @@ export interface TextureRef {
   id: string;
 }
 
+/** Colour of the Cover wordmark: light on dark photos, dark on light photos. */
+export type WordmarkTone = "light" | "dark";
+
 export type TemplateId = "cover" | "photo" | "multi-photo" | "graphic" | "info";
 
 export type Post =
-  | { template: "cover" | "photo"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean }
+  | {
+      template: "cover";
+      slots: [PhotoSlot];
+      texture: TextureRef;
+      grain: boolean;
+      /** Light for dark photos (the default), dark for light photos. */
+      wordmark: WordmarkTone;
+    }
+  | { template: "photo"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean }
   | { template: "multi-photo"; slots: PhotoSlot[] /* 2–4 */; texture: TextureRef; grain: boolean }
   | { template: "graphic"; graphicId: string; texture: TextureRef }
   | {

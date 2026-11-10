@@ -85,9 +85,9 @@ Reference: `CoverPost.ai`, `First Post@2x.png`
 |---|---|
 | Texture | Default: wood parquet |
 | Polaroid | Rect **(116, 210) 848×1021**, with shadow |
-| Wordmark | The `chapter` wordmark (vector, `assets/wordmark/chapter.svg`), fill **`#F4F6F9`**, bounding box **x 190 → 890, y 481 → 786** (700×305, including the `p` descender). Not clipped to the photo window. |
+| Wordmark | The `chapter` wordmark (vector, `assets/wordmark/chapter.svg`), fill **`#F4F6F9`** (light, the default and the reference) or **`#000000`** (dark, for photos too light for the wordmark to read), chosen per post, bounding box **x 190 → 890, y 481 → 786** (700×305, including the `p` descender). Not clipped to the photo window. |
 
-**Parameters:** 1 photo slot, texture, grain.
+**Parameters:** 1 photo slot, wordmark colour (light or dark), texture, grain.
 
 ### Photo (`photo`)
 
@@ -200,7 +200,9 @@ interface PhotoSlot {
 interface TextureRef { kind: "library" | "upload"; id: string; }
 
 type Post =
-  | { template: "cover" | "photo"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean }
+  | { template: "cover"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean;
+      wordmark: "light" | "dark" }
+  | { template: "photo"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean }
   | { template: "multi-photo"; slots: PhotoSlot[] /* 2–4 */; texture: TextureRef; grain: boolean }
   | { template: "graphic"; graphicId: string; texture: TextureRef }
   | { template: "info"; eventNumber: number; title: string; body: string;

@@ -222,6 +222,7 @@ describe("fromPost", () => {
         slots: [{ photoId: "p", panX: 0.2, panY: -0.1, zoom: 2 }],
         texture: tile,
         grain: true,
+        wordmark: "dark",
       },
       {
         template: "multi-photo",
@@ -280,6 +281,22 @@ describe("registry", () => {
       expect(missingInputs(d).length).toBeGreaterThan(0);
       expect(toPost(d)).toBeNull();
     }
+  });
+});
+
+describe("cover wordmark", () => {
+  it("is light by default, also after switching from another template", () => {
+    expect(newDraft("cover")).toMatchObject({ wordmark: "light" });
+    expect(convertDraft(newDraft("photo"), "cover", { lastUsedTexture: null })).toMatchObject({
+      wordmark: "light",
+    });
+  });
+
+  it("is stored on the post, and only on a cover", () => {
+    const dark = { ...acceptPhotoInDraft(newDraft("cover"), "a"), wordmark: "dark" } as Draft;
+    expect(toPost(dark)).toMatchObject({ template: "cover", wordmark: "dark" });
+    const photo = toPost(acceptPhotoInDraft(newDraft("photo"), "a"))!;
+    expect("wordmark" in photo).toBe(false);
   });
 });
 
