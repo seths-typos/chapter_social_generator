@@ -68,6 +68,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Photos stay in the pool for the whole session. | After a post is added to the batch, all pool photos are still available for the next post. |
 | Indicate which photos have been used. | A photo used in any batch post shows a "used" marker and a count. It stays selectable. |
 | Remove a photo from the pool. | Removing a photo that a batch post uses asks for confirmation first, or the removal is blocked. |
+| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. |
 
 ### Photo input modes
 
@@ -114,24 +115,35 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 ## App flow
 
+There are two flows. The photo pool is a side panel, not a step: he can fill it before, during or between posts. The main flow starts from the template picker.
+
+**Flow 0: Photo pool (optional, any time)**
+
+```mermaid
+flowchart LR
+    U[Upload photos to pool] --> S{Any polaroid scans?}
+    S -- Yes --> C[Set mode: Polaroid scan<br/>4-corner crop]
+    S -- No --> R[Ready to use in posts]
+    C --> R
+```
+
+**Main flow: Make a post**
+
 ```mermaid
 flowchart TD
-    A[Open tool] --> B[Upload photos to session pool]
-    B --> C{Polaroid scans?}
-    C -- Yes --> D[Set mode: Polaroid scan<br/>4-corner crop]
-    C -- No --> E[Choose template]
-    D --> E
-    E --> F[Pick photo(s) from pool<br/>or upload graphic]
-    F --> G[Choose / upload texture]
-    G --> H[Fill text fields<br/>Info template only]
-    H --> I[Optional: reposition / zoom / grain]
-    I --> J[Live preview]
-    J --> K[Add to batch<br/>name + caption]
-    K --> L{Another post?}
-    L -- Yes --> E
-    L -- No --> M[Review batch<br/>reorder / edit / remove]
-    M --> N[Download all → ZIP]
-    M -. edit post .-> J
+    A[New post: choose template] --> B{Needs photos or a graphic?}
+    B -- Yes --> C[Pick from pool<br/>or upload right here]
+    B -- No --> D
+    C --> D[Choose or upload texture]
+    D --> E[Fill text fields<br/>Info only]
+    E --> F[Optional: reposition / zoom / grain]
+    F --> G[Live preview]
+    G --> H[Add to batch]
+    H --> I{Another post?}
+    I -- Yes --> A
+    I -- No --> J[Review batch<br/>name, caption, reorder, edit, remove]
+    J --> K[Download all → ZIP]
+    J -. edit post .-> G
 ```
 
 **Layout:** one screen with three regions:
