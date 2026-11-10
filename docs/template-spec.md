@@ -216,7 +216,7 @@ Adding a template means adding a variant to both unions and one definition file.
 | Property | Value |
 |---|---|
 | Count | **16** bundled textures (Unsplash photos supplied by the owner; see `public/textures/ATTRIBUTION.md`). The brief prefers photos of floors and tables from real events, so these can be swapped or added to later with no code change. |
-| Ids | `wood-dark-worn`, `wood-planks-burnt`, `plywood-weathered`, `osb-board`, `plaster-white`, `paper-white`, `marble-white`, `linen-white`, `paper-tissue-white`, `paper-crumpled-kraft`, `concrete-stained`, `brick-herringbone-grey`, `mesh-grey`, `chalkboard-black`, `linen-burgundy`, `tile-encaustic-red` |
+| Ids | `tile-encaustic-red`, `linen-burgundy`, `chalkboard-black`, `mesh-grey`, `brick-herringbone-grey`, `concrete-stained`, `paper-crumpled-kraft`, `paper-tissue-white`, `linen-white`, `marble-white`, `paper-white`, `plaster-white`, `osb-board`, `plywood-weathered`, `wood-planks-burnt`, `wood-dark-worn` (in picker order, which is the manifest's order) |
 | Location | `public/textures/{id}.jpg` plus `public/textures/{id}-thumb.jpg` (240×320) |
 | Manifest | `public/textures/textures.json`: `[{ "id": "plaster-white", "name": "White plaster", "file": "plaster-white.jpg", "thumb": "plaster-white-thumb.jpg", "width": 2160, "height": 2880 }]`. Ids are kebab-case and unique; the loader validates this. |
 | Processing | Centre-cropped to 3:4, resized to **2160×2880**, converted to sRGB, progressive JPEG at quality 85, stepped down (to a floor of 70) toward 1.5 MB. Most land at 0.7–1.5 MB; two fine-grained textures (`linen-white`, `concrete-stained`) are 1.6–1.8 MB at quality 70. Thumbnails JPEG quality 80. |
