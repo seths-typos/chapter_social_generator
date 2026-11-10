@@ -25,6 +25,7 @@ Chapter Social Generator is a single-purpose, browser-based tool for making Inst
 - Carousel management. The tool outputs individual PNGs, and he assembles carousels in Instagram.
 - Posting or scheduling to Instagram.
 - Accounts, saved drafts, or any persistence, including browser storage (`localStorage`, IndexedDB). Closing the tab ends the session.
+- Mobile-optimized layout. The tool is designed for a laptop.
 - Persisting uploaded textures. Uploaded textures are usable only during the session.
 - Auto-incrementing the event number.
 - Automatic polaroid edge detection.
@@ -95,7 +96,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 |---|---|
 | Live preview. | The preview updates within about 100 ms of any input change and matches the exported PNG exactly. |
 | Brand-accurate render. | Output matches the reference PNGs in layout, type (Druk, Instrument Serif), colors and drop shadows when given the same inputs. |
-| Fonts always load. | Rendering waits for fonts to load, so no PNG is ever exported with fallback fonts. |
+| Fonts always load. | Fonts are bundled with the site. Rendering waits for them to load, so no PNG is ever exported with fallback fonts. |
 
 ### Batch list and export
 
@@ -142,8 +143,8 @@ flowchart TD
 ## Generator UI notes
 
 - **The UI is a tool, not a template.** It should be clean, neutral and quiet so the preview is the most colorful thing on screen. Hints of the brand are welcome, such as the `ch.` mark in the header or the lavender accent from the Info badge, but the UI must not compete with the post.
-- **UI typography:** use **Druk for titles and headings** in the UI (app name, section headers such as "Photos", "Batch"). Druk is not used for body text, labels, inputs or buttons. The UI body typeface is TBD.
-- **Device:** designed for laptop and desktop first. Phone support is TBD (see [Open questions](#open-questions)).
+- **UI typography:** **Druk** for titles and headings (app name, section headers such as "Photos", "Batch"). **Geist** (free, OFL) for body text, labels, inputs and buttons.
+- **Device:** designed for laptop and desktop. Phones aren't a v1 target.
 - **Errors in plain language:** for example "That file isn't an image" or "Photo is too small for a crisp export (min 1080px)". Show a warning, not a block, for low-resolution photos.
 - **Fast path by default:** sensible defaults everywhere, so he can make a good post by choosing a template, choosing a photo and clicking Add. Fine-tuning controls are there when wanted, never required.
 
@@ -160,8 +161,8 @@ flowchart TD
 |---|---|---|
 | 1 | **Multi-Photo layout** | Needs a design: how many photos (2–4?), arrangement, overlap and rotation of polaroids. To be resolved in the Template Spec. |
 | 2 | **Grain filter values** | To be tuned during the build. |
-| 3 | **UI body typeface** | Druk for UI titles; body, label and input face TBD. Decide during the build. |
-| 4 | **Phone support** | Will he use this on his phone? It affects layout and the four-corner crop interaction. Laptop is assumed for v1. |
+| 3 | ~~UI typeface~~ | **Resolved:** Druk for UI titles, Geist for UI body. |
+| 4 | ~~Phone support~~ | **Resolved:** not a v1 target. Laptop-first. |
 | 5 | **HEIC photos** | iPhone photos AirDropped to a Mac are often HEIC, and Chrome can't decode HEIC natively. Option: convert in the browser with a library such as `heic2any`. Decide in Technical Requirements. |
-| 6 | **Druk web embedding** | Confirm the license covers serving the font files from a public website. Druk is loaded as a web font for both the UI titles and the template rendering. |
-| 7 | **Public access** | The site will be public on GitHub Pages for now. Confirm with the founder whether that's OK. |
+| 6 | ~~Druk licensing~~ | **Resolved:** treated as a private internal tool under Chapter's Druk license. The font is bundled with the site. |
+| 7 | ~~Hosting and access~~ | **Resolved:** GitHub Pages from a public repo, no login. |

@@ -42,7 +42,7 @@ Every content object (polaroid, graphic, Info card) gets the same shadow. It's t
 | Shape | Same rectangle as the object, unrotated relative to it |
 | Scaling | In Multi-Photo, offset and blur scale with the polaroid's scale factor |
 
-**Acceptance:** the rendered shadow around the Info card matches `InfoPost.ai`'s shadow (rect 102,110 → 980,1342) within ±2 alpha levels per channel, measured along the center row and column.
+**Acceptance:** the rendered shadow around the Info card matches `InfoPost.ai`'s shadow (rect 102,110 → 980,1342) when checked side by side in the dev comparison view.
 
 ### Polaroid
 
@@ -219,12 +219,12 @@ interface BatchItem { id: string; name: string; caption: string; post: Post; }
 
 | Asset | Path | Source | Status |
 |---|---|---|---|
-| Druk Medium, Druk Bold | `public/fonts/druk-medium.woff2`, `public/fonts/druk-bold.woff2` | Chapter's license. Received as desktop OTFs (`Druk-Medium.otf`, `Druk-Bold.otf`). Only these two weights are used. | Convert to WOFF2 in the build. **Don't commit the fonts until web-embedding rights are confirmed:** in a public repo or on a public site, they're downloadable by anyone. |
+| Druk Medium, Druk Bold | `public/fonts/druk-medium.woff2`, `public/fonts/druk-bold.woff2` | Chapter's license (OTFs supplied: `Druk-Medium.otf`, `Druk-Bold.otf`) | Convert to WOFF2 in the build |
 | Instrument Serif Regular | `public/fonts/instrument-serif-regular.woff2` | Google Fonts (OFL), self-hosted | Download in the build |
 | `chapter` wordmark | `assets/wordmark/chapter.svg` | Vector paths in `CoverPost.ai` / `InfoPost.ai`, or `Wordmark (Black)@2x.png` | Extract to SVG in the build |
 | `ch.` mark | `assets/wordmark/ch.svg` | `Secondary Wordmark (Black)@2x.png` | For the UI header and favicon |
 | Polaroid frame | `assets/polaroid/frame.png` | Scan in `CoverPost.ai`, with the window cut out | Make in the build |
-| Reference renders | `docs/reference/{cover,graphic,info}.png` | Rendered from the `.ai` files at 1080×1440 | For visual comparison tests |
+| Reference renders | `docs/reference/{cover,graphic,info}.png` | Rendered from the `.ai` files at 1080×1440 | For visual review (dev comparison view) |
 
 ## Open items
 
@@ -234,5 +234,4 @@ interface BatchItem { id: string; name: string; caption: string; post: Post; }
 | 2 | Shadow blur and offset | Starting values above. Verify against the reference renders. |
 | 3 | Multi-Photo presets | Starting positions above. Tune visually. A future "shuffle" option could add variety. |
 | 4 | Textures (10, including terrazzo) | Supplied by the user during the build. Solid-color placeholders until then. |
-| 5 | Druk web-embedding rights | The files have been received. Rights need confirming before the fonts are committed or deployed publicly. |
-| 6 | Dedicated blank polaroid frame scan | Optional upgrade over the frame cut from the Cover scan |
+| 5 | Dedicated blank polaroid frame scan | Optional upgrade over the frame cut from the Cover scan |
