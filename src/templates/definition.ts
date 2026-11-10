@@ -41,6 +41,11 @@ export interface TemplateDefinition<K extends TemplateId> {
   photoIds(post: PostFor<K>): string[];
   /** Every pool photo id the draft uses so far. */
   draftPhotoIds(draft: DraftFor<K>): string[];
+  /**
+   * The draft with a pool photo put where the template wants one next (clicking a photo in
+   * the pool). Templates without images return the draft unchanged.
+   */
+  acceptPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
   /** The draft with a (removed) pool photo taken out. */
   clearPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
 

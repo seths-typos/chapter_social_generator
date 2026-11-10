@@ -172,6 +172,17 @@ describe("choosing and switching templates", () => {
     expect(s().draft).toMatchObject({ info: { title: "Hi", eventNumber: 3, body: "" } });
   });
 
+  it("addPhotoToDraft puts a pool photo where the template wants it", () => {
+    s().addPhotoToDraft("p1");
+    expect(s().draft).toBeNull();
+    s().setTemplate("photo");
+    s().addPhotoToDraft("p1");
+    expect(slots()[0]!.photoId).toBe("p1");
+    s().setTemplate("graphic");
+    s().addPhotoToDraft("g1");
+    expect(s().draft).toMatchObject({ graphicId: "g1" });
+  });
+
   it("editDraft edits only a draft of the named template", () => {
     s().setTemplate("graphic");
     const before = s().draft;

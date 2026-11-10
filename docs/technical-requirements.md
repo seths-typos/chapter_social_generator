@@ -114,7 +114,8 @@ Template-specific fields are edited through the store's `editDraft(template, fn)
 |---|---|
 | `texture.ts` | Cover-fit an image (or a solid placeholder color) to the canvas |
 | `shadow.ts` | Draw the standard shadow for a rectangle: `shadowColor rgba(0,0,0,0.75)`, `shadowBlur 12`, `shadowOffsetY 6`, scaled by a factor. Draw the shape with the shadow, then draw the content on top without it. |
-| `polaroid.ts` | Regular mode: clip to the window, draw the photo with pan and zoom, draw `frame.png`. Scan mode: draw the warped scan, contain-fit. Supports translate, rotate and scale for Multi-Photo. |
+| `polaroid.ts` | `drawPolaroid(ctx, { placement, photo, view, frame })`. Regular mode: shadow, clip to the window, draw the photo with pan and zoom, draw `frame.png`. Placed by centre, rotation and scale (for Multi-Photo). Scan mode (Phase 3): draw the warped scan, contain-fit. |
+| `frame.ts` | Loads `frame.png` once when the app starts. Export of a polaroid post waits for it. |
 | `grain.ts` | Seeded noise tile (`mulberry32`, fixed seed), composited with `globalCompositeOperation = "overlay"` inside the photo clip. Strength is a constant, tuned during the build. |
 | `text.ts` | Measuring, word-wrapping and shrink-to-fit, following the Template Spec rules. Draws text by baseline, using the baselines measured from the design files. |
 | `wordmark.ts` | The `chapter` wordmark as `Path2D` vector paths read from `chapter.svg`, filled in any colour and scaled to a rectangle. |
@@ -126,7 +127,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 
 - `?compare={cover|photo|graphic|info}` renders the template from its `fixture` inputs and lays `docs/reference/{template}.png` over it.
 - Controls: a reference **opacity slider**, a **Difference** toggle (the reference is blended with `mix-blend-mode: difference`, so identical pixels turn black), a zoom of Fit, 100% or 200%, and links to switch template.
-- Fixture images (for example the event graphic placed in `GraphicPost.ai`) live in `docs/reference/fixtures/{name}.png` and are referred to by the pool-photo id `fixture-{name}`. `?template={id}&fixture` opens the normal editor with the same inputs.
+- Fixture images (for example the event graphic placed in `GraphicPost.ai`) live in `docs/reference/fixtures/{name}.{png,jpg}` and are referred to by the pool-photo id `fixture-{name}`. `?template={id}&fixture` opens the normal editor with the same inputs.
 - A template without a fixture renders empty. The reference backgrounds use textures that aren't in the library, so the background always differs.
 - This view is only available in dev builds. It and the fixture loader are imported on demand behind `import.meta.env.DEV`, so neither they nor the reference images reach the production bundle.
 - Reference PNGs are rendered once from the `.ai` files at 1080×1440 and committed. They're images of the designs, not font files.
@@ -182,7 +183,7 @@ The minimum required features are WebGL2, `createImageBitmap` with `imageOrienta
 /
 ├─ docs/                      planning docs, decisions, reference renders
 │  └─ reference/              cover.png, photo.png, graphic.png, info.png
-│     └─ fixtures/            images the template fixtures use (graphic.png)
+│     └─ fixtures/            images the template fixtures use
 ├─ public/
 │  ├─ fonts/                  instrument-serif-regular.woff2, geist-*.woff2 (Druk is not shipped)
 │  └─ textures/               textures.json, *.jpg, *-thumb.jpg

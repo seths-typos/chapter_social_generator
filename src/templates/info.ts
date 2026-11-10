@@ -229,6 +229,7 @@ export const infoTemplate: TemplateDefinition<"info"> = {
   }),
   photoIds: () => [],
   draftPhotoIds: () => [],
+  acceptPhoto: (draft) => draft,
   clearPhoto: (draft) => draft,
   hasTypedText: ({ info }) =>
     [info.title, info.body, info.location].some((text) => text.trim() !== ""),

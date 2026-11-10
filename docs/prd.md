@@ -68,7 +68,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Photos stay in the pool for the whole session. | After a post is added to the batch, all pool photos are still available for the next post. |
 | Indicate which photos have been used. | A photo used in any batch post shows a "used" marker and a count. It stays selectable. |
 | Remove a photo from the pool. | A photo that a batch post uses can't be removed until those posts are removed (the button is disabled and says why). Removing a photo that is in the post being edited asks for confirmation first, then empties that slot. |
-| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. |
+| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. Clicking a photo in the Photos panel also puts it into the post being edited. |
 
 ### Photo input modes
 

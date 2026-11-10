@@ -49,6 +49,7 @@ export const graphicTemplate: TemplateDefinition<"graphic"> = {
   fromPost: (post, base) => ({ ...base, template: "graphic", graphicId: post.graphicId }),
   photoIds: (post) => [post.graphicId],
   draftPhotoIds: (draft) => (draft.graphicId ? [draft.graphicId] : []),
+  acceptPhoto: (draft, graphicId) => ({ ...draft, graphicId }),
   clearPhoto: (draft, photoId) =>
     draft.graphicId === photoId ? { ...draft, graphicId: null } : draft,
   render: renderGraphic,

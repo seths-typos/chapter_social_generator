@@ -6,6 +6,7 @@
 import { emptySlot, type DraftSlot, type PhotoDraft } from "@/store/draft";
 import type { PhotoSlot, Post } from "@/store/types";
 import type { TemplateDefinition } from "./definition";
+import { PhotoSlotEditor } from "./PhotoSlotEditor";
 
 type SlotTemplateId = PhotoDraft["template"];
 type PhotoPost = Extract<Post, { slots: PhotoSlot[] }>;
@@ -19,6 +20,8 @@ type SlotOps<K extends SlotTemplateId> = Required<
     | "fromPost"
     | "photoIds"
     | "draftPhotoIds"
+    | "acceptPhoto"
+    | "Editor"
     | "clearPhoto"
   >
 >;
@@ -63,6 +66,16 @@ export function slotDraftOps<K extends SlotTemplateId>(
       }) as PhotoDraft,
     photoIds: (post) => post.slots.map((s) => s.photoId),
     draftPhotoIds: (draft) => draft.slots.filter(isFilled).map((s) => s.photoId),
+    Editor: PhotoSlotEditor,
+    // The first empty slot, or the last slot when all are full (so one-slot templates swap).
+    acceptPhoto: (draft, photoId) => {
+      const empty = draft.slots.findIndex((s) => !isFilled(s));
+      const target = empty === -1 ? draft.slots.length - 1 : empty;
+      return {
+        ...draft,
+        slots: draft.slots.map((s, i) => (i === target ? { ...emptySlot(), photoId } : s)),
+      } as PhotoDraft;
+    },
     clearPhoto: (draft, photoId) =>
       ({
         ...draft,

@@ -9,7 +9,7 @@ import { decodeImage } from "@/render/textureLibrary";
 import { appStore } from "@/store/store";
 import { FIXTURE_IMAGE_PREFIX } from "@/templates/constants";
 
-const urls = import.meta.glob<string>("../../docs/reference/fixtures/*.png", {
+const urls = import.meta.glob<string>("../../docs/reference/fixtures/*.{png,jpg}", {
   query: "?url",
   import: "default",
 });

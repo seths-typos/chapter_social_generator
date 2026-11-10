@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { hasSlots, slotCount, type Draft } from "@/store/draft";
 import type { Post } from "@/store/types";
 import {
+  acceptPhotoInDraft,
   clearPhotoFromDraft,
   convertDraft,
   fromPost,
@@ -10,6 +11,7 @@ import {
   photoIdsInDraft,
   photoIdsInPost,
   photoUsage,
+  takesPhotos,
   TEMPLATE_IDS,
   TEMPLATE_LIST,
   TEMPLATES,
@@ -278,6 +280,34 @@ describe("registry", () => {
       expect(missingInputs(d).length).toBeGreaterThan(0);
       expect(toPost(d)).toBeNull();
     }
+  });
+});
+
+describe("acceptPhotoInDraft", () => {
+  it("fills the first empty slot, then swaps the last one", () => {
+    let multi = acceptPhotoInDraft(newDraft("multi-photo"), "a");
+    expect(photoIdsInDraft(multi)).toEqual(["a"]);
+    multi = acceptPhotoInDraft(multi, "b");
+    expect(photoIdsInDraft(multi)).toEqual(["a", "b"]);
+    multi = acceptPhotoInDraft(multi, "c");
+    expect(photoIdsInDraft(multi)).toEqual(["a", "c"]);
+  });
+
+  it("swaps the photo of a one-slot template and resets its view", () => {
+    const first = acceptPhotoInDraft(newDraft("cover"), "a");
+    const zoomed = { ...first, slots: [{ photoId: "a", panX: 1, panY: 0, zoom: 2 }] } as Draft;
+    expect(acceptPhotoInDraft(zoomed, "b")).toMatchObject({
+      slots: [{ photoId: "b", panX: 0, panY: 0, zoom: 1 }],
+    });
+  });
+
+  it("sets the graphic, and leaves Info alone", () => {
+    expect(acceptPhotoInDraft(newDraft("graphic"), "g")).toMatchObject({ graphicId: "g" });
+    const info = newDraft("info");
+    expect(acceptPhotoInDraft(info, "g")).toBe(info);
+    expect(takesPhotos(info)).toBe(false);
+    expect(takesPhotos(newDraft("photo"))).toBe(true);
+    expect(takesPhotos(newDraft("graphic"))).toBe(true);
   });
 });
 

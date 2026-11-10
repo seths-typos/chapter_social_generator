@@ -74,6 +74,15 @@ export function photoUsage(posts: readonly Post[]): Map<string, number> {
   return usage;
 }
 
+/** The draft with a pool photo put in its next free place. Unchanged if the template takes no images. */
+export function acceptPhotoInDraft(draft: Draft, photoId: string): Draft {
+  return templateFor(draft.template).acceptPhoto(draft, photoId);
+}
+
+/** True when the draft's template uses pool images at all. */
+export const takesPhotos = (draft: Draft): boolean =>
+  acceptPhotoInDraft(draft, "\u0000probe") !== draft;
+
 /** The draft with a pool photo taken out of wherever it was used. */
 export function clearPhotoFromDraft(draft: Draft, photoId: string): Draft {
   return templateFor(draft.template).clearPhoto(draft, photoId);

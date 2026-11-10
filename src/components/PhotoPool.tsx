@@ -6,7 +6,7 @@ import { previewUrl, releasePreviewUrl } from "@/image/previewUrl";
 import { removePhotoAsset } from "@/render/assetCache";
 import { useAppStore } from "@/store/store";
 import type { PhotoMode, PoolPhoto } from "@/store/types";
-import { photoIdsInDraft, photoUsage } from "@/templates/registry";
+import { photoIdsInDraft, photoUsage, takesPhotos } from "@/templates/registry";
 import { Panel } from "./Panel";
 
 const hasFiles = (e: DragEvent): boolean => e.dataTransfer?.types.includes("Files") ?? false;
@@ -22,6 +22,8 @@ export function PhotoPool() {
   const removePhoto = useAppStore((s) => s.removePhoto);
   const setPhotoMode = useAppStore((s) => s.setPhotoMode);
   const usage = useMemo(() => photoUsage(batch.map((b) => b.post)), [batch]);
+  const canUse = draft !== null && takesPhotos(draft);
+  const addPhotoToDraft = useAppStore((s) => s.addPhotoToDraft);
   const inDraft = useMemo(() => new Set(draft ? photoIdsInDraft(draft) : []), [draft]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
@@ -169,12 +171,20 @@ export function PhotoPool() {
                         : "border-neutral-200"
                     }`}
                   >
-                    <img
-                      src={previewUrl(photo.thumbnail)}
-                      alt={photo.name}
-                      title={photo.name}
-                      className="h-full w-full object-cover"
-                    />
+                    <button
+                      type="button"
+                      disabled={!canUse}
+                      onClick={() => addPhotoToDraft(photo.id)}
+                      aria-label={`Use ${label} in this post`}
+                      title={canUse ? `Use ${label} in this post` : photo.name}
+                      className="block h-full w-full enabled:cursor-pointer"
+                    >
+                      <img
+                        src={previewUrl(photo.thumbnail)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
                     {used > 0 && (
                       <span
                         title={`In ${used} ${used === 1 ? "post" : "posts"} in the batch`}

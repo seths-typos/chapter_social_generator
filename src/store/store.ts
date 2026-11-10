@@ -11,6 +11,7 @@ import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { ZOOM_MAX, ZOOM_MIN, type MultiPhotoCount } from "@/templates/constants";
 import {
+  acceptPhotoInDraft,
   clearPhotoFromDraft,
   convertDraft,
   fromPost,
@@ -68,6 +69,8 @@ export interface AppState {
   setGrain: (grain: boolean) => void;
   setPhotoCount: (count: MultiPhotoCount) => void;
   setSlotPhoto: (index: number, photoId: string | null) => void;
+  /** Put a pool photo into the draft wherever its template wants one next. */
+  addPhotoToDraft: (photoId: string) => void;
   setSlotView: (index: number, view: { panX?: number; panY?: number; zoom?: number }) => void;
   resetSlotView: (index: number) => void;
   /**
@@ -164,6 +167,7 @@ export function createAppStore(): StoreApi<AppState> {
       setTexture: (texture) => updateDraft((d) => ({ ...d, texture, textureChosen: true })),
       setGrain: (grain) => updatePhotoDraft((d) => ({ ...d, grain })),
       setPhotoCount: (count) => updateDraft((d) => withPhotoCount(d, count)),
+      addPhotoToDraft: (photoId) => updateDraft((d) => acceptPhotoInDraft(d, photoId)),
       setSlotPhoto: (index, photoId) =>
         updatePhotoDraft((d) => mapSlot(d, index, () => ({ ...emptySlot(), photoId }))),
       setSlotView: (index, view) =>

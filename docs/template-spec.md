@@ -56,7 +56,9 @@ A polaroid is an **848×1021** object (about the 88×107 mm Polaroid 600 ratio).
 | Frame size | 848×1021 |
 | Photo window (relative to the frame) | x **60**, y **57**, w **726**, h **753** (ratio ≈ 0.964). Measured from the scan's dark photo area, rounded outward so the transparent cut covers it fully. The cut in `frame.png` is exactly this rectangle, so the photo drawn behind it must fill it exactly. |
 | Photo fit | Cover-fit into the window, centered by default. Optional pan and zoom (zoom 1.0–3.0×). Panning can never expose an empty gap. |
-| Draw order | Photo clipped to the window, then the frame on top |
+| Draw order | Shadow on the full 848×1021 rect, then the photo clipped to the window, then the frame on top |
+| Empty state | Before a photo is chosen the window is a flat `#C9CCD1`. It is never exported. |
+| Placement | A polaroid is drawn in its own 848×1021 space and placed by a centre, a rotation and a uniform scale (`PolaroidPlacement`). Cover and Photo use centre (540, 720.5), no rotation, scale 1. The shadow's blur and offset scale with it. |
 
 #### Polaroid scan: user-cropped
 
@@ -89,7 +91,7 @@ Reference: `CoverPost.ai`, `First Post@2x.png`
 
 ### Photo (`photo`)
 
-Reference: `polaroidArtboard 3@2x.png`
+Reference: `polaroidArtboard 3@2x.png`. This is an Instagram mock-up on a different texture, so it shows the look, not the layout: the layout is Cover's.
 
 Identical to **Cover**, without the wordmark.
 
@@ -236,7 +238,7 @@ Adding a template means adding a variant to both unions and one definition file.
 | `ch.` mark | `src/assets/wordmark/ch.svg` | "ch." shaped in Druk Bold (matches `Secondary Wordmark (Black)@2x.png`) | ✅ Done. For the UI header and favicon |
 | Polaroid frame | `src/assets/polaroid/frame.png` | Scan in `CoverPost.ai`, with the window cut out, at 1696×2042 | ✅ Done |
 | Reference renders | `docs/reference/{cover,photo,graphic,info}.png` | `cover`, `graphic`, `info` rendered from the `.ai` files at 1080×1440 (stray swatch label removed from `cover`); `photo` scaled from `polaroidArtboard 3@2x.png` | ✅ Done. For visual review (dev comparison view) |
-| Fixture images | `docs/reference/fixtures/graphic.png` | The 958×974 event graphic embedded in `GraphicPost.ai` | ✅ Done. Input for the Graphic fixture (dev comparison view only) |
+| Fixture images | `docs/reference/fixtures/{graphic.png,cover.jpg,photo.jpg}` | `graphic`: the 958×974 event graphic embedded in `GraphicPost.ai`. `cover`: the photo area of the polaroid scan embedded in `CoverPost.ai`. `photo`: the photo cropped out of `polaroidArtboard 3@2x.png`. | ✅ Done. Inputs for the fixtures (dev comparison view only) |
 
 ## Open items
 

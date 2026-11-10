@@ -46,6 +46,9 @@ function fakeCtx() {
     stroke() {},
     translate() {},
     scale() {},
+    rotate() {},
+    rect() {},
+    clip() {},
     fillRect(x: number, y: number, w: number, h: number) {
       fills.push({ x, y, w, h, style: this.fillStyle, shadow: this.shadowBlur > 0 });
     },
@@ -101,7 +104,15 @@ describe("renderPost", () => {
     const { ctx, fills } = fakeCtx();
     renderPost(ctx, newDraft("photo"), placeholderAssets());
     expect(fills[0]!.style).toBe("#A0602E");
-    expect(fills.at(-1)).toMatchObject({ ...POLAROID.rect, style: POLAROID.paperColor });
+    // The polaroid draws in its own space: a shadow on its full size, then the empty window.
+    expect(fills[1]).toMatchObject({
+      x: 0,
+      y: 0,
+      w: POLAROID.rect.w,
+      h: POLAROID.rect.h,
+      shadow: true,
+    });
+    expect(fills.at(-1)).toMatchObject({ ...POLAROID.window, style: POLAROID.emptyWindowColor });
   });
 
   it("falls back to a neutral fill for an unknown texture", () => {
