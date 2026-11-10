@@ -52,9 +52,9 @@ A polaroid is an **848×1021** object (about the 88×107 mm Polaroid 600 ratio).
 
 | Part | Value |
 |---|---|
-| Frame asset | `assets/polaroid/frame.png`: the scanned polaroid from `CoverPost.ai` with its photo window cut out (transparent), at 2817×3394 source px. Keeps real paper texture and edges. Can be replaced later with a dedicated blank scan. |
+| Frame asset | `src/assets/polaroid/frame.png`: the scanned polaroid from `CoverPost.ai` with its photo window cut out (transparent), stored at 2× output size (1696×2042, ~1.1 MB). Keeps real paper texture and edges. Can be replaced later with a dedicated blank scan. |
 | Frame size | 848×1021 |
-| Photo window (relative to the frame) | x **60**, y **59**, w **725**, h **748** (ratio ≈ 0.969) |
+| Photo window (relative to the frame) | x **60**, y **57**, w **726**, h **753** (ratio ≈ 0.964). Measured from the scan's dark photo area, rounded outward so the transparent cut covers it fully. The cut in `frame.png` is exactly this rectangle, so the photo drawn behind it must fill it exactly. |
 | Photo fit | Cover-fit into the window, centered by default. Optional pan and zoom (zoom 1.0–3.0×). Panning can never expose an empty gap. |
 | Draw order | Photo clipped to the window, then the frame on top |
 
@@ -219,12 +219,12 @@ interface BatchItem { id: string; name: string; caption: string; post: Post; }
 
 | Asset | Path | Source | Status |
 |---|---|---|---|
-| Druk Medium, Druk Bold | `public/fonts/druk-medium.woff2`, `public/fonts/druk-bold.woff2` | Chapter's license (OTFs supplied: `Druk-Medium.otf`, `Druk-Bold.otf`) | Convert to WOFF2 in the build |
-| Instrument Serif Regular | `public/fonts/instrument-serif-regular.woff2` | Google Fonts (OFL), self-hosted | Download in the build |
-| `chapter` wordmark | `assets/wordmark/chapter.svg` | Vector paths in `CoverPost.ai` / `InfoPost.ai`, or `Wordmark (Black)@2x.png` | Extract to SVG in the build |
-| `ch.` mark | `assets/wordmark/ch.svg` | `Secondary Wordmark (Black)@2x.png` | For the UI header and favicon |
-| Polaroid frame | `assets/polaroid/frame.png` | Scan in `CoverPost.ai`, with the window cut out | Make in the build |
-| Reference renders | `docs/reference/{cover,graphic,info}.png` | Rendered from the `.ai` files at 1080×1440 | For visual review (dev comparison view) |
+| Druk Medium, Druk Bold | `public/fonts/druk-medium.woff2`, `public/fonts/druk-bold.woff2` | Chapter's license (OTFs supplied: `Druk-Medium.otf`, `Druk-Bold.otf`) | ✅ Done |
+| Instrument Serif Regular | `public/fonts/instrument-serif-regular.woff2` | Google Fonts (OFL), self-hosted | ✅ Done |
+| `chapter` wordmark | `src/assets/wordmark/chapter.svg` | The 7 vector glyph paths in `CoverPost.ai` (viewBox 700.66×304.79, `fill="currentColor"`) | ✅ Done |
+| `ch.` mark | `src/assets/wordmark/ch.svg` | "ch." shaped in Druk Bold (matches `Secondary Wordmark (Black)@2x.png`) | ✅ Done. For the UI header and favicon |
+| Polaroid frame | `src/assets/polaroid/frame.png` | Scan in `CoverPost.ai`, with the window cut out, at 1696×2042 | ✅ Done |
+| Reference renders | `docs/reference/{cover,photo,graphic,info}.png` | `cover`, `graphic`, `info` rendered from the `.ai` files at 1080×1440 (stray swatch label removed from `cover`); `photo` scaled from `polaroidArtboard 3@2x.png` | ✅ Done. For visual review (dev comparison view) |
 
 ## Open items
 
