@@ -325,3 +325,15 @@ const infoPost: Post = {
   location: "L",
   texture: tile,
 };
+
+describe("fixtures", () => {
+  it("fill a draft completely, so the reference render can be reproduced", () => {
+    for (const t of TEMPLATE_LIST) {
+      if (!t.fixture) continue;
+      const filled = t.fixture(newDraft(t.id));
+      expect(filled.template).toBe(t.id);
+      expect(missingInputs(filled)).toEqual([]);
+    }
+    expect(TEMPLATES.info.fixture).toBeDefined();
+  });
+});

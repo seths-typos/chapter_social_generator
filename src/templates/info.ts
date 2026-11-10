@@ -1,19 +1,168 @@
 import { drawShadow } from "@/render/shadow";
-import type { RendererFor } from "@/render/types";
-import type { InfoFields } from "@/store/draft";
-import { INFO_CARD, LIBRARY_TEXTURE } from "./constants";
+import {
+  drawLines,
+  fitBlock,
+  fitHeadline,
+  fitLine,
+  fitWarnings,
+  type TextFit,
+} from "@/render/text";
+import type { FitWarning, RendererFor } from "@/render/types";
+import { drawWordmark } from "@/render/wordmark";
+import type { DraftFor, InfoFields } from "@/store/draft";
+import {
+  INFO_BADGE,
+  INFO_BODY,
+  INFO_CARD,
+  INFO_DATE,
+  INFO_LOCATION,
+  INFO_LOCKUP,
+  INFO_RULES,
+  INFO_TEXT_COLOR,
+  INFO_TITLE,
+  LIBRARY_TEXTURE,
+} from "./constants";
 import type { TemplateDefinition } from "./definition";
+import { formatEventDate } from "./infoDate";
+import { InfoEditor } from "./InfoEditor";
 
-/**
- * Info: event details on a card. docs/template-spec.md#info-info
- * The card and its shadow are final; badge and text land in #10.
- */
-const renderInfo: RendererFor<"info"> = (ctx) => {
+type Ctx = CanvasRenderingContext2D;
+
+/** A centred single line that shrinks to fit (the date and location lines). */
+function drawDetailLine(
+  ctx: Ctx,
+  text: string,
+  spec: typeof INFO_DATE | typeof INFO_LOCATION,
+): TextFit {
+  const fit = fitLine(ctx, text, { ...spec, maxSize: spec.size });
+  drawLines(ctx, fit.lines, {
+    font: spec.font,
+    size: fit.size,
+    lineHeight: fit.lineHeight,
+    x: spec.centerX,
+    baseline: spec.baseline,
+    align: "center",
+    color: INFO_TEXT_COLOR,
+  });
+  return fit;
+}
+
+function drawCard(ctx: Ctx): void {
   const r = INFO_CARD.rect;
   drawShadow(ctx, r);
   ctx.fillStyle = INFO_CARD.fill;
   ctx.fillRect(r.x, r.y, r.w, r.h);
-  return [];
+  ctx.fillStyle = INFO_RULES.color;
+  for (const y of INFO_RULES.ys) {
+    ctx.fillRect(INFO_RULES.x, y - INFO_RULES.thickness / 2, INFO_RULES.w, INFO_RULES.thickness);
+  }
+}
+
+/** The fixed "chapter presents" line. */
+function drawLockup(ctx: Ctx, wordmark: Parameters<typeof drawWordmark>[1] | undefined): void {
+  if (wordmark) drawWordmark(ctx, wordmark, INFO_LOCKUP.wordmark, INFO_TEXT_COLOR);
+  const p = INFO_LOCKUP.presents;
+  drawLines(ctx, [p.text], {
+    font: p.font,
+    size: p.size,
+    lineHeight: p.size,
+    x: p.x,
+    baseline: p.baseline,
+    align: "left",
+    color: INFO_TEXT_COLOR,
+    strokeWidth: p.strokeWidth,
+  });
+}
+
+function drawTitle(ctx: Ctx, title: string): TextFit {
+  const t = INFO_TITLE;
+  const fit = fitHeadline(ctx, title, { ...t, maxSize: t.size });
+  drawLines(ctx, fit.lines, {
+    font: t.font,
+    size: fit.size,
+    lineHeight: fit.lineHeight,
+    x: t.centerX,
+    baseline: fit.lines.length > 1 ? t.wrappedBaseline : t.baseline,
+    align: "center",
+    color: INFO_TEXT_COLOR,
+  });
+  return fit;
+}
+
+/** Left-aligned body, centred as a block between the two rules. */
+function drawBody(ctx: Ctx, body: string): TextFit {
+  const b = INFO_BODY;
+  const fit = fitBlock(ctx, body, { ...b, maxSize: b.size });
+  const firstBaseline =
+    b.centerY - ((fit.lines.length - 1) * fit.lineHeight) / 2 + fit.size * b.baselineShiftEm;
+  drawLines(ctx, fit.lines, {
+    font: b.font,
+    size: fit.size,
+    lineHeight: fit.lineHeight,
+    x: b.x,
+    baseline: firstBaseline,
+    align: "left",
+    color: INFO_TEXT_COLOR,
+  });
+  return fit;
+}
+
+/** The `ch. N` badge, drawn last so it overlaps the card's corner. */
+function drawBadge(ctx: Ctx, eventNumber: number | null): TextFit {
+  const b = INFO_BADGE;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(b.centerX, b.centerY, b.diameter / 2, 0, Math.PI * 2);
+  ctx.fillStyle = b.fill;
+  ctx.fill();
+  ctx.strokeStyle = b.stroke;
+  ctx.lineWidth = b.strokeWidth;
+  ctx.stroke();
+  ctx.restore();
+
+  const text = eventNumber === null ? "ch." : `ch. ${eventNumber}`;
+  const fit = fitLine(ctx, text, { ...b.text, maxSize: b.text.size });
+  drawLines(ctx, fit.lines, {
+    font: b.text.font,
+    size: fit.size,
+    lineHeight: fit.lineHeight,
+    x: b.centerX,
+    baseline: b.text.baseline,
+    align: "center",
+    color: INFO_TEXT_COLOR,
+  });
+  return fit;
+}
+
+/** Info: event details on a card. docs/template-spec.md#info-info */
+const renderInfo: RendererFor<"info"> = (ctx, draft, assets) => {
+  const { info } = draft;
+  drawCard(ctx);
+  drawLockup(ctx, assets.wordmark);
+  const warnings: FitWarning[] = [
+    ...fitWarnings(
+      drawTitle(ctx, info.title),
+      "title",
+      "The title is too long, even on two lines.",
+    ),
+    ...fitWarnings(drawBody(ctx, info.body), "body", "The body text is too long to fit."),
+    ...fitWarnings(
+      drawDetailLine(ctx, formatEventDate(info.date, info.startTime, info.endTime), INFO_DATE),
+      "date",
+      "The date line is too long to fit.",
+    ),
+    ...fitWarnings(
+      drawDetailLine(ctx, info.location, INFO_LOCATION),
+      "location",
+      "The location is too long for one line.",
+    ),
+    ...fitWarnings(
+      drawBadge(ctx, info.eventNumber),
+      "eventNumber",
+      "The event number doesn't fit in the badge.",
+    ),
+  ];
+  return warnings;
 };
 
 const emptyInfo = (): InfoFields => ({
@@ -24,6 +173,17 @@ const emptyInfo = (): InfoFields => ({
   startTime: "",
   endTime: "",
   location: "",
+});
+
+/** The inputs of the reference render, `docs/reference/info.png`. */
+const referenceInfo = (): InfoFields => ({
+  eventNumber: 1,
+  title: "Recess At Night!",
+  body: "Take a break from all the hard work and wintertime blues, and come play for an evening. Join us at Anew Café & Goods for a recess session designed for adults who haven't forgotten the joy of recess.",
+  date: "2026-03-10",
+  startTime: "18:30",
+  endTime: "21:00",
+  location: "Anew Café & Goods, New York, NY",
 });
 
 export const infoTemplate: TemplateDefinition<"info"> = {
@@ -70,4 +230,6 @@ export const infoTemplate: TemplateDefinition<"info"> = {
   photoIds: () => [],
   clearPhoto: (draft) => draft,
   render: renderInfo,
+  Editor: InfoEditor,
+  fixture: (draft: DraftFor<"info">) => ({ ...draft, info: referenceInfo() }),
 };

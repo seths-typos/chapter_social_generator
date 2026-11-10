@@ -86,8 +86,97 @@ export const FONTS = {
   instrumentSerif: { family: "Instrument Serif", weight: 400 },
 } as const;
 
-/** Info template card.docs/template-spec.md#info-info */
+/**
+ * Info template. docs/template-spec.md#info-info
+ * Positions are measured from `InfoPost.ai`. Text is placed by baseline.
+ */
 export const INFO_CARD = {
   rect: { x: 116, y: 120, w: 848, h: 1200 } satisfies Rect,
   fill: "#FDFFFD",
 } as const;
+
+export const INFO_TEXT_COLOR = "#000000";
+
+/** The `ch. N` badge. The stroke is centred on the circle's edge, so the outer diameter is 213. */
+export const INFO_BADGE = {
+  centerX: 148.5,
+  centerY: 172,
+  diameter: 204,
+  fill: "#EBCBFE",
+  stroke: "#CB7FF8",
+  strokeWidth: 9,
+  text: {
+    font: FONTS.drukBold,
+    size: 108,
+    minSize: 72,
+    maxWidth: 170,
+    baseline: 209,
+  },
+} as const;
+
+/** The fixed "chapter presents" line: the wordmark, then "presents" on the same baseline. */
+export const INFO_LOCKUP = {
+  wordmark: { x: 292.4, y: 217.4, w: 226, h: 98.3 } satisfies Rect,
+  presents: {
+    text: "presents",
+    font: FONTS.drukBold,
+    size: 104,
+    x: 529.8,
+    baseline: 295.9,
+    /** The design outlines "presents" to match the wordmark's heavier weight. */
+    strokeWidth: 0.75,
+  },
+} as const;
+
+export const INFO_TITLE = {
+  font: FONTS.drukMedium,
+  size: 167,
+  minSize: 120,
+  maxWidth: 772,
+  centerX: 540,
+  baseline: 511,
+  maxLines: 2,
+  wrappedLineHeightRatio: 0.95,
+  /** First baseline when wrapped to two lines, so the pair sits where the single line did. *tune* */
+  wrappedBaseline: 437,
+} as const;
+
+export const INFO_RULES = {
+  x: 154,
+  w: 772,
+  ys: [589, 1047],
+  thickness: 1,
+  color: "#231F20",
+} as const;
+
+export const INFO_BODY = {
+  font: FONTS.instrumentSerif,
+  size: 45,
+  minSize: 36,
+  lineHeightRatio: 1.2,
+  x: 216,
+  maxWidth: 648,
+  maxHeight: 430,
+  /** Midpoint between the two rules; the block is centred on it. */
+  centerY: 818,
+  /**
+   * Baselines sit this far (in em) below an even split around `centerY`, which puts the
+   * reference's five lines on its baselines (720.5 … 936.5).
+   */
+  baselineShiftEm: 0.233,
+} as const;
+
+const INFO_DETAIL_LINE = {
+  font: FONTS.drukMedium,
+  size: 65,
+  minSize: 48,
+  maxWidth: 772,
+  centerX: 540,
+} as const;
+
+export const INFO_DATE = { ...INFO_DETAIL_LINE, baseline: 1155 } as const;
+export const INFO_LOCATION = { ...INFO_DETAIL_LINE, baseline: 1233 } as const;
+
+/** Event number limits. docs/template-spec.md#fields-and-overflow */
+export const EVENT_NUMBER_MIN = 1;
+export const EVENT_NUMBER_MAX = 999;

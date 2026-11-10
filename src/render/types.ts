@@ -15,8 +15,15 @@ export interface RenderAssets {
   photos: ReadonlyMap<string, ImageBitmap>;
   /** The polaroid frame with its window cut out. */
   frame?: CanvasImageSource;
-  /** The `chapter` wordmark, pre-rasterised for the Cover (white) and Info (black) templates. */
-  wordmark?: { light: CanvasImageSource; dark: CanvasImageSource };
+  /** The `chapter` wordmark as vector paths. Absent outside a browser (unit tests). */
+  wordmark?: WordmarkAsset | undefined;
+}
+
+/** The `chapter` wordmark: glyph paths in a `width`×`height` box, filled in any colour at draw time. */
+export interface WordmarkAsset {
+  paths: readonly Path2D[];
+  width: number;
+  height: number;
 }
 
 export const textureKey = (t: TextureRef): string => `${t.kind}:${t.id}`;

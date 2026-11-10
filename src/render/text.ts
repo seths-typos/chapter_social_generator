@@ -1,5 +1,5 @@
 /**
- * Text engine: measure, word-wrap, shrink-to-fit and glyph-box-top drawing.
+ * Text engine: measure, word-wrap, shrink-to-fit and baseline-positioned drawing.
  * docs/template-spec.md#fields-and-overflow · docs/technical-requirements.md#primitives-srcrender
  *
  * This module holds no layout values. Templates pass sizes, widths and minimums from
@@ -26,7 +26,18 @@ export interface MeasureContext {
 
 /** The slice of a 2D context the draw function uses. */
 export type DrawContext = MeasureContext &
-  Pick<CanvasRenderingContext2D, "save" | "restore" | "fillText" | "fillStyle" | "textAlign">;
+  Pick<
+    CanvasRenderingContext2D,
+    | "save"
+    | "restore"
+    | "fillText"
+    | "strokeText"
+    | "fillStyle"
+    | "strokeStyle"
+    | "lineWidth"
+    | "lineJoin"
+    | "textAlign"
+  >;
 
 export interface LineMetrics {
   /** Advance width. */
@@ -228,38 +239,35 @@ export interface DrawTextOptions {
   lineHeight: number;
   /** Anchor x: the left edge, centre or right edge, per `align`. */
   x: number;
-  /** y of the top of the first line's glyph box (how Illustrator reports text position). */
-  top: number;
+  /** y of the first line's baseline. Later baselines step down by `lineHeight`. */
+  baseline: number;
   align: "left" | "center" | "right";
   color: string;
-  /**
-   * Measure the glyph-box top from this string instead of the first line. Use it to keep
-   * a field's baseline steady whatever is typed (e.g. "H" so lowercase-only text doesn't
-   * ride up).
-   */
-  topRef?: string;
+  /** Outline the glyphs with a stroke this wide (px) in the same colour, to thicken them. */
+  strokeWidth?: number;
 }
 
 /**
- * Draw lines so the top of the first line's ink sits at `top`; later baselines step down
- * by `lineHeight`. Returns the first baseline's y.
+ * Draw lines by baseline. Baselines are what the design files give for every text item,
+ * and they don't move with what is typed (an ink-top position would shift between
+ * "MOON" and "moon"). docs/decisions/0004-text-positioned-by-baseline.md
  */
-export function drawLines(
-  ctx: DrawContext,
-  lines: readonly string[],
-  opts: DrawTextOptions,
-): number {
-  const first = lines[0];
-  if (first === undefined) return opts.top;
-  const { ascent } = measureLine(ctx, opts.topRef ?? first, opts.font, opts.size);
-  const baseline = opts.top + ascent;
+export function drawLines(ctx: DrawContext, lines: readonly string[], opts: DrawTextOptions): void {
+  if (lines.length === 0) return;
   ctx.save();
   setFont(ctx, opts.font, opts.size);
   ctx.textAlign = opts.align;
   ctx.fillStyle = opts.color;
+  if (opts.strokeWidth) {
+    ctx.strokeStyle = opts.color;
+    ctx.lineWidth = opts.strokeWidth;
+    ctx.lineJoin = "round";
+  }
   lines.forEach((line, i) => {
-    if (line !== "") ctx.fillText(line, opts.x, baseline + i * opts.lineHeight);
+    if (line === "") return;
+    const y = opts.baseline + i * opts.lineHeight;
+    ctx.fillText(line, opts.x, y);
+    if (opts.strokeWidth) ctx.strokeText(line, opts.x, y);
   });
   ctx.restore();
-  return baseline;
 }

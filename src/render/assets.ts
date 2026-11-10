@@ -9,6 +9,7 @@ import { TEMPLATE_LIST } from "@/templates/registry";
 import { ensureLibraryTexture, getTexturesSnapshot, subscribeTextures } from "./assetCache";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
+import { getWordmark } from "./wordmark";
 
 export interface TextureLibraryState {
   entries: TextureManifestEntry[];
@@ -66,5 +67,5 @@ export function useRenderAssets(): RenderAssets {
   }, [entries, current]);
 
   const photos = useMemo(() => new Map<string, ImageBitmap>(), []);
-  return useMemo(() => ({ textures, photos }), [textures, photos]);
+  return useMemo(() => ({ textures, photos, wordmark: getWordmark() }), [textures, photos]);
 }

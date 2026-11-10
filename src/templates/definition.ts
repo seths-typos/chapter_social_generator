@@ -9,9 +9,10 @@
  *      (src/store/draft.ts).
  *   3. Create `src/templates/{name}.ts` exporting its definition.
  *   4. Add it to `TEMPLATES` in `registry.ts`. Its position there is its picker position.
- * Template-specific fields are edited through the store's `editDraft(template, fn)`.
+ * A template with its own fields also exports an `Editor` form component (see `EditorProps`).
  */
 
+import type { ComponentType } from "react";
 import type { RendererFor } from "@/render/types";
 import type { DraftBase, DraftFor } from "@/store/draft";
 import type { PostFor, TemplateId, TextureRef } from "@/store/types";
@@ -43,6 +44,23 @@ export interface TemplateDefinition<K extends TemplateId> {
 
   /** Draw everything above the background texture. Returns fit warnings. */
   render: RendererFor<K>;
+
+  /** The template's own form fields. Templates with nothing beyond the shared controls omit it. */
+  Editor?: ComponentType<EditorProps<K>>;
+  /**
+   * Fill a fresh draft with the inputs of the template's reference render, for checking it
+   * against `docs/reference/{id}.png` (dev only).
+   */
+  fixture?: (draft: DraftFor<K>) => DraftFor<K>;
+}
+
+/**
+ * What a template's form receives. It edits its draft through `onChange` rather than
+ * reaching for the store, which keeps template files free of store imports.
+ */
+export interface EditorProps<K extends TemplateId> {
+  draft: DraftFor<K>;
+  onChange: (fn: (draft: DraftFor<K>) => DraftFor<K>) => void;
 }
 
 /** A definition for whichever template is current (`DraftFor<TemplateId>` is just `Draft`). */

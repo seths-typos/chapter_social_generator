@@ -26,6 +26,26 @@ function fakeCtx() {
     getTransform: () => new DOMMatrixStub(),
     clearRect() {},
     drawImage() {},
+    font: "",
+    textBaseline: "alphabetic",
+    textAlign: "start",
+    strokeStyle: "#000",
+    lineWidth: 1,
+    lineJoin: "miter",
+    // Text is 10 px per character whatever the size, so nothing overflows in these tests.
+    measureText: (text: string) => ({
+      width: text.length * 10,
+      actualBoundingBoxAscent: 10,
+      actualBoundingBoxDescent: 2,
+    }),
+    fillText() {},
+    strokeText() {},
+    beginPath() {},
+    arc() {},
+    fill() {},
+    stroke() {},
+    translate() {},
+    scale() {},
     fillRect(x: number, y: number, w: number, h: number) {
       fills.push({ x, y, w, h, style: this.fillStyle, shadow: this.shadowBlur > 0 });
     },

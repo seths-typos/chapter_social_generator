@@ -1,18 +1,33 @@
+import { useCallback, useState } from "react";
 import { ChMark } from "@/components/ChMark";
+import { Editor } from "@/components/Editor";
 import { Panel, Placeholder } from "@/components/Panel";
 import { Preview } from "@/components/Preview";
 import { TexturePicker } from "@/components/TexturePicker";
+import type { FitWarning, RenderResult } from "@/render/types";
+
+const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
+  a.length === b.length && a.every((w, i) => w.field === b[i]?.field && w.message === b[i].message);
 
 /**
  * The one-screen layout from docs/prd.md#app-flow:
  *   left   – session photo pool
- *   center – live preview + the selected template's controls
+ *   center – live preview, with the selected template's controls beside it
  *   right  – batch list and Download all
  * Everything inside the panels is a placeholder until its issue lands.
  */
 export function AppShell() {
+  // The renderer is the only thing that knows whether text fits, so the preview reports
+  // its warnings here and the editor uses them to block Add to batch.
+  const [warnings, setWarnings] = useState<readonly FitWarning[]>([]);
+  const onResult = useCallback(
+    (result: RenderResult) =>
+      setWarnings((prev) => (sameWarnings(prev, result.warnings) ? prev : result.warnings)),
+    [],
+  );
+
   return (
-    <div className="flex h-screen min-w-[1100px] flex-col bg-neutral-100 text-neutral-900">
+    <div className="flex h-screen min-w-[1200px] flex-col bg-neutral-100 text-neutral-900">
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-5">
         <ChMark className="h-6" />
         <h1 className="font-display text-2xl leading-none font-bold tracking-wide">
@@ -23,19 +38,20 @@ export function AppShell() {
         </span>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)_340px] gap-4 p-4">
+      <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_300px] gap-4 p-4">
         <Panel title="Photos">
           <Placeholder label="Session photo pool" issue="#14 import · #15 pool panel" />
         </Panel>
 
-        <div className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_auto] gap-4">
+        <div className="grid min-h-0 min-w-0 grid-cols-[minmax(0,1fr)_minmax(340px,400px)] gap-4">
           <Panel title="Preview">
-            <Preview />
+            <Preview onResult={onResult} />
           </Panel>
           <Panel title="Template">
             <div className="flex flex-col gap-3">
               <Placeholder label="Template picker" issue="#12" />
               <TexturePicker />
+              <Editor warnings={warnings} />
             </div>
           </Panel>
         </div>

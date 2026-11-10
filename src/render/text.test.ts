@@ -25,6 +25,9 @@ function fakeCtx() {
     textBaseline: "top" as CanvasTextBaseline,
     textAlign: "start" as CanvasTextAlign,
     fillStyle: "" as string | CanvasGradient | CanvasPattern,
+    strokeStyle: "" as string | CanvasGradient | CanvasPattern,
+    lineWidth: 1,
+    lineJoin: "miter" as CanvasLineJoin,
     measureText(text: string) {
       const size = Number(/(\d+(?:\.\d+)?)px/.exec(ctx.font)?.[1]);
       return {
@@ -36,6 +39,7 @@ function fakeCtx() {
     save: vi.fn(),
     restore: vi.fn(),
     fillText: vi.fn(),
+    strokeText: vi.fn(),
   };
   return ctx satisfies DrawContext;
 }
@@ -229,45 +233,49 @@ describe("drawLines", () => {
     size: 100,
     lineHeight: 95,
     x: 540,
-    top: 335,
+    baseline: 511,
     align: "center" as const,
     color: "#000000",
   };
 
-  it("puts the top of the first line's glyph box at `top`", () => {
+  it("draws the first line on the baseline with the font, alignment and colour set", () => {
     const ctx = fakeCtx();
-    const baseline = drawLines(ctx, ["TITLE"], base);
-    expect(baseline).toBe(405); // 335 + 0.7 × 100
-    expect(ctx.fillText).toHaveBeenCalledWith("TITLE", 540, 405);
+    drawLines(ctx, ["TITLE"], base);
+    expect(ctx.fillText).toHaveBeenCalledWith("TITLE", 540, 511);
     expect(ctx.textAlign).toBe("center");
     expect(ctx.fillStyle).toBe("#000000");
     expect(ctx.font).toBe('500 100px "Test"');
+    expect(ctx.textBaseline).toBe("alphabetic");
+    expect(ctx.strokeText).not.toHaveBeenCalled();
   });
 
-  it("uses the text's own ink, so lowercase sits higher", () => {
+  it("keeps the same baseline whatever the text's ink height", () => {
     const ctx = fakeCtx();
     drawLines(ctx, ["moon"], base);
-    expect(ctx.fillText).toHaveBeenCalledWith("moon", 540, 385);
-  });
-
-  it("can pin the baseline to a reference string", () => {
-    const ctx = fakeCtx();
-    drawLines(ctx, ["moon"], { ...base, topRef: "H" });
-    expect(ctx.fillText).toHaveBeenCalledWith("moon", 540, 405);
+    expect(ctx.fillText).toHaveBeenCalledWith("moon", 540, 511);
   });
 
   it("steps later lines by the line-height and skips blank lines", () => {
     const ctx = fakeCtx();
     drawLines(ctx, ["ONE", "", "TWO"], base);
     expect(ctx.fillText).toHaveBeenCalledTimes(2);
-    expect(ctx.fillText).toHaveBeenNthCalledWith(1, "ONE", 540, 405);
-    expect(ctx.fillText).toHaveBeenNthCalledWith(2, "TWO", 540, 595);
+    expect(ctx.fillText).toHaveBeenNthCalledWith(1, "ONE", 540, 511);
+    expect(ctx.fillText).toHaveBeenNthCalledWith(2, "TWO", 540, 701);
+  });
+
+  it("outlines the glyphs when a stroke width is given", () => {
+    const ctx = fakeCtx();
+    drawLines(ctx, ["presents"], { ...base, strokeWidth: 0.75 });
+    expect(ctx.strokeText).toHaveBeenCalledWith("presents", 540, 511);
+    expect(ctx.lineWidth).toBe(0.75);
+    expect(ctx.strokeStyle).toBe("#000000");
   });
 
   it("draws nothing for no lines and restores the context", () => {
     const ctx = fakeCtx();
-    expect(drawLines(ctx, [], base)).toBe(335);
+    drawLines(ctx, [], base);
     expect(ctx.fillText).not.toHaveBeenCalled();
+    expect(ctx.save).not.toHaveBeenCalled();
     drawLines(ctx, ["A"], base);
     expect(ctx.save).toHaveBeenCalledTimes(1);
     expect(ctx.restore).toHaveBeenCalledTimes(1);

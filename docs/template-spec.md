@@ -142,24 +142,28 @@ Reference: `InfoPost.ai`, `text_preferred.png`
 |---|---|
 | Texture | Default: white tile |
 | Card | Rect **(116, 120) 848×1200**, fill **`#FDFFFD`**, standard shadow |
-| Badge circle | Center **(148.5, 172)**, outer diameter **205** (including stroke), fill **`#EBCBFE`**, stroke **9 px `#CB7FF8`**. Fixed colors. Overlaps the card's top-left corner. |
-| Badge text | `ch. {N}`, Druk Bold **108**, `#000000`, centered in the circle (reference glyph box 82,95 → 205,232) |
-| "chapter presents" | **Fixed.** The `chapter` wordmark (vector, black) followed by "presents" in Druk Bold **104**, black, on a shared baseline. The line spans x **292 → 788**, centered at x 540, cap/x-height zone around y 221–318. |
-| Title | Druk Medium **167**, black, centered at x 540, top of glyph box at y **335**. Max width **772** (x 154 → 926). |
+| Badge circle | Center **(148.5, 172)**, diameter **204**, fill **`#EBCBFE`**, stroke **9 px `#CB7FF8`** centred on the edge (so **213** across the outside of the stroke). Fixed colors. Overlaps the card's top-left corner. Drawn last. |
+| Badge text | `ch. {N}`, Druk Bold **108**, `#000000`, centered on the circle at x 148.5, baseline y **209** |
+| "chapter presents" | **Fixed.** The `chapter` wordmark (vector, black) in the box **(292.4, 217.4) 226×98.3**, followed by "presents" in Druk Bold **104**, black, left edge x **529.8**, baseline y **295.9**, outlined with a **0.75 px** black stroke (as in the design, to match the wordmark's weight). The line spans x 292 → 788. |
+| Title | Druk Medium **167**, black, centered at x 540, baseline y **511**. Max width **772** (x 154 → 926). Wrapped to two lines: first baseline y **437** *tune*. |
 | Rule 1 | y **589**, x 154 → 926, 1 px, `#231F20` |
-| Body | Instrument Serif Regular **45**, line-height **54**, black, **left-aligned** at x **216**, max width **648** (216 → 864). The block is vertically centered between the rules (reference block y 676 → 950). |
+| Body | Instrument Serif Regular **45**, line-height **54** (1.2×), black, **left-aligned** at x **216**, max width **648** (216 → 864). The block is vertically centered on y **818**, midway between the rules: baselines are spaced evenly around it, then moved down **0.233 em**. The reference's five lines land on baselines 720.5 → 936.5. |
 | Rule 2 | y **1047**, x 154 → 926, 1 px, `#231F20` (the reference spans 150 → 932, normalized to match Rule 1) |
-| Date/time line | Druk Medium **65**, black, centered at x 540, glyph box top y **1087**. Rendered **uppercase**. |
-| Location line | Druk Medium **65**, black, centered at x 540, glyph box top y **1165**. Rendered as typed. |
+| Date/time line | Druk Medium **65**, black, centered at x 540, baseline y **1155**. Rendered **uppercase**. |
+| Location line | Druk Medium **65**, black, centered at x 540, baseline y **1233**. Rendered as typed. |
+
+**Text is positioned by baseline.** The values above are the baselines in `InfoPost.ai`. When text shrinks to fit, its baseline stays put. See [decision 0004](decisions/0004-text-positioned-by-baseline.md).
+
+**Known differences from the reference render:** the reference title starts with a stray space (it sits about 8 px right of center) and its badge text sits about 5 px left of the circle's center. The template centers both.
 
 #### Fields and overflow
 
 | Field | Input | Rule |
 |---|---|---|
-| Event number | Integer 1–999 | Renders `ch. {N}`. If it's wider than the circle's inner width (170 px), shrink to fit (minimum 72). |
+| Event number | Integer 1–999 | Renders `ch. {N}` (`ch.` while empty). If it's wider than 170 px, shrink to fit (minimum 72). |
 | Title | Text, 1 line by default | Shrink to fit within 772 px: 167 → minimum **120**. Still too wide at 120: wrap to 2 lines at 120 with line-height 0.95, breaking where the two lines come out most even. Still overflowing: show a "Title too long" warning and block **Add to batch**. |
 | Body | Multi-line text | At 45/54: if the block is taller than **430 px** (the space between the rules minus padding), shrink in 1 px steps down to minimum **36** (line-height stays at 1.2×). Still overflowing: show a warning and block **Add to batch**. |
-| Date | Date picker + start time + optional end time | Formatted automatically as `TUESDAY, MARCH 10, 6:30 PM - 9:00 PM`: full weekday, full month, no leading zeros, ` - ` between times, uppercase. Shrink to fit 772 px down to minimum **48**. |
+| Date | Date picker + start time + optional end time | Formatted automatically as `TUESDAY, MARCH 10, 6:30 PM - 9:00 PM`: full weekday, full month, no leading zeros, ` - ` between times, uppercase. With no end time the line ends after the start time. Shrink to fit 772 px down to minimum **48**. |
 | Location | Text, e.g. `Anew Café & Goods, New York, NY` | Shrink to fit 772 px down to minimum **48**. Still too wide: warn and block **Add to batch**. |
 
 **Why the date is structured:** a free-text date drifts in format from post to post, so the date is built from pickers to keep it consistent.

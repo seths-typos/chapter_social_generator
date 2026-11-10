@@ -48,13 +48,12 @@ export function Preview({ onResult }: PreviewProps) {
   }
 
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex h-full min-h-0 items-center justify-center">
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         className="max-h-full max-w-full rounded-sm shadow-sm"
-        style={{ ...frameStyle, width: "auto" }}
         aria-label={`Post preview, ${CANVAS_WIDTH} by ${CANVAS_HEIGHT}`}
       />
     </div>

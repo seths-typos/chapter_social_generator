@@ -70,7 +70,7 @@ function renderPost(ctx: CanvasRenderingContext2D, post: Post, assets: RenderAss
 // RenderResult = { warnings: FitWarning[] }   // e.g. title too long, used to block "Add to batch"
 ```
 
-- **Pure:** output depends only on `post` and `assets` (decoded images, frame, textures, wordmark). No reading from the store, the DOM or the clock.
+- **Pure:** output depends only on `post` and `assets` (decoded images, frame, textures, wordmark paths). No reading from the store, the DOM or the clock.
 - **One code path:** the preview canvas is a real **1080×1440** canvas, scaled down with CSS (`width: 100%`). Export calls `renderPost` on a fresh 1080×1440 canvas and then `canvas.toBlob("image/png")`.
 - **Template code** lives in `src/templates/{cover,photo,multiPhoto,graphic,info}.ts`, one definition per file (see [Template definitions](#template-definitions)). Every coordinate, size and color comes from `src/templates/constants.ts`, which mirrors the Template Spec one-to-one.
 - **Draws from a `Draft`:** templates render the editor's `Draft`, so a half-filled post can be previewed. `renderPost` loads a stored `Post` into a draft first, so preview and export still share one code path.
@@ -87,7 +87,8 @@ Each template file exports one `TemplateDefinition` (`src/templates/definition.t
 | `newDraft`, `missingInputs`, `toPost`, `fromPost` | The template's `Draft`: create it, check it, convert it to and from a `Post` |
 | `photoIds`, `clearPhoto` | Which pool photos a post uses, and removing one from a draft |
 | `render` | Draws everything above the background texture and returns fit warnings |
-| `Editor` (with #10), `fixture` (with #13) | The template's form, and sample inputs for the comparison view |
+| `Editor` (optional) | The template's own form fields. It gets its draft and an `onChange` as props and never imports the store. |
+| `fixture` (optional) | Fills a draft with the inputs of the reference render. Dev only: `?template={id}&fixture`, and the comparison view. |
 
 **To add a template:**
 
@@ -107,7 +108,8 @@ Template-specific fields are edited through the store's `editDraft(template, fn)
 | `shadow.ts` | Draw the standard shadow for a rectangle: `shadowColor rgba(0,0,0,0.75)`, `shadowBlur 12`, `shadowOffsetY 6`, scaled by a factor. Draw the shape with the shadow, then draw the content on top without it. |
 | `polaroid.ts` | Regular mode: clip to the window, draw the photo with pan and zoom, draw `frame.png`. Scan mode: draw the warped scan, contain-fit. Supports translate, rotate and scale for Multi-Photo. |
 | `grain.ts` | Seeded noise tile (`mulberry32`, fixed seed), composited with `globalCompositeOperation = "overlay"` inside the photo clip. Strength is a constant, tuned during the build. |
-| `text.ts` | Measuring, word-wrapping and shrink-to-fit, following the Template Spec rules. Positions text by glyph-box top using `actualBoundingBoxAscent`, to match Illustrator's reference boxes. |
+| `text.ts` | Measuring, word-wrapping and shrink-to-fit, following the Template Spec rules. Draws text by baseline, using the baselines measured from the design files. |
+| `wordmark.ts` | The `chapter` wordmark as `Path2D` vector paths read from `chapter.svg`, filled in any colour and scaled to a rectangle. |
 | `fit.ts` | Cover/contain math, and clamping pan and zoom so a photo never leaves a gap |
 
 ### Visual review aid
