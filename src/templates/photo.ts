@@ -22,5 +22,6 @@ export const photoTemplate: TemplateDefinition<"photo"> = {
   label: "Photo",
   defaultTexture: LIBRARY_TEXTURE.woodDarkWorn,
   ...slotDraftOps("photo", SINGLE_PHOTO_SLOTS),
+  placeholder: true,
   render: renderPhoto,
 };

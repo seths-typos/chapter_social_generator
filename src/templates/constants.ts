@@ -69,12 +69,15 @@ export const COVER_WORDMARK = {
 export const GRAPHIC = {
   width: 847,
   centerX: 540,
-  centerY: 709,
+  centerY: 708,
   maxHeight: 1240,
   /** The reference slot, used as the placeholder before a graphic is chosen. */
   referenceRect: { x: 117, y: 278, w: 847, h: 861 } satisfies Rect,
   placeholderColor: "#C9CCD1",
 } as const;
+
+/** Template picker thumbnails: the real render, drawn small. */
+export const THUMBNAIL = { width: 180, height: 240 } as const;
 
 /**
  * Fonts the templates draw text with. Families match `src/app/fonts.css`, and each one

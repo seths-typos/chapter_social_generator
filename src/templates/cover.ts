@@ -15,5 +15,6 @@ export const coverTemplate: TemplateDefinition<"cover"> = {
   label: "Cover",
   defaultTexture: LIBRARY_TEXTURE.woodDarkWorn,
   ...slotDraftOps("cover", SINGLE_PHOTO_SLOTS),
+  placeholder: true,
   render: renderCover,
 };

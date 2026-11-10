@@ -85,7 +85,6 @@ export function TexturePicker() {
         />
       </div>
 
-      {disabled && <p className="text-xs text-neutral-400">Choose a template first.</p>}
       {error && <p className="text-xs text-red-600">Couldn’t load the texture library: {error}</p>}
       {loading && !error && <p className="text-xs text-neutral-400">Loading textures…</p>}
 

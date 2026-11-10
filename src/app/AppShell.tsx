@@ -3,7 +3,9 @@ import { ChMark } from "@/components/ChMark";
 import { Editor } from "@/components/Editor";
 import { Panel, Placeholder } from "@/components/Panel";
 import { Preview } from "@/components/Preview";
+import { TemplatePicker } from "@/components/TemplatePicker";
 import { TexturePicker } from "@/components/TexturePicker";
+import { useRenderAssets } from "@/render/assets";
 import type { FitWarning, RenderResult } from "@/render/types";
 
 const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
@@ -14,11 +16,12 @@ const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
  *   left   – session photo pool
  *   center – live preview, with the selected template's controls beside it
  *   right  – batch list and Download all
- * Everything inside the panels is a placeholder until its issue lands.
+ * The photo pool and batch panels are placeholders until their issues land.
  */
 export function AppShell() {
   // The renderer is the only thing that knows whether text fits, so the preview reports
   // its warnings here and the editor uses them to block Add to batch.
+  const assets = useRenderAssets();
   const [warnings, setWarnings] = useState<readonly FitWarning[]>([]);
   const onResult = useCallback(
     (result: RenderResult) =>
@@ -45,13 +48,13 @@ export function AppShell() {
 
         <div className="grid min-h-0 min-w-0 grid-cols-[minmax(0,1fr)_minmax(340px,400px)] gap-4">
           <Panel title="Preview">
-            <Preview onResult={onResult} />
+            <Preview assets={assets} onResult={onResult} />
           </Panel>
           <Panel title="Template">
             <div className="flex flex-col gap-3">
-              <Placeholder label="Template picker" issue="#12" />
+              <TemplatePicker assets={assets} />
               <TexturePicker />
-              <Editor warnings={warnings} />
+              <Editor warnings={warnings} assets={assets} />
             </div>
           </Panel>
         </div>

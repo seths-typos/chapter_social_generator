@@ -6,7 +6,13 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAppStore } from "@/store/store";
 import { TEMPLATE_LIST } from "@/templates/registry";
-import { ensureLibraryTexture, getTexturesSnapshot, subscribeTextures } from "./assetCache";
+import {
+  ensureLibraryTexture,
+  getPhotosSnapshot,
+  getTexturesSnapshot,
+  subscribePhotos,
+  subscribeTextures,
+} from "./assetCache";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
 import { getWordmark } from "./wordmark";
@@ -66,6 +72,6 @@ export function useRenderAssets(): RenderAssets {
     }
   }, [entries, current]);
 
-  const photos = useMemo(() => new Map<string, ImageBitmap>(), []);
+  const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
   return useMemo(() => ({ textures, photos, wordmark: getWordmark() }), [textures, photos]);
 }

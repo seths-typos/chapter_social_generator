@@ -1,29 +1,40 @@
-import { createElement } from "react";
-import type { FitWarning } from "@/render/types";
-import { useAppStore } from "@/store/store";
-import { missingInputs, templateFor } from "@/templates/registry";
-import { Placeholder } from "./Panel";
+import { createElement, useState } from "react";
+import { downloadBlob, missingAssets, renderPostToPng } from "@/export/png";
+import { pngFilename } from "@/export/filenames";
+import { importImage } from "@/image/importImage";
+import { setPhotoAsset } from "@/render/assetCache";
+import type { FitWarning, RenderAssets } from "@/render/types";
+import { defaultName, newId, useAppStore } from "@/store/store";
+import type { ImportOutcome } from "@/templates/definition";
+import { missingInputs, templateFor, toPost } from "@/templates/registry";
 
 interface EditorProps {
   /** Fit warnings from the latest preview render. Blocking ones stop Add to batch. */
   warnings: readonly FitWarning[];
+  assets: RenderAssets;
 }
 
+const buttonClass =
+  "rounded-md px-3 py-1.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40";
+
 /**
- * The current template's form, plus what still stands between the draft and the batch:
- * missing inputs and blocking fit warnings. docs/prd.md#template-selection-and-editing
+ * The current template's form, plus what still stands between the draft and a finished
+ * post: missing inputs and blocking fit warnings. docs/prd.md#template-selection-and-editing
  */
-export function Editor({ warnings }: EditorProps) {
+export function Editor({ warnings, assets }: EditorProps) {
   const draft = useAppStore((s) => s.draft);
+  const pool = useAppStore((s) => s.pool);
+  const batch = useAppStore((s) => s.batch);
   const editDraft = useAppStore((s) => s.editDraft);
+  const addPhotos = useAppStore((s) => s.addPhotos);
   const addToBatch = useAppStore((s) => s.addToBatch);
-  const batchCount = useAppStore((s) => s.batch.length);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   if (!draft) {
     return (
       <p className="text-sm text-neutral-500">
-        {batchCount > 0
-          ? `Added. ${batchCount} ${batchCount === 1 ? "post" : "posts"} in the batch. Choose a template for the next one.`
+        {batch.length > 0
+          ? `Added. ${batch.length} ${batch.length === 1 ? "post" : "posts"} in the batch. Choose a template for the next one.`
           : "Choose a template to start a post."}
       </p>
     );
@@ -32,18 +43,46 @@ export function Editor({ warnings }: EditorProps) {
   const template = templateFor(draft.template);
   const missing = missingInputs(draft);
   const blocking = warnings.filter((w) => w.blocking);
-  const canAdd = missing.length === 0 && blocking.length === 0;
+  const post = missing.length === 0 && blocking.length === 0 ? toPost(draft) : null;
+  const loading = post ? missingAssets(post, assets) : [];
+
+  async function addImage(file: File): Promise<ImportOutcome> {
+    const result = await importImage(file, newId);
+    if (!result.ok) return result;
+    setPhotoAsset(result.photo.id, result.bitmap);
+    addPhotos([result.photo]);
+    return { ok: true, photoId: result.photo.id };
+  }
+
+  async function downloadPng() {
+    if (!post) return;
+    setDownloadError(null);
+    try {
+      const blob = await renderPostToPng(post, assets);
+      downloadBlob(blob, pngFilename(defaultName(post.template, batch)));
+    } catch (err) {
+      setDownloadError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  const status =
+    missing.length > 0
+      ? `Still needed: ${missing.join(", ")}`
+      : blocking.length > 0
+        ? "Shorten the text above to finish this post."
+        : loading.length > 0
+          ? `Still loading: ${loading.join(", ")}`
+          : "";
 
   return (
     <div className="flex flex-col gap-3">
-      {template.Editor ? (
+      {template.Editor &&
         createElement(template.Editor, {
           draft,
           onChange: (fn) => editDraft(draft.template, fn),
-        })
-      ) : (
-        <Placeholder label={`${template.label} controls`} issue="coming in a later issue" />
-      )}
+          pool,
+          importImage: addImage,
+        })}
 
       {warnings.length > 0 && (
         <ul className="flex flex-col gap-1" role="alert">
@@ -57,20 +96,27 @@ export function Editor({ warnings }: EditorProps) {
           ))}
         </ul>
       )}
+      {downloadError && (
+        <p className="text-sm text-red-700" role="alert">
+          Couldn’t download: {downloadError}
+        </p>
+      )}
 
-      <div className="flex items-center justify-end gap-3">
-        <span className="text-xs text-neutral-500">
-          {missing.length > 0
-            ? `Still needed: ${missing.join(", ")}`
-            : blocking.length > 0
-              ? "Shorten the text above to add this post."
-              : ""}
-        </span>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <span className="mr-auto text-xs text-neutral-500">{status}</span>
         <button
           type="button"
-          disabled={!canAdd}
+          disabled={!post || loading.length > 0}
+          onClick={() => void downloadPng()}
+          className={`${buttonClass} border border-neutral-300 text-neutral-900 hover:bg-neutral-50`}
+        >
+          Download PNG
+        </button>
+        <button
+          type="button"
+          disabled={!post}
           onClick={() => addToBatch()}
-          className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className={`${buttonClass} bg-neutral-900 text-white`}
         >
           Add to batch
         </button>

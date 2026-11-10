@@ -87,7 +87,9 @@ Each template file exports one `TemplateDefinition` (`src/templates/definition.t
 | `newDraft`, `missingInputs`, `toPost`, `fromPost` | The template's `Draft`: create it, check it, convert it to and from a `Post` |
 | `photoIds`, `clearPhoto` | Which pool photos a post uses, and removing one from a draft |
 | `render` | Draws everything above the background texture and returns fit warnings |
-| `Editor` (optional) | The template's own form fields. It gets its draft and an `onChange` as props and never imports the store. |
+| `Editor` (optional) | The template's own form fields. It gets its draft, an `onChange`, the photo pool and an `importImage` function as props, and never imports the store. |
+| `placeholder` (optional) | Marks a template whose render is still a stand-in. The picker shows it disabled, labelled "Soon". |
+| `hasTypedText` (optional) | Whether the draft holds typed text that switching template would discard. The picker asks before switching. |
 | `fixture` (optional) | Fills a draft with the inputs of the reference render. Dev only: `?template={id}&fixture`, and the comparison view. |
 
 **To add a template:**
@@ -130,6 +132,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 | Downscale on import | Long edge capped at **3000 px**, enough for the largest slot (848 px) with room for zoom and scan cropping. The downscaled bitmap is kept and the original blob is released. |
 | Low-resolution warning | A photo whose short edge is under 1080 px is flagged in the pool. It isn't blocked. |
 | Thumbnails | 240 px-wide bitmaps for the pool and texture picker |
+| Template picker thumbnails | Drawn by the real renderer (`renderPost` on a scratch 1080×1440 canvas, scaled to 180×240), using the template's `fixture` inputs when it has them |
 | Memory | A target of 50 photos per session without the tab crashing. Bitmaps are `.close()`d when removed. |
 
 ### Perspective crop (Polaroid scan mode)
@@ -144,7 +147,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 | Item | Requirement |
 |---|---|
 | PNG | `canvas.toBlob("image/png")` at 1080×1440, sRGB |
-| Single download | An `<a download>` link to an object URL, named `{slugified-name}.png` |
+| Single download | "Download PNG" in the editor: an `<a download>` link to an object URL, named `{slugified-name}.png` (the name the post would get in the batch, e.g. `info-1.png`). Disabled until the post is complete, has no blocking fit warning, and its texture and images are loaded. |
 | ZIP | `fflate.zipSync` → `chapter-posts-{YYYY-MM-DD}.zip` containing `{NN}-{slug}.png` (in batch order, zero-padded) and `captions.txt` |
 | `captions.txt` | UTF-8, LF line endings. For each post: `{filename}`, a newline, the caption, then a blank line. |
 | Render at export | Each post is re-rendered from its stored `Post` data (not from cached preview pixels) |

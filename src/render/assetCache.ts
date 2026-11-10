@@ -1,5 +1,5 @@
 /**
- * In-memory cache of decoded render assets (textures now; photos arrive in #14).
+ * In-memory cache of decoded render assets: textures and pool photos.
  * Lives outside React and the Zustand store because the values are ImageBitmaps.
  * Components subscribe with `useSyncExternalStore`; the snapshot is replaced on change
  * so the preview re-renders when a texture finishes loading. Nothing persists.
@@ -61,10 +61,42 @@ export async function ensureLibraryTexture(
   }
 }
 
+// ── Pool photos ───────────────────────────────────────────────────────────────
+
+const photos = new Map<string, ImageBitmap>();
+let photoSnapshot: ReadonlyMap<string, ImageBitmap> = new Map();
+const photoListeners = new Set<Listener>();
+
+function emitPhotos() {
+  photoSnapshot = new Map(photos);
+  for (const l of photoListeners) l();
+}
+
+export function subscribePhotos(listener: Listener): () => void {
+  photoListeners.add(listener);
+  return () => photoListeners.delete(listener);
+}
+
+export const getPhotosSnapshot = (): ReadonlyMap<string, ImageBitmap> => photoSnapshot;
+
+/** Keep a pool photo's decoded bitmap, keyed by the photo's id. */
+export function setPhotoAsset(id: string, bitmap: ImageBitmap): void {
+  photos.set(id, bitmap);
+  emitPhotos();
+}
+
+/** Drop a pool photo's bitmap and free its memory. */
+export function removePhotoAsset(id: string): void {
+  photos.get(id)?.close();
+  if (photos.delete(id)) emitPhotos();
+}
+
 /** Test hook: clear everything. */
 export function resetTextureCache(): void {
   textures.clear();
   pending.clear();
   errors.clear();
   emit();
+  photos.clear();
+  emitPhotos();
 }

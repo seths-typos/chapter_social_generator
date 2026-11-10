@@ -229,6 +229,8 @@ export const infoTemplate: TemplateDefinition<"info"> = {
   }),
   photoIds: () => [],
   clearPhoto: (draft) => draft,
+  hasTypedText: ({ info }) =>
+    [info.title, info.body, info.location].some((text) => text.trim() !== ""),
   render: renderInfo,
   Editor: InfoEditor,
   fixture: (draft: DraftFor<"info">) => ({ ...draft, info: referenceInfo() }),

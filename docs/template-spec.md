@@ -123,9 +123,10 @@ Reference: `GraphicPost.ai`, `graphic.png`
 | Layer | Spec |
 |---|---|
 | Texture | Default: white tile |
-| Graphic | The user's uploaded image, **keeping its own aspect ratio**. Width **847 px**, height = 847 ÷ (image aspect). Centered at **(540, 709)**, the center of the reference slot (117,278 → 964,1139). |
+| Graphic | The user's uploaded image, **keeping its own aspect ratio**. Width **847 px**, height = 847 ÷ (image aspect). Centered at **(540, 708)**, the center of the reference graphic (116.9,277.6 → 964,1138.8). |
 | Max height | **1240 px**. A taller graphic is scaled to 1240 tall, keeps its aspect ratio, and stays centered horizontally. |
 | Shadow | Standard shadow on the graphic's rectangle |
+| Empty state | Before a graphic is chosen, a blank `#C9CCD1` card with the standard shadow fills the reference slot (117,278 → 964,1139). It is never exported. |
 | Grain | Not available (the graphic is artwork, not a photo) |
 
 **Parameters:** graphic image (from the pool or uploaded), texture.

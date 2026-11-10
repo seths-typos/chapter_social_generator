@@ -14,5 +14,6 @@ export const multiPhotoTemplate: TemplateDefinition<"multi-photo"> = {
   label: "Multi-Photo",
   defaultTexture: LIBRARY_TEXTURE.woodDarkWorn,
   ...slotDraftOps("multi-photo", MULTI_PHOTO_SLOTS),
+  placeholder: true,
   render: renderMultiPhoto,
 };

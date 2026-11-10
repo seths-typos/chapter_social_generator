@@ -96,3 +96,16 @@ export function convertDraft(
   const slots = Array.from({ length: n }, (_, i) => carried[i] ?? emptySlot());
   return { ...next, grain: draft.grain, slots } as Draft;
 }
+
+/** The draft a template's picker thumbnail shows: its reference inputs if it has them, else empty. */
+export function thumbnailDraft(template: TemplateId): Draft {
+  const t = templateFor(template);
+  const draft = newDraft(template);
+  return t.fixture ? t.fixture(draft) : draft;
+}
+
+/** True when switching this draft to another template would throw away typed text. */
+export function losesTypedText(draft: Draft, template: TemplateId): boolean {
+  if (draft.template === template) return false;
+  return templateFor(draft.template).hasTypedText?.(draft) ?? false;
+}

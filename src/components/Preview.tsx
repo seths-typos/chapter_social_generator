@@ -1,12 +1,11 @@
 import { useEffect, useEffectEvent, useRef } from "react";
-import { useRenderAssets } from "@/render/assets";
 import { renderPost } from "@/render/renderPost";
-import type { RenderResult } from "@/render/types";
+import type { RenderAssets, RenderResult } from "@/render/types";
 import { useAppStore } from "@/store/store";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
-import { Placeholder } from "./Panel";
 
 interface PreviewProps {
+  assets: RenderAssets;
   /** Called after each render with the renderer's fit warnings. */
   onResult?: (result: RenderResult) => void;
 }
@@ -17,17 +16,19 @@ interface PreviewProps {
  * any draft change; intermediate changes within a frame are coalesced.
  * docs/technical-requirements.md#rendering-engine
  */
-export function Preview({ onResult }: PreviewProps) {
+export function Preview({ assets, onResult }: PreviewProps) {
   const draft = useAppStore((s) => s.draft);
-  const assets = useRenderAssets();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const emitResult = useEffectEvent((result: RenderResult) => onResult?.(result));
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !draft) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    if (!draft) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
     const frame = requestAnimationFrame(() => {
       const result = renderPost(ctx, draft, assets);
       emitResult(result);
@@ -35,27 +36,19 @@ export function Preview({ onResult }: PreviewProps) {
     return () => cancelAnimationFrame(frame);
   }, [draft, assets]);
 
-  const frameStyle = { aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}`, height: "100%" };
-
-  if (!draft) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="max-h-full rounded-sm bg-neutral-200" style={frameStyle}>
-          <Placeholder label="Choose a template to start" issue="" />
-        </div>
-      </div>
-    );
-  }
-
+  // One canvas in both states: as a replaced element it keeps 3:4 however the panel is shaped.
   return (
-    <div className="flex h-full min-h-0 items-center justify-center">
+    <div className="relative flex h-full min-h-0 items-center justify-center">
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        className="max-h-full max-w-full rounded-sm shadow-sm"
+        className={`max-h-full max-w-full rounded-sm ${draft ? "shadow-sm" : "bg-neutral-200"}`}
         aria-label={`Post preview, ${CANVAS_WIDTH} by ${CANVAS_HEIGHT}`}
       />
+      {!draft && (
+        <span className="absolute text-sm text-neutral-500">Choose a template to start</span>
+      )}
     </div>
   );
 }

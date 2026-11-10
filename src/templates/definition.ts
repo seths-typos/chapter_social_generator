@@ -15,7 +15,7 @@
 import type { ComponentType } from "react";
 import type { RendererFor } from "@/render/types";
 import type { DraftBase, DraftFor } from "@/store/draft";
-import type { PostFor, TemplateId, TextureRef } from "@/store/types";
+import type { PoolPhoto, PostFor, TemplateId, TextureRef } from "@/store/types";
 
 export interface TemplateDefinition<K extends TemplateId> {
   id: K;
@@ -42,6 +42,11 @@ export interface TemplateDefinition<K extends TemplateId> {
   /** The draft with a (removed) pool photo taken out. */
   clearPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
 
+  /** True while the template still draws a stand-in. The picker shows it as "Soon". */
+  placeholder?: true;
+  /** Whether the draft holds typed text that switching template would discard. */
+  hasTypedText?(draft: DraftFor<K>): boolean;
+
   /** Draw everything above the background texture. Returns fit warnings. */
   render: RendererFor<K>;
 
@@ -61,7 +66,13 @@ export interface TemplateDefinition<K extends TemplateId> {
 export interface EditorProps<K extends TemplateId> {
   draft: DraftFor<K>;
   onChange: (fn: (draft: DraftFor<K>) => DraftFor<K>) => void;
+  /** The session's photo pool, to choose images from. */
+  pool: readonly PoolPhoto[];
+  /** Add an image file to the pool. Resolves with its id, or a message to show. */
+  importImage: (file: File) => Promise<ImportOutcome>;
 }
+
+export type ImportOutcome = { ok: true; photoId: string } | { ok: false; message: string };
 
 /** A definition for whichever template is current (`DraftFor<TemplateId>` is just `Draft`). */
 export type AnyTemplateDefinition = TemplateDefinition<TemplateId>;
