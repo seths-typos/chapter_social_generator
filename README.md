@@ -4,7 +4,7 @@ Make on-brand Instagram posts for [Chapter](https://www.chapter.nyc) in the brow
 
 **For:** Chapter's founder, making event announcement and post-event photo posts.
 
-**Live:** https://seths-typos.github.io/chapter_social_generator/ *(available after the first deploy)*
+**Live:** https://seths-typos.github.io/chapter_social_generator/ (deployed from `main` by GitHub Actions)
 
 ## Templates
 

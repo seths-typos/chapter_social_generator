@@ -222,8 +222,8 @@ Unit tests cover the pure logic:
 ## Version control and CI
 
 - Work happens on `main` or short-lived branches.
-- **CI** (`.github/workflows/ci.yml`, runs on every push and PR): `npm ci` → typecheck → lint → `vitest run` → `vite build`.
-- **Deploy** (`.github/workflows/deploy.yml`): on push to `main`, runs the same checks, then deploys to GitHub Pages.
+- **CI** (`.github/workflows/ci.yml`, runs on every PR and on pushes to branches other than `main`): `npm ci` → typecheck → lint → `vitest run` → `vite build`.
+- **Deploy** (`.github/workflows/deploy.yml`): on push to `main`, runs the same checks by calling `ci.yml`, then builds and deploys to GitHub Pages. It can also be run by hand from the Actions tab.
 
 ## Out of scope (v1)
 
