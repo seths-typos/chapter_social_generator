@@ -31,9 +31,12 @@ downloadable.
   always told when the fallback is in use".
 - With the fallback, text is wider, so titles wrap and lines shrink sooner. Layout rules
   still hold; the look does not match the references.
-- The Druk WOFF2 files were committed earlier (`a6d7785` onward), so they remain in the
-  repository's **history** until it is rewritten. This must be dealt with before the repo
-  is made public.
+- The Druk WOFF2 files had been committed earlier, so they were in the repository's
+  history. Before going public the history was rewritten to drop them from every commit,
+  and the public repository was created fresh from that cleaned history (same name, issues
+  re-created with the same numbers). The original repository is kept private as
+  `chapter_social_generator_archive`. Commit hashes from before 2026-11-10 differ between
+  the two.
 - A possible follow-up if Safari matters: let the user load their Druk font files from
   disk for the session.
 
