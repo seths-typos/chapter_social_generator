@@ -39,6 +39,8 @@ export interface TemplateDefinition<K extends TemplateId> {
   fromPost(post: PostFor<K>, base: DraftBase): DraftFor<K>;
   /** Every pool photo id the post uses. */
   photoIds(post: PostFor<K>): string[];
+  /** Every pool photo id the draft uses so far. */
+  draftPhotoIds(draft: DraftFor<K>): string[];
   /** The draft with a (removed) pool photo taken out. */
   clearPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
 

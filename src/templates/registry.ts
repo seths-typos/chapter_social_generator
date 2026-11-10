@@ -60,6 +60,20 @@ export function photoIdsInPost(post: Post): string[] {
   return templateFor(post.template).photoIds(post);
 }
 
+/** Every pool photo id a draft references so far. */
+export function photoIdsInDraft(draft: Draft): string[] {
+  return templateFor(draft.template).draftPhotoIds(draft);
+}
+
+/** How many batch posts use each pool photo, keyed by photo id (unused photos are absent). */
+export function photoUsage(posts: readonly Post[]): Map<string, number> {
+  const usage = new Map<string, number>();
+  for (const post of posts) {
+    for (const id of new Set(photoIdsInPost(post))) usage.set(id, (usage.get(id) ?? 0) + 1);
+  }
+  return usage;
+}
+
 /** The draft with a pool photo taken out of wherever it was used. */
 export function clearPhotoFromDraft(draft: Draft, photoId: string): Draft {
   return templateFor(draft.template).clearPhoto(draft, photoId);

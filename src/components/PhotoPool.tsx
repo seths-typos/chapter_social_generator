@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { isLowResolution } from "@/image/importImage";
 import { importToPool } from "@/image/importToPool";
 import { LOW_RES_SHORT_EDGE, PHOTO_ACCEPT } from "@/image/limits";
-import { previewUrl } from "@/image/previewUrl";
+import { previewUrl, releasePreviewUrl } from "@/image/previewUrl";
+import { removePhotoAsset } from "@/render/assetCache";
 import { useAppStore } from "@/store/store";
+import type { PhotoMode, PoolPhoto } from "@/store/types";
+import { photoIdsInDraft, photoUsage } from "@/templates/registry";
 import { Panel } from "./Panel";
 
 const hasFiles = (e: DragEvent): boolean => e.dataTransfer?.types.includes("Files") ?? false;
@@ -14,6 +17,12 @@ const hasFiles = (e: DragEvent): boolean => e.dataTransfer?.types.includes("File
  */
 export function PhotoPool() {
   const pool = useAppStore((s) => s.pool);
+  const batch = useAppStore((s) => s.batch);
+  const draft = useAppStore((s) => s.draft);
+  const removePhoto = useAppStore((s) => s.removePhoto);
+  const setPhotoMode = useAppStore((s) => s.setPhotoMode);
+  const usage = useMemo(() => photoUsage(batch.map((b) => b.post)), [batch]);
+  const inDraft = useMemo(() => new Set(draft ? photoIdsInDraft(draft) : []), [draft]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [failures, setFailures] = useState<readonly string[]>([]);
@@ -78,6 +87,19 @@ export function PhotoPool() {
 
   const busy = progress !== null;
 
+  /** A photo in a batch post can't be removed; one in the post being edited asks first. */
+  function remove(photo: PoolPhoto) {
+    const label = photo.name || "this photo";
+    if (
+      inDraft.has(photo.id) &&
+      !window.confirm(`Remove ${label}? It is in the post you’re editing.`)
+    )
+      return;
+    if (!removePhoto(photo.id)) return;
+    removePhotoAsset(photo.id);
+    releasePreviewUrl(photo.thumbnail);
+  }
+
   return (
     <Panel
       title="Photos"
@@ -135,27 +157,69 @@ export function PhotoPool() {
           </p>
         ) : (
           <ul className="grid grid-cols-2 gap-2">
-            {pool.map((photo) => (
-              <li
-                key={photo.id}
-                className="relative aspect-square overflow-hidden rounded-sm border border-neutral-200 bg-neutral-100"
-              >
-                <img
-                  src={previewUrl(photo.thumbnail)}
-                  alt={photo.name}
-                  title={photo.name}
-                  className="h-full w-full object-cover"
-                />
-                {isLowResolution(photo) && (
-                  <span
-                    title={`${photo.width}×${photo.height}. Under ${LOW_RES_SHORT_EDGE}px on the short side it may look soft.`}
-                    className="absolute bottom-1 left-1 rounded-sm bg-amber-100 px-1 text-[10px] font-medium text-amber-800"
+            {pool.map((photo) => {
+              const used = usage.get(photo.id) ?? 0;
+              const label = photo.name || "photo";
+              return (
+                <li key={photo.id} className="flex flex-col gap-1">
+                  <div
+                    className={`relative aspect-square overflow-hidden rounded-sm border bg-neutral-100 ${
+                      inDraft.has(photo.id)
+                        ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
+                        : "border-neutral-200"
+                    }`}
                   >
-                    Low res
-                  </span>
-                )}
-              </li>
-            ))}
+                    <img
+                      src={previewUrl(photo.thumbnail)}
+                      alt={photo.name}
+                      title={photo.name}
+                      className="h-full w-full object-cover"
+                    />
+                    {used > 0 && (
+                      <span
+                        title={`In ${used} ${used === 1 ? "post" : "posts"} in the batch`}
+                        className="absolute top-1 left-1 rounded-sm bg-neutral-900 px-1 text-[10px] font-medium text-white"
+                      >
+                        Used ×{used}
+                      </span>
+                    )}
+                    {isLowResolution(photo) && (
+                      <span
+                        title={`${photo.width}×${photo.height}. Under ${LOW_RES_SHORT_EDGE}px on the short side it may look soft.`}
+                        className="absolute bottom-1 left-1 rounded-sm bg-amber-100 px-1 text-[10px] font-medium text-amber-800"
+                      >
+                        Low res
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      disabled={used > 0}
+                      onClick={() => remove(photo)}
+                      aria-label={`Remove ${label}`}
+                      title={
+                        used > 0
+                          ? "Used in the batch. Remove those posts first."
+                          : "Remove from this session"
+                      }
+                      className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-sm bg-white/90 text-xs leading-none text-neutral-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <select
+                    value={photo.mode}
+                    onChange={(e) => setPhotoMode(photo.id, e.target.value as PhotoMode)}
+                    aria-label={`How to use ${label}`}
+                    className="w-full rounded-sm border border-neutral-200 bg-white px-1 py-0.5 text-[11px] text-neutral-600"
+                  >
+                    <option value="regular">Regular photo</option>
+                    <option value="scan" disabled>
+                      Polaroid scan (soon)
+                    </option>
+                  </select>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

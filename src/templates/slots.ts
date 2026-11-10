@@ -12,7 +12,14 @@ type PhotoPost = Extract<Post, { slots: PhotoSlot[] }>;
 type SlotOps<K extends SlotTemplateId> = Required<
   Pick<
     TemplateDefinition<K>,
-    "slots" | "newDraft" | "missingInputs" | "toPost" | "fromPost" | "photoIds" | "clearPhoto"
+    | "slots"
+    | "newDraft"
+    | "missingInputs"
+    | "toPost"
+    | "fromPost"
+    | "photoIds"
+    | "draftPhotoIds"
+    | "clearPhoto"
   >
 >;
 
@@ -55,6 +62,7 @@ export function slotDraftOps<K extends SlotTemplateId>(
         grain: post.grain,
       }) as PhotoDraft,
     photoIds: (post) => post.slots.map((s) => s.photoId),
+    draftPhotoIds: (draft) => draft.slots.filter(isFilled).map((s) => s.photoId),
     clearPhoto: (draft, photoId) =>
       ({
         ...draft,

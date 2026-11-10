@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasSlots, slotCount } from "@/store/draft";
+import { hasSlots, slotCount, type Draft } from "@/store/draft";
 import type { Post } from "@/store/types";
 import {
   clearPhotoFromDraft,
@@ -7,7 +7,9 @@ import {
   fromPost,
   missingInputs,
   newDraft,
+  photoIdsInDraft,
   photoIdsInPost,
+  photoUsage,
   TEMPLATE_IDS,
   TEMPLATE_LIST,
   TEMPLATES,
@@ -18,6 +20,13 @@ import {
 const wood = { kind: "library", id: "wood-dark-worn" } as const;
 const tile = { kind: "library", id: "plaster-white" } as const;
 const upload = { kind: "upload", id: "u1" } as const;
+const slot = (photoId: string) => ({ photoId, panX: 0, panY: 0, zoom: 1 });
+const photoPost = (photoId: string): Post => ({
+  template: "photo",
+  slots: [slot(photoId)],
+  texture: tile,
+  grain: false,
+});
 
 describe("newDraft", () => {
   it("is shaped per template", () => {
@@ -272,9 +281,30 @@ describe("registry", () => {
   });
 });
 
+describe("photoIdsInDraft and photoUsage", () => {
+  it("lists the photos a draft uses so far", () => {
+    expect(photoIdsInDraft(newDraft("info"))).toEqual([]);
+    expect(photoIdsInDraft(newDraft("photo"))).toEqual([]);
+    expect(photoIdsInDraft({ ...newDraft("graphic"), graphicId: "g" } as Draft)).toEqual(["g"]);
+    expect(photoIdsInDraft(fromPost(photoPost("a")))).toEqual(["a"]);
+  });
+
+  it("counts posts per photo, once per post", () => {
+    const multi: Post = {
+      template: "multi-photo",
+      slots: [slot("a"), slot("a"), slot("b")],
+      texture: tile,
+      grain: false,
+    };
+    const usage = photoUsage([photoPost("a"), multi]);
+    expect(usage.get("a")).toBe(2);
+    expect(usage.get("b")).toBe(1);
+    expect(usage.has("c")).toBe(false);
+  });
+});
+
 describe("photoIdsInPost", () => {
   it("lists slot photos, the graphic, or nothing", () => {
-    const slot = (photoId: string) => ({ photoId, panX: 0, panY: 0, zoom: 1 });
     expect(
       photoIdsInPost({ template: "photo", slots: [slot("a")], texture: tile, grain: false }),
     ).toEqual(["a"]);
