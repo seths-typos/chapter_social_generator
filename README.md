@@ -22,10 +22,8 @@ Vite, React, TypeScript, Tailwind CSS, Canvas 2D rendering. A static site with n
 
 ## Run locally
 
-*Available once the project is scaffolded (Phase 0).*
-
 ```sh
-nvm use          # Node 22
+nvm use          # Node 26
 npm install
 npm run dev      # local dev server
 npm test         # unit tests

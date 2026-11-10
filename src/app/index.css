@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Brand tokens. See docs/technical-requirements.md#stack and docs/template-spec.md */
+@theme {
+  --color-lavender-200: #ebcbfe;
+  --color-lavender-500: #cb7ff8;
+}

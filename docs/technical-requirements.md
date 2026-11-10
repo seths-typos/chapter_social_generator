@@ -26,7 +26,7 @@ How the Chapter Social Generator is built. Read with the [PRD](prd.md) (what it 
 | HEIC | **`heic2any`** | Loaded with a dynamic `import()` only when a HEIC/HEIF file is added |
 | Unit tests | **Vitest** | Pure logic only (see [Testing](#testing)) |
 | Lint/format | ESLint + Prettier | |
-| Runtime | Node 22 LTS, npm | Pin in `.nvmrc` and `package.json#engines` |
+| Runtime | Node 26 LTS, npm | Pin in `.nvmrc` and `package.json#engines` |
 
 No other runtime dependencies without a reason recorded in `docs/decisions/`.
 
