@@ -31,6 +31,16 @@ export function PhotoPool() {
   /** In a post with several photos, the one in the selected position; otherwise any in the post. */
   const isActive = (id: string) =>
     slots && slots.length > 1 ? slots[activeSlot]?.photoId === id : inDraft.has(id);
+  /** What clicking a photo will do to the post, shown on hover. Null when it changes nothing. */
+  const clickEffect = (id: string): string | null => {
+    if (!canUse) return null;
+    const index = slots ? Math.min(activeSlot, slots.length - 1) : 0;
+    const occupant = slots ? (slots[index]?.photoId ?? null) : ([...inDraft][0] ?? null);
+    if (occupant === id) return null;
+    if (slots && slots.length > 1)
+      return occupant ? `Replace photo ${index + 1}` : `Put in position ${index + 1}`;
+    return occupant ? "Replace" : "Use in post";
+  };
   /** Which positions (1-based) of a several-photo post a photo is in. */
   const positionsOf = (id: string) =>
     slots && slots.length > 1 ? slots.flatMap((sl, i) => (sl.photoId === id ? [i + 1] : [])) : [];
@@ -174,7 +184,7 @@ export function PhotoPool() {
               return (
                 <li key={photo.id} className="flex flex-col gap-1">
                   <div
-                    className={`relative aspect-square overflow-hidden rounded-sm border bg-neutral-100 ${
+                    className={`group relative aspect-square overflow-hidden rounded-sm border bg-neutral-100 ${
                       isActive(photo.id)
                         ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
                         : inDraft.has(photo.id)
@@ -196,6 +206,11 @@ export function PhotoPool() {
                         className="h-full w-full object-cover"
                       />
                     </button>
+                    {clickEffect(photo.id) && (
+                      <span className="pointer-events-none absolute inset-x-0 top-1/2 mx-auto w-fit -translate-y-1/2 rounded-sm bg-neutral-900/85 px-1.5 py-0.5 text-[11px] font-medium text-white opacity-0 group-hover:opacity-100">
+                        {clickEffect(photo.id)}
+                      </span>
+                    )}
                     {used > 0 && (
                       <span
                         title={`In ${used} ${used === 1 ? "post" : "posts"} in the batch`}
