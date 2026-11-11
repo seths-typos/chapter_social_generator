@@ -12,14 +12,12 @@ import { coverTemplate } from "./cover";
 import type { AnyTemplateDefinition, PhotoTarget, TemplateDefinition } from "./definition";
 import { graphicTemplate } from "./graphic";
 import { infoTemplate } from "./info";
-import { multiPhotoTemplate } from "./multiPhoto";
 import { photoTemplate } from "./photo";
 
 /** Every template. Key order is the template picker's display order. */
 export const TEMPLATES: { readonly [K in TemplateId]: TemplateDefinition<K> } = {
   cover: coverTemplate,
   photo: photoTemplate,
-  "multi-photo": multiPhotoTemplate,
   graphic: graphicTemplate,
   info: infoTemplate,
 };
@@ -148,7 +146,7 @@ export function fixtureDraft(template: TemplateId): Draft {
 export function losesTypedText(draft: Draft, template: TemplateId): boolean {
   if (draft.template === template) return false;
   if (!(templateFor(draft.template).hasTypedText?.(draft) ?? false)) return false;
-  // Nothing is lost when the text is carried over (the text card, Photo ↔ Multi-Photo).
+  // Nothing is lost when the text is carried over (the text card).
   const converted = convertDraft(draft, template, { lastUsedTexture: null });
   return !(templateFor(template).hasTypedText?.(converted) ?? false);
 }

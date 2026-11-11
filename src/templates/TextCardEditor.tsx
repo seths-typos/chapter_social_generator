@@ -11,7 +11,7 @@ interface Props {
 const inputClass =
   "w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm focus:border-neutral-900 focus:outline-none";
 
-/** The optional text card's fields, shared by Photo and Multi-Photo. */
+/** The optional text card's fields. */
 export function TextCardEditor({ card, onCard }: Props) {
   return (
     <div className="flex flex-col gap-2">

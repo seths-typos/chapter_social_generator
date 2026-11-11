@@ -3,10 +3,9 @@ import { polaroidCorners } from "@/render/polaroid";
 import type { MeasureContext } from "@/render/text";
 import type { PhotoDraft } from "@/store/draft";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, TEXT_CARD } from "./constants";
-import { multiPhotoPlacements } from "./multiPhoto";
+import { photoPlacements } from "./photo";
 import {
   acceptPhotoInDraft,
-  convertDraft,
   fromPost,
   losesTypedText,
   missingInputs,
@@ -35,7 +34,6 @@ function fakeCtx(): MeasureContext {
 const line = (text: string) => ({ text, heading: false });
 const withCard = (draft: PhotoDraft, heading: string, text: string): PhotoDraft =>
   ({ ...draft, textCard: { on: true, heading, text } }) as PhotoDraft;
-const none = { lastUsedTexture: null };
 
 describe("cardLines", () => {
   it("puts the heading first and drops blank lines", () => {
@@ -72,10 +70,10 @@ describe("textCardRect and condense", () => {
     expect(bottom.rotation).toBe(-4);
   });
 
-  it("keeps every Multi-Photo polaroid below the card and on the canvas", () => {
+  it("keeps every polaroid below the card and on the canvas", () => {
     const cardBottom = textCardRect().y + textCardRect().h;
-    for (const count of [2, 3, 4]) {
-      for (const p of multiPhotoPlacements(count, true)) {
+    for (const count of [1, 2, 3, 4]) {
+      for (const p of photoPlacements(count, true)) {
         for (const c of polaroidCorners(p)) {
           expect(c.y).toBeGreaterThan(cardBottom);
           expect(c.y).toBeLessThan(CANVAS_HEIGHT);
@@ -139,12 +137,8 @@ describe("text card in drafts and posts", () => {
     });
   });
 
-  it("carries over between Photo and Multi-Photo, and warns before it would be lost", () => {
+  it("warns before switching template would lose it", () => {
     const draft = withCard(filled, "", "Nom Wah");
-    expect(convertDraft(draft, "multi-photo", none)).toMatchObject({
-      textCard: { on: true, text: "Nom Wah" },
-    });
-    expect(losesTypedText(draft, "multi-photo")).toBe(false);
     expect(losesTypedText(draft, "cover")).toBe(true);
     expect(losesTypedText(filled, "cover")).toBe(false);
   });

@@ -1,6 +1,6 @@
 # Chapter Social Generator
 
-A static, browser-only tool that turns photos and text into on-brand Instagram grid posts (1080×1440 PNG) for [Chapter](https://www.chapter.nyc), a NYC social club. The founder picks a template (Cover, Photo, Multi-Photo, Graphic, Info), fills it from a session photo pool, previews it, adds it to a batch, and downloads a ZIP of PNGs plus captions. There's no backend, no accounts and no persistence. The point of the tool is **consistent output**: shadow, texture, polaroid frame and type are locked in code.
+A static, browser-only tool that turns photos and text into on-brand Instagram grid posts (1080×1440 PNG) for [Chapter](https://www.chapter.nyc), a NYC social club. The founder picks a template (Cover, Photo with one to four polaroids, Graphic, Info), fills it from a session photo pool, previews it, adds it to a batch, and downloads a ZIP of PNGs plus captions. There's no backend, no accounts and no persistence. The point of the tool is **consistent output**: shadow, texture, polaroid frame and type are locked in code.
 
 ## Stack
 

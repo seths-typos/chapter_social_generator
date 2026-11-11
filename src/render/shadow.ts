@@ -10,9 +10,9 @@ const OFFSCREEN = 100_000;
  *
  * Only the shadow is painted: the shape is drawn far off-canvas and the shadow is offset
  * back by the same amount. The offset is applied in device space, so this works inside a
- * rotated/scaled transform (Multi-Photo) with the shadow still falling straight down.
+ * rotated/scaled transform (scattered polaroids) with the shadow still falling straight down.
  *
- * @param scale  Multiplies blur and offset (Multi-Photo polaroids are scaled down).
+ * @param scale  Multiplies blur and offset (scattered polaroids are scaled down).
  */
 export function drawShadow(ctx: CanvasRenderingContext2D, rect: Rect, scale = 1): void {
   ctx.save();

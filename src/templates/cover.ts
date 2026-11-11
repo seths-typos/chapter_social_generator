@@ -3,7 +3,7 @@ import { drawWordmark } from "@/render/wordmark";
 import { COVER_WORDMARK, FIXTURE_IMAGE, LIBRARY_TEXTURE, SINGLE_PHOTO_SLOTS } from "./constants";
 import { CoverEditor } from "./CoverEditor";
 import type { TemplateDefinition } from "./definition";
-import { renderPhoto, singlePhotoTargets } from "./photo";
+import { photoTargets, renderPhoto } from "./photo";
 import { slotDraftOps } from "./slots";
 
 /**
@@ -33,7 +33,7 @@ export const coverTemplate: TemplateDefinition<"cover"> = {
   },
   fromPost: (post, base) => ({ ...slotOps.fromPost(post, base), wordmark: post.wordmark }),
   render: renderCover,
-  photoTargets: singlePhotoTargets,
+  photoTargets,
   Editor: CoverEditor,
   // The photo inside the polaroid scan in CoverPost.ai. Only loaded in dev builds.
   fixture: (draft) => coverTemplate.acceptPhoto(draft, FIXTURE_IMAGE.cover),

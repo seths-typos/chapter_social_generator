@@ -40,7 +40,7 @@ Every content object (polaroid, graphic, Info card) gets the same shadow. The va
 | Offset | x **0**, y **+11 px** |
 | Blur | Gaussian, σ ≈ **11.5 px** (canvas `shadowBlur: 23`) |
 | Shape | Same rectangle as the object, unrotated relative to it |
-| Scaling | In Multi-Photo, offset and blur scale with the polaroid's scale factor |
+| Scaling | With more than one photo, offset and blur scale with the polaroid's scale factor |
 
 **Acceptance:** the shadow uses the values above on every template; it is deliberately softer than the one in the reference files.
 
@@ -97,22 +97,17 @@ Reference: `CoverPost.ai`, `First Post@2x.png`
 
 ### Photo (`photo`)
 
-Reference: `polaroidArtboard 3@2x.png`. This is an Instagram mock-up on a different texture, so it shows the look, not the layout: the layout is Cover's.
+Reference: `polaroidArtboard 3@2x.png`. This is an Instagram mock-up on a different texture, so it shows the look, not the layout.
 
-Identical to **Cover**, without the wordmark.
-
-**Parameters:** 1 photo slot, texture, film look.
-
-### Multi-Photo (`multi-photo`)
-
-New template, not in the original designs. Concept: 2–4 polaroids scattered on a table, slightly rotated and overlapping.
+One to four polaroids on a texture. Photo and the former Multi-Photo template are one template with a photo count ([decision 0010](decisions/0010-one-photo-template.md)).
 
 | Property | Value |
 |---|---|
-| Photo count | **2, 3, or 4**, chosen by the user |
-| Polaroid | Same construction as above (each slot can be regular or scan), uniformly scaled. The shadow's blur and offset scale with it. |
+| Photo count | **1, 2, 3, or 4**, chosen by the user. A new post starts at 1. |
+| One photo | Identical to **Cover**, without the wordmark: the full-size polaroid at (116, 210). |
+| Two to four | Polaroids scattered on a table, slightly rotated and overlapping. Same construction (each slot can be regular or scan), uniformly scaled. The shadow's blur and offset scale with it. |
 | Z-order | Slot 1 at the bottom, last slot on top |
-| Layout | A fixed preset per count (below). Center points are in canvas px, rotation in degrees (clockwise is positive). *tune* |
+| Layout | A fixed preset per count (below). Center points are in canvas px, rotation in degrees (clockwise is positive). |
 
 | Count | Scale | Slot 1 | Slot 2 | Slot 3 | Slot 4 |
 |---|---|---|---|---|---|
@@ -120,15 +115,15 @@ New template, not in the original designs. Concept: 2–4 polaroids scattered on
 | 3 | 0.50 (424×511) | (300, 380) −5° | (760, 560) +4° | (470, 1030) −2° | — |
 | 4 | 0.46 (390×470) | (290, 360) −4° | (790, 400) +3° | (300, 1050) +3° | (780, 1080) −5° |
 
-**Acceptance:** at every count, every polaroid (including its shadow) stays fully inside the canvas, and each photo's face area (the center 60% of its window) is not covered by another polaroid. Both are unit-tested against the presets (`src/templates/multiPhoto.test.ts`), so a retuned value that breaks either fails the tests. The values above are the starting presets, unchanged after the first build.
+**Acceptance:** at every count, every polaroid (including its shadow) stays fully inside the canvas, and each photo's face area (the center 60% of its window) is not covered by another polaroid. Both are unit-tested against the presets (`src/templates/photo.test.ts`), so a retuned value that breaks either fails the tests.
 
-**Editing:** changing the count keeps the photos already placed (fewer drops the last slots). A photo clicked in the pool goes to the first empty slot. Each photo is dragged and zoomed in the preview on its own; the zoom slider acts on the slot selected in the controls.
+**Editing:** changing the count keeps the photos already placed (fewer drops the last slots). A photo clicked in the pool goes to the selected position. Each photo is dragged and zoomed in the preview on its own; the zoom slider acts on the slot selected in the controls. With more than one photo, dragging one numbered thumbnail onto another swaps them.
 
-**Parameters:** photo count, 2–4 photo slots (pan and zoom per slot), texture, film look. Swapping two slots' photos is a nice-to-have.
+**Parameters:** photo count, 1–4 photo slots (pan and zoom per slot), texture, film look, optional text card.
 
 ### Text card
 
-An optional white card of text above the photos, offered on Photo and Multi-Photo (not Cover, where the wordmark sits over the photo). It is off by default; a post without it is unchanged.
+An optional white card of text above the photos, offered on Photo (not Cover, where the wordmark sits over the photo). It is off by default; a post without it is unchanged.
 
 - **Split:** the canvas is divided at **26%** of its height (374 px), which makes the card just tall enough for the heading and the one line of text at full size. *tune:* a temporary slider (`?tune` in the URL) changes the split live so it can be chosen by eye.
 - **Card:** x 116, width 848 (the polaroid and Info card width), from 48 px below the top of the canvas down to the split line. Fill `#FDFFFD`, standard drop shadow. Drawn above the photos.
@@ -221,8 +216,7 @@ interface TextureRef { kind: "library" | "upload"; id: string; }
 type Post =
   | { template: "cover"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean;
       wordmark: "light" | "dark" }
-  | { template: "photo"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean; textCard?: TextCard }
-  | { template: "multi-photo"; slots: PhotoSlot[] /* 2–4 */; texture: TextureRef; grain: boolean; textCard?: TextCard }
+  | { template: "photo"; slots: PhotoSlot[] /* 1–4 */; texture: TextureRef; grain: boolean; textCard?: TextCard }
   | { template: "graphic"; graphicId: string; texture: TextureRef }
   | { template: "info"; eventNumber: number; title: string; body: string;
       date: string /* YYYY-MM-DD */; startTime: string /* HH:mm */; endTime?: string;
@@ -244,7 +238,7 @@ Adding a template means adding a variant to both unions and one definition file.
 | Location | `public/textures/{id}.jpg` plus `public/textures/{id}-thumb.jpg` (240×320) |
 | Manifest | `public/textures/textures.json`: `[{ "id": "plaster-white", "name": "White plaster", "file": "plaster-white.jpg", "thumb": "plaster-white-thumb.jpg", "width": 2160, "height": 2880 }]`. Ids are kebab-case and unique; the loader validates this. |
 | Processing | Centre-cropped to 3:4, resized to **2160×2880**, converted to sRGB, progressive JPEG at quality 85, stepped down (to a floor of 70) toward 1.5 MB. Most land at 0.7–1.5 MB; two fine-grained textures (`linen-white`, `concrete-stained`) are 1.6–1.8 MB at quality 70. Thumbnails JPEG quality 80. |
-| Template defaults | Cover, Photo and Multi-Photo: `wood-dark-worn`. Graphic and Info: `plaster-white`. After the first post, the last-used texture carries over within the session. (See [decision 0002](decisions/0002-texture-library-set.md).) |
+| Template defaults | Cover and Photo: `wood-dark-worn`. Graphic and Info: `plaster-white`. After the first post, the last-used texture carries over within the session. (See [decision 0002](decisions/0002-texture-library-set.md).) |
 | Loading | The manifest is fetched once. Each texture image is fetched and decoded the first time it's needed (the two defaults up front), then cached in memory for the session. |
 | Session uploads | Decoded in the browser, added to the picker with an "Uploaded" tag, selectable like library textures. Never persisted. Below 1080×1440 a low-resolution notice is shown. |
 | Colour fallback | The renderer still accepts a `{ "kind": "color" }` texture asset (used in tests and as a stand-in while an image loads). |
@@ -267,6 +261,6 @@ Adding a template means adding a variant to both unions and one definition file.
 |---|---|---|
 | 1 | Film look | Values tuned with the owner. Offered as one toggle; could become a choice of named looks later. |
 | 2 | Shadow blur and offset | Starting values above. Verify against the reference renders. |
-| 3 | Multi-Photo presets | Starting positions above. Tune visually. A future "shuffle" option could add variety. |
+| 3 | Photo presets for 2–4 photos | Starting positions above. Tune visually. A future "shuffle" option could add variety. |
 | 4 | Textures (10, including terrazzo) | Supplied by the user during the build. Solid-color placeholders until then. |
 | 5 | Dedicated blank polaroid frame scan | Optional upgrade over the frame cut from the Cover scan |

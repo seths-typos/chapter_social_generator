@@ -41,8 +41,7 @@ describe("newDraft", () => {
       textureChosen: false,
     });
     expect(newDraft("cover")).not.toHaveProperty("textCard");
-    expect(newDraft("multi-photo")).toMatchObject({ template: "multi-photo", grain: false });
-    expect(slotCount(newDraft("multi-photo"))).toBe(2);
+    expect(slotCount(newDraft("photo"))).toBe(1);
     expect(newDraft("graphic")).toEqual({
       template: "graphic",
       graphicId: null,
@@ -77,23 +76,23 @@ describe("convertDraft", () => {
     if (!hasSlots(d)) throw new Error();
     d.slots[0] = { photoId: "p1", panX: 0.5, panY: 0, zoom: 2 };
     d.grain = true;
-    const multi = convertDraft(d, "multi-photo", none);
-    expect(multi).toMatchObject({ template: "multi-photo", grain: true });
+    const multi = withPhotoCount(d, 2);
     expect(hasSlots(multi) && multi.slots.map((s) => s.photoId)).toEqual(["p1", null]);
     const cover = convertDraft(multi, "cover", none);
+    expect(cover).toMatchObject({ template: "cover", grain: true });
     expect(hasSlots(cover) && cover.slots).toEqual([
       { photoId: "p1", panX: 0.5, panY: 0, zoom: 2 },
     ]);
   });
 
-  it("multi → single keeps the first filled photo", () => {
-    let d = newDraft("multi-photo");
+  it("several photos → Cover keeps the first filled photo", () => {
+    let d = newDraft("photo");
     d = withPhotoCount(d, 3);
     if (!hasSlots(d)) throw new Error();
     d.slots[1]!.photoId = "b";
     d.slots[2]!.photoId = "c";
-    const photo = convertDraft(d, "photo", none);
-    expect(hasSlots(photo) && photo.slots[0]!.photoId).toBe("b");
+    const cover = convertDraft(d, "cover", none);
+    expect(hasSlots(cover) && cover.slots.map((s) => s.photoId)).toEqual(["b"]);
   });
 
   it("drops info text and graphic when leaving those templates", () => {
@@ -117,21 +116,23 @@ describe("convertDraft", () => {
 });
 
 describe("withPhotoCount", () => {
-  it("resizes multi-photo slots, keeping photos, and clamps to 2–4", () => {
-    let d = newDraft("multi-photo");
+  it("resizes Photo slots, keeping photos, and clamps to 1–4", () => {
+    let d = newDraft("photo");
     if (!hasSlots(d)) throw new Error();
     d.slots[0]!.photoId = "a";
     d = withPhotoCount(d, 4);
     expect(hasSlots(d) && d.slots.map((s) => s.photoId)).toEqual(["a", null, null, null]);
     d = withPhotoCount(d, 2);
     expect(slotCount(d)).toBe(2);
-    expect(slotCount(withPhotoCount(d, 9 as 4))).toBe(4);
-    expect(slotCount(withPhotoCount(d, 1 as 2))).toBe(2);
+    expect(slotCount(withPhotoCount(d, 9))).toBe(4);
+    expect(slotCount(withPhotoCount(d, 0))).toBe(1);
   });
 
   it("is a no-op for other templates", () => {
-    const d = newDraft("photo");
-    expect(withPhotoCount(d, 4)).toBe(d);
+    const cover = newDraft("cover");
+    expect(withPhotoCount(cover, 4)).toBe(cover);
+    const info = newDraft("info");
+    expect(withPhotoCount(info, 4)).toBe(info);
   });
 });
 
@@ -150,8 +151,8 @@ describe("toPost / missingInputs", () => {
     });
   });
 
-  it("multi-photo: needs every slot filled", () => {
-    let d = newDraft("multi-photo");
+  it("several photos: needs every slot filled", () => {
+    let d = newDraft("photo");
     d = withPhotoCount(d, 3);
     if (!hasSlots(d)) throw new Error();
     d.slots[0]!.photoId = "a";
@@ -227,7 +228,7 @@ describe("fromPost", () => {
         wordmark: "dark",
       },
       {
-        template: "multi-photo",
+        template: "photo",
         slots: [
           { photoId: "a", panX: 0, panY: 0, zoom: 1 },
           { photoId: "b", panX: 0, panY: 0, zoom: 1 },
@@ -261,13 +262,7 @@ describe("fromPost", () => {
 describe("registry", () => {
   it("keys every definition by its own id, in picker order", () => {
     for (const id of TEMPLATE_IDS) expect(TEMPLATES[id].id).toBe(id);
-    expect(TEMPLATE_LIST.map((t) => t.id)).toEqual([
-      "cover",
-      "photo",
-      "multi-photo",
-      "graphic",
-      "info",
-    ]);
+    expect(TEMPLATE_LIST.map((t) => t.id)).toEqual(["cover", "photo", "graphic", "info"]);
   });
 
   it("gives every template a unique label and a library default texture", () => {
@@ -304,7 +299,7 @@ describe("cover wordmark", () => {
 
 describe("acceptPhotoInDraft", () => {
   it("fills the first empty slot, then swaps the last one", () => {
-    let multi = acceptPhotoInDraft(newDraft("multi-photo"), "a");
+    let multi = acceptPhotoInDraft(withPhotoCount(newDraft("photo"), 2), "a");
     expect(photoIdsInDraft(multi)).toEqual(["a"]);
     multi = acceptPhotoInDraft(multi, "b");
     expect(photoIdsInDraft(multi)).toEqual(["a", "b"]);
@@ -313,7 +308,7 @@ describe("acceptPhotoInDraft", () => {
   });
 
   it("fills the given position when there is one", () => {
-    let multi = acceptPhotoInDraft(newDraft("multi-photo"), "a", 1);
+    let multi = acceptPhotoInDraft(withPhotoCount(newDraft("photo"), 2), "a", 1);
     expect(multi).toMatchObject({ slots: [{ photoId: null }, { photoId: "a" }] });
     multi = acceptPhotoInDraft(multi, "b", 1);
     expect(multi).toMatchObject({ slots: [{ photoId: null }, { photoId: "b" }] });
@@ -348,7 +343,7 @@ describe("photoIdsInDraft and photoUsage", () => {
 
   it("counts posts per photo, once per post", () => {
     const multi: Post = {
-      template: "multi-photo",
+      template: "photo",
       slots: [slot("a"), slot("a"), slot("b")],
       texture: tile,
       grain: false,
@@ -367,7 +362,7 @@ describe("photoIdsInPost", () => {
     ).toEqual(["a"]);
     expect(
       photoIdsInPost({
-        template: "multi-photo",
+        template: "photo",
         slots: [slot("a"), slot("b")],
         texture: tile,
         grain: false,
@@ -380,7 +375,7 @@ describe("photoIdsInPost", () => {
 
 describe("clearPhotoFromDraft", () => {
   it("empties the slots that used the photo and resets their view", () => {
-    let d = withPhotoCount(newDraft("multi-photo"), 3);
+    let d = withPhotoCount(newDraft("photo"), 3);
     if (!hasSlots(d)) throw new Error();
     d.slots[0] = { photoId: "a", panX: 0.5, panY: 0, zoom: 2 };
     d.slots[1] = { photoId: "b", panX: 0, panY: 0, zoom: 1 };

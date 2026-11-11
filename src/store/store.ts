@@ -9,7 +9,7 @@
 
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { ZOOM_MAX, ZOOM_MIN, type MultiPhotoCount } from "@/templates/constants";
+import { ZOOM_MAX, ZOOM_MIN, type PhotoCount } from "@/templates/constants";
 import {
   acceptPhotoInDraft,
   clearPhotoFromDraft,
@@ -68,7 +68,7 @@ export interface AppState {
   clearDraft: () => void;
   setTexture: (texture: TextureRef) => void;
   setGrain: (grain: boolean) => void;
-  setPhotoCount: (count: MultiPhotoCount) => void;
+  setPhotoCount: (count: PhotoCount) => void;
   setSlotPhoto: (index: number, photoId: string | null) => void;
   /** The photo position selected in the editor. Always 0 for one-photo templates. */
   activeSlot: number;

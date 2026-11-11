@@ -43,7 +43,7 @@ export interface TextureRef {
 }
 
 /**
- * The optional text card above the photos (Photo and Multi-Photo).
+ * The optional text card above the photos (Photo).
  * docs/template-spec.md#text-card
  */
 export interface TextCard {
@@ -56,7 +56,7 @@ export interface TextCard {
 /** Colour of the Cover wordmark: light on dark photos, dark on light photos. */
 export type WordmarkTone = "light" | "dark";
 
-export type TemplateId = "cover" | "photo" | "multi-photo" | "graphic" | "info";
+export type TemplateId = "cover" | "photo" | "graphic" | "info";
 
 export type Post =
   | {
@@ -70,14 +70,7 @@ export type Post =
     }
   | {
       template: "photo";
-      slots: [PhotoSlot];
-      texture: TextureRef;
-      grain: boolean;
-      textCard?: TextCard;
-    }
-  | {
-      template: "multi-photo";
-      slots: PhotoSlot[] /* 2–4 */;
+      slots: PhotoSlot[] /* 1–4 */;
       texture: TextureRef;
       grain: boolean;
       textCard?: TextCard;

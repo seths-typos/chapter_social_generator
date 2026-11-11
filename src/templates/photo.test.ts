@@ -8,20 +8,29 @@ import {
   POLAROID,
   SHADOW,
 } from "./constants";
-import { multiPhotoCount, multiPhotoPlacements } from "./multiPhoto";
+import { photoCount, photoPlacements } from "./photo";
 
 const COUNTS = [2, 3, 4] as const;
 
-describe("multiPhotoCount", () => {
-  it("clamps to 2–4", () => {
-    expect([0, 2, 3, 4, 9].map(multiPhotoCount)).toEqual([2, 2, 3, 4, 4]);
+describe("photoCount", () => {
+  it("clamps to 1–4", () => {
+    expect([0, 1, 2, 3, 4, 9].map(photoCount)).toEqual([1, 1, 2, 3, 4, 4]);
   });
 });
 
-describe("Multi-Photo presets", () => {
+describe("one photo", () => {
+  it("is the full-size polaroid", () => {
+    const r = POLAROID.rect;
+    expect(photoPlacements(1)).toEqual([
+      { cx: r.x + r.w / 2, cy: r.y + r.h / 2, scale: 1, rotation: 0 },
+    ]);
+  });
+});
+
+describe("Photo presets for two to four photos", () => {
   it("has one placement per photo, all at the preset's scale", () => {
     for (const count of COUNTS) {
-      const placements = multiPhotoPlacements(count);
+      const placements = photoPlacements(count);
       expect(placements).toHaveLength(count);
       for (const p of placements) expect(p.scale).toBe(MULTI_PHOTO_LAYOUT[count].scale);
     }
@@ -29,7 +38,7 @@ describe("Multi-Photo presets", () => {
 
   it("keeps every polaroid and its shadow on the canvas", () => {
     for (const count of COUNTS) {
-      for (const placement of multiPhotoPlacements(count)) {
+      for (const placement of photoPlacements(count)) {
         // The shadow spreads by its blur on every side and falls further below.
         const blur = SHADOW.blur * placement.scale;
         const drop = SHADOW.offsetY * placement.scale;
@@ -48,7 +57,7 @@ describe("Multi-Photo presets", () => {
     const inset = (1 - FACE_AREA_FRACTION) / 2;
     const STEPS = 12;
     for (const count of COUNTS) {
-      const placements = multiPhotoPlacements(count);
+      const placements = photoPlacements(count);
       placements.forEach((placement, i) => {
         for (let a = 0; a <= STEPS; a++) {
           for (let b = 0; b <= STEPS; b++) {

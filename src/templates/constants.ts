@@ -15,14 +15,12 @@ export interface Rect {
   h: number;
 }
 
-/** Multi-Photo template: how many polaroids a post may hold. */
-export const MULTI_PHOTO_MIN = 2;
-export const MULTI_PHOTO_MAX = 4;
-export type MultiPhotoCount = 2 | 3 | 4;
+/** How many polaroids a Photo post may hold. */
+export type PhotoCount = 1 | 2 | 3 | 4;
 
-/** How many photo slots a slot-based template holds. Cover and Photo: exactly one. */
+/** How many photo slots a slot-based template holds. Cover: exactly one. Photo: one to four. */
 export const SINGLE_PHOTO_SLOTS = { min: 1, max: 1 } as const;
-export const MULTI_PHOTO_SLOTS = { min: MULTI_PHOTO_MIN, max: MULTI_PHOTO_MAX } as const;
+export const PHOTO_SLOTS = { min: 1, max: 4 } as const;
 
 /**
  * Library textures the code refers to by id (the template defaults).
@@ -88,12 +86,13 @@ export const POLAROID = {
 } as const;
 
 /**
- * Multi-Photo layouts: one fixed preset per photo count. Each slot is a polaroid centre in
+ * Photo layouts for two to four photos: one fixed preset per photo count. (One photo uses
+ * `POLAROID.rect`.) Each slot is a polaroid centre in
  * canvas px and a rotation in degrees (clockwise positive); slot 1 is at the bottom.
- * docs/template-spec.md#multi-photo-multi-photo
+ * docs/template-spec.md#photo-photo
  */
 export const MULTI_PHOTO_LAYOUT: Record<
-  MultiPhotoCount,
+  Exclude<PhotoCount, 1>,
   { scale: number; slots: readonly { cx: number; cy: number; rotation: number }[] }
 > = {
   2: {

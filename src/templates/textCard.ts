@@ -1,5 +1,5 @@
 /**
- * The optional text card for Photo and Multi-Photo: a white card with a heading and one line of text in the
+ * The optional text card for Photo: a white card with a heading and one line of text in the
  * top part of the canvas, with the template's usual layout scaled down into the rest.
  * docs/template-spec.md#text-card
  */

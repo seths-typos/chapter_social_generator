@@ -11,8 +11,7 @@ Make on-brand Instagram posts for [Chapter](https://www.chapter.nyc) in the brow
 | Template | What it's for |
 |---|---|
 | Cover | Polaroid photo with the `chapter` wordmark |
-| Photo | Post-event polaroid photo |
-| Multi-Photo | 2–4 polaroids scattered on a table |
+| Photo | Post-event photos: one polaroid, or 2–4 scattered on a table, with an optional text card |
 | Graphic | Upcoming event graphic on a texture |
 | Info | Event details: `ch. N`, title, description, date and location |
 
@@ -48,7 +47,7 @@ No code change is needed. Everything in this repo is public, so only add images 
 
 ## Adjust a template
 
-Every layout value (positions, sizes, type sizes, shadow, film look, Multi-Photo layouts) lives in [`src/templates/constants.ts`](src/templates/constants.ts) and mirrors the [Template Spec](docs/template-spec.md). To change one:
+Every layout value (positions, sizes, type sizes, shadow, film look, the layouts for 2–4 photos) lives in [`src/templates/constants.ts`](src/templates/constants.ts) and mirrors the [Template Spec](docs/template-spec.md). To change one:
 
 1. Change the value in the spec and in `constants.ts` together.
 2. Check it by eye in the comparison view, which shows the render next to the reference: `npm run dev`, then open `/chapter_social_generator/?compare=info` (or `cover`, `photo`, `graphic`).

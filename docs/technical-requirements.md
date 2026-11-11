@@ -89,7 +89,7 @@ Each template file exports one `TemplateDefinition` (`src/templates/definition.t
 | Member | Purpose |
 |---|---|
 | `id`, `label`, `defaultTexture` | Identity, picker name, and the texture used until one is chosen |
-| `slots` (optional) | `{ min, max }` photo slots. Present on Cover, Photo and Multi-Photo, which share their draft operations through `slotDraftOps`. |
+| `slots` (optional) | `{ min, max }` photo slots. Present on Cover (one) and Photo (one to four), which share their draft operations through `slotDraftOps`. |
 | `newDraft`, `missingInputs`, `toPost`, `fromPost` | The template's `Draft`: create it, check it, convert it to and from a `Post` |
 | `photoIds`, `clearPhoto` | Which pool photos a post uses, and removing one from a draft |
 | `render` | Draws everything above the background texture and returns fit warnings |
@@ -216,7 +216,7 @@ Unit tests cover the pure logic:
 - Cover/contain math and pan/zoom clamping
 - Homography: known corner sets map to the expected points
 - Shrink-to-fit and wrap decisions, using a mocked `measureText`
-- Multi-Photo presets: every polaroid's rotated bounds, plus shadow, stay inside the canvas
+- Photo presets for 2–4 photos: every polaroid's rotated bounds, plus shadow, stay inside the canvas
 
 ## Hosting and deployment
 

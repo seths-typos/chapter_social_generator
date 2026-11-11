@@ -43,13 +43,7 @@ export type Draft =
   | (DraftBase & { template: "cover"; slots: [DraftSlot]; grain: boolean; wordmark: WordmarkTone })
   | (DraftBase & {
       template: "photo";
-      slots: [DraftSlot];
-      grain: boolean;
-      textCard: TextCardDraft;
-    })
-  | (DraftBase & {
-      template: "multi-photo";
-      slots: DraftSlot[] /* 2–4 */;
+      slots: DraftSlot[] /* 1–4 */;
       grain: boolean;
       textCard: TextCardDraft;
     })

@@ -134,8 +134,10 @@ describe("choosing and switching templates", () => {
     s().setTemplate("photo");
     s().setSlotPhoto(0, "p1");
     s().setGrain(true);
-    s().setTemplate("multi-photo");
+    s().setPhotoCount(2);
     expect(slots().map((x) => x.photoId)).toEqual(["p1", null]);
+    s().setTemplate("cover");
+    expect(slots().map((x) => x.photoId)).toEqual(["p1"]);
     expect(s().draft).toMatchObject({ grain: true });
     s().setTemplate("info");
     s().setInfo({ title: "Hello" });
@@ -145,7 +147,7 @@ describe("choosing and switching templates", () => {
   });
 
   it("clamps pan, zoom and photo count", () => {
-    s().setTemplate("multi-photo");
+    s().setTemplate("photo");
     s().setSlotView(0, { panX: 5, panY: -5, zoom: 10 });
     expect(slots()[0]).toMatchObject({ panX: 1, panY: -1, zoom: 3 });
     s().setSlotView(0, { zoom: 0.1 });
@@ -184,7 +186,7 @@ describe("choosing and switching templates", () => {
   });
 
   it("addPhotoToDraft fills the selected position, then selects the next empty one", () => {
-    s().setTemplate("multi-photo");
+    s().setTemplate("photo");
     s().setPhotoCount(3);
     s().setActiveSlot(1);
     s().addPhotoToDraft("b");

@@ -1,6 +1,6 @@
 /**
  * Draft operations shared by the templates whose inputs are pool photos in slots
- * (Cover, Photo, Multi-Photo). Spread into a template's definition.
+ * (Cover, Photo). Spread into a template's definition.
  */
 
 import { emptySlot, emptyTextCard, type DraftSlot, type PhotoDraft } from "@/store/draft";

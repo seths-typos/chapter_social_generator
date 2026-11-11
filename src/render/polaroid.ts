@@ -4,7 +4,7 @@
  *
  * A polaroid is always 848×1021 in its own space. Where it lands on the canvas is a
  * `PolaroidPlacement`: a centre, a rotation and a uniform scale. Cover and Photo use one
- * unrotated polaroid at scale 1; Multi-Photo scatters several.
+ * unrotated polaroid at scale 1; Photo scatters several when it holds more than one.
  */
 
 import { CANVAS_HEIGHT, CANVAS_WIDTH, POLAROID, type Rect } from "@/templates/constants";
