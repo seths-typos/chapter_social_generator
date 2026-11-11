@@ -136,7 +136,7 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 | # | Task | Acceptance criteria | Spec |
 |---|---|---|---|
 | 6.1 | **Film look** (#30) | One per-post toggle applying seeded grain (`grain.ts`, overlay blend), a soft glow and a slight fade (`photoEffects.ts`) to the photo area only. Values tuned by eye with the owner and recorded in the Template Spec. | [Film look](template-spec.md#film-look) |
-| 6.2 | **Shadow fine-tune** (#31) | Blur, offset and opacity confirmed against all references in the comparison view. Final values recorded in the Template Spec. | [Drop shadow](template-spec.md#drop-shadow) |
+| 6.2 | **Shadow fine-tune** (#31) | Blur, offset and opacity measured against the reference, then tuned by eye with the owner to a softer shadow ([decision 0008](decisions/0008-softer-drop-shadow.md)). Final values recorded in the Template Spec. | [Drop shadow](template-spec.md#drop-shadow) |
 | 6.3 | **Real texture library** (#32) | *Largely done early in #8 with 16 Unsplash textures (decision 0002).* Remaining: swap in or add textures photographed at real venues if the founder wants them. | [Texture library](template-spec.md#texture-library) |
 | 6.4 | **UX/UI pass (owner)** (#33) | The owner reviews and restyles the tool UI. Claude Code implements the resulting issues. | [Generator UI notes](prd.md#generator-ui-notes) |
 | 6.5 | **MVP feedback fixes** (#34) | All issues from the MVP test are triaged and the v1 ones are fixed. | — |
@@ -162,7 +162,7 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 | Risk | Mitigation |
 |---|---|
 | Canvas text positioning drifts from Illustrator's | Position by glyph box (`actualBoundingBoxAscent`) and check every text template in the comparison view before closing the task |
-| Shadow or grain differ between Chrome and Safari | Check both browsers in 6.2 and 6.6. If they differ noticeably, pre-render the shadow as a blurred bitmap instead of using canvas `shadowBlur`. |
+| Shadow or grain differ between Chrome and Safari | Check both browsers in 6.2 and 6.6. If they differ noticeably, pre-render the shadow as a blurred bitmap instead of using canvas `shadowBlur`. Checked 2026-11-10 in Chrome and a WebKit build: the shadow falloff agrees to within 1%, and the Film look glow has a coded blur for Safari. |
 | The frame cut from the Cover scan looks off with some photos | Swap in a dedicated blank polaroid scan later (Template Spec open item) |
 | HEIC conversion is slow for big batches | Convert one at a time with a per-photo spinner. `heic2any` only loads when a HEIC file is added. |
 | Memory pressure with many large photos | Downscale on import to a 3000px long edge, and close bitmaps when photos are removed |

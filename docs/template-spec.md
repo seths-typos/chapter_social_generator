@@ -31,18 +31,18 @@ Measurements come from the Illustrator files `CoverPost.ai`, `GraphicPost.ai` an
 
 ### Drop shadow
 
-Every content object (polaroid, graphic, Info card) gets the same shadow. It's taken from Illustrator's rasterized shadow in `InfoPost.ai`: black, Darken blend, 75% opacity.
+Every content object (polaroid, graphic, Info card) gets the same shadow. The values were tuned by eye with the owner on 2026-11-10: softer, wider and lower than the shadow in `InfoPost.ai` (opacity 0.75, offset 6, blur 12), which the first build matched. See [decision 0008](decisions/0008-softer-drop-shadow.md).
 
 | Property | Value |
 |---|---|
 | Color | `#000000` |
-| Opacity | 0.75 |
-| Offset | x **0**, y **+6 px** |
-| Blur | Gaussian, σ ≈ **6 px** (canvas `shadowBlur: 12`). Fades out about 14 px beyond the object's edge. *tune*: measured against `docs/reference/info.png` on 2026-11-10 and within a few percent of the reference falloff on all four sides; a temporary panel (`?tune` in the URL) lets the owner adjust opacity, blur and offset by eye before the values are locked (#31). |
+| Opacity | **0.60** |
+| Offset | x **0**, y **+11 px** |
+| Blur | Gaussian, σ ≈ **11.5 px** (canvas `shadowBlur: 23`) |
 | Shape | Same rectangle as the object, unrotated relative to it |
 | Scaling | In Multi-Photo, offset and blur scale with the polaroid's scale factor |
 
-**Acceptance:** the rendered shadow around the Info card matches `InfoPost.ai`'s shadow (rect 102,110 → 980,1342) when checked side by side in the dev comparison view.
+**Acceptance:** the shadow uses the values above on every template; it is deliberately softer than the one in the reference files.
 
 ### Polaroid
 

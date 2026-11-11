@@ -3,33 +3,6 @@ import { SHADOW, type Rect } from "@/templates/constants";
 /** Far enough that the shape itself always lands off-canvas. */
 const OFFSCREEN = 100_000;
 
-export interface ShadowSettings {
-  opacity: number;
-  offsetY: number;
-  blur: number;
-}
-
-// TEMPORARY: the values in use. They start as the constants; the tuning panel (`?tune`)
-// changes them live so the final numbers can be chosen by eye.
-let settings: ShadowSettings = {
-  opacity: SHADOW.opacity,
-  offsetY: SHADOW.offsetY,
-  blur: SHADOW.blur,
-};
-const listeners = new Set<() => void>();
-
-export const getShadowSettings = (): ShadowSettings => settings;
-
-export function subscribeShadow(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-export function setShadowSettings(next: Partial<ShadowSettings>): void {
-  settings = { ...settings, ...next };
-  for (const l of listeners) l();
-}
-
 /**
  * Layer 2: the standard drop shadow for a content rectangle, drawn on its own.
  * The content is drawn afterwards without a shadow, exactly covering the rect.
@@ -46,10 +19,10 @@ export function drawShadow(ctx: CanvasRenderingContext2D, rect: Rect, scale = 1)
   // Pre-translate in device space so the shape lands off-canvas regardless of the CTM.
   const m = ctx.getTransform();
   ctx.setTransform(new DOMMatrix().translate(-OFFSCREEN, 0).multiply(m));
-  ctx.shadowColor = rgba(SHADOW.color, settings.opacity);
-  ctx.shadowBlur = settings.blur * scale;
+  ctx.shadowColor = rgba(SHADOW.color, SHADOW.opacity);
+  ctx.shadowBlur = SHADOW.blur * scale;
   ctx.shadowOffsetX = OFFSCREEN + SHADOW.offsetX * scale;
-  ctx.shadowOffsetY = settings.offsetY * scale;
+  ctx.shadowOffsetY = SHADOW.offsetY * scale;
   ctx.fillStyle = "#000";
   ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
   ctx.restore();

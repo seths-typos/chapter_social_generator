@@ -16,7 +16,6 @@ import {
 } from "./assetCache";
 import { ensureFrame, getFrameSnapshot, subscribeFrame } from "./frame";
 import { getGrain } from "./grain";
-import { getShadowSettings, subscribeShadow } from "./shadow";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
 import { getWordmark } from "./wordmark";
@@ -79,8 +78,6 @@ export function useRenderAssets(): RenderAssets {
   const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
   const frame = useSyncExternalStore(subscribeFrame, getFrameSnapshot, getFrameSnapshot);
   useEffect(() => void ensureFrame(), []);
-  // TEMPORARY: redraw when the shadow tuning panel (`?tune`) changes a value.
-  const shadow = useSyncExternalStore(subscribeShadow, getShadowSettings, getShadowSettings);
   return useMemo(
     () => ({
       textures,
@@ -90,7 +87,6 @@ export function useRenderAssets(): RenderAssets {
       effects: FILM_LOOK,
       ...(frame ? { frame } : {}),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `shadow` forces a redraw
-    [textures, photos, frame, shadow],
+    [textures, photos, frame],
   );
 }

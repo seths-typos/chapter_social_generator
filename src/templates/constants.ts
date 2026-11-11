@@ -43,15 +43,15 @@ export const ZOOM_STEP = 0.01;
 
 /**
  * Standard drop shadow for every content object. docs/template-spec.md#drop-shadow
- * `blur` is the canvas shadowBlur value (σ ≈ blur / 2). Marked *tune* in the spec; the
- * temporary panel (`?tune`) adjusts opacity, offsetY and blur live.
+ * `blur` is the canvas shadowBlur value (σ ≈ blur / 2). Tuned by eye with the owner
+ * (decision 0008).
  */
 export const SHADOW = {
   color: "#000000",
-  opacity: 0.75,
+  opacity: 0.6,
   offsetX: 0,
-  offsetY: 6,
-  blur: 12,
+  offsetY: 11,
+  blur: 23,
 } as const;
 
 /**
