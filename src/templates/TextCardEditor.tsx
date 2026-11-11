@@ -26,7 +26,7 @@ export function TextCardEditor({ card, onCard }: Props) {
       {card.on && (
         <>
           <label className="flex flex-col gap-1 text-xs text-neutral-600">
-            Heading (optional, italic)
+            Heading (optional, smaller and italic)
             <input
               type="text"
               value={card.heading}
@@ -35,11 +35,11 @@ export function TextCardEditor({ card, onCard }: Props) {
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-neutral-600">
-            Text (one line per row)
-            <textarea
-              rows={3}
-              value={card.lines}
-              onChange={(e) => onCard({ ...card, lines: e.target.value })}
+            Text
+            <input
+              type="text"
+              value={card.text}
+              onChange={(e) => onCard({ ...card, text: e.target.value })}
               className={inputClass}
             />
           </label>

@@ -130,10 +130,10 @@ New template, not in the original designs. Concept: 2–4 polaroids scattered on
 
 An optional white card of text above the photos, offered on Photo and Multi-Photo (not Cover, where the wordmark sits over the photo). It is off by default; a post without it is unchanged.
 
-- **Split:** the canvas is divided at **38.2%** of its height (550 px), the smaller golden-ratio part. *tune:* a temporary slider (`?tune` in the URL) changes the split live so it can be chosen by eye.
+- **Split:** the canvas is divided at **26%** of its height (374 px), which makes the card just tall enough for the heading and the one line of text at full size. *tune:* a temporary slider (`?tune` in the URL) changes the split live so it can be chosen by eye.
 - **Card:** x 116, width 848 (the polaroid and Info card width), from 48 px below the top of the canvas down to the split line. Fill `#FDFFFD`, standard drop shadow. Drawn above the photos.
-- **Photos:** the template's usual full-canvas layout is scaled by the lower area's share of the height (61.8%) and centred horizontally, with its top at the split line. Positions, rotations, frame and shadow all scale together, so the layout's own margins become the padding around it.
-- **Text:** an optional heading line in slanted Druk Medium, then one centred Druk Medium line per typed line, black. All lines share one size: the largest from 120 px down to 40 px at which every line fits the card width and the lines together fit its height, each less 36 px of padding per side. Line height is 1.15 × the size. Lines are never wrapped. The block is centred vertically in the card.
+- **Photos:** the template's usual full-canvas layout is scaled by the lower area's share of the height (74%) and centred horizontally, with its top at the split line. Positions, rotations, frame and shadow all scale together, so the layout's own margins become the padding around it.
+- **Text:** an optional heading in slanted Druk Medium, then one line of text in Druk Medium, both centred and black. The text is 120 px and the heading is 16% smaller (0.84 × the text size). Both shrink together, down to 40 px for the text, until each fits the card width and the two together fit its height, each less 36 px of padding per side. Line height is 1.15 × each line's size. Nothing wraps. The block is centred vertically in the card; without a heading the text sits alone in the middle.
 - **Overflow:** if the text doesn't fit at 40 px, the post can't be added until it is shortened. A card switched on with no text also blocks the post.
 - No italic Druk face is declared, so the heading is the browser's slant of Druk Medium (or of the fallback).
 

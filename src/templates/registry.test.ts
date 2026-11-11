@@ -36,7 +36,7 @@ describe("newDraft", () => {
       template: "photo",
       slots: [{ photoId: null, panX: 0, panY: 0, zoom: 1 }],
       grain: false,
-      textCard: { on: false, heading: "", lines: "" },
+      textCard: { on: false, heading: "", text: "" },
       texture: wood,
       textureChosen: false,
     });

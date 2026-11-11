@@ -1,5 +1,5 @@
 /**
- * The optional text card for Photo and Multi-Photo: a white card of centred lines in the
+ * The optional text card for Photo and Multi-Photo: a white card with a heading and one line of text in the
  * top part of the canvas, with the template's usual layout scaled down into the rest.
  * docs/template-spec.md#text-card
  */
@@ -34,18 +34,13 @@ export function activeTextCard(draft: Draft): TextCardDraft | null {
 /** True when the card has anything to draw. */
 export const hasCardText = (card: TextCard): boolean => cardLines(card).length > 0;
 
-/** The lines to draw, heading first. Blank lines are dropped. */
+/** The lines to draw, heading first. Blank ones are dropped. */
 export function cardLines(card: TextCard): { text: string; heading: boolean }[] {
   const clean = (s: string) => s.trim().split(/\s+/).filter(Boolean).join(" ");
-  const heading = clean(card.heading);
-  const lines = card.lines
-    .split(/\r\n?|\n/)
-    .map(clean)
-    .filter(Boolean);
   return [
-    ...(heading ? [{ text: heading, heading: true }] : []),
-    ...lines.map((text) => ({ text, heading: false })),
-  ];
+    { text: clean(card.heading), heading: true },
+    { text: clean(card.text), heading: false },
+  ].filter((l) => l.text !== "");
 }
 
 /** The card's rectangle: from the top margin down to the split line. */
@@ -76,16 +71,16 @@ export function condense(placement: PolaroidPlacement, on: boolean, at = split):
 }
 
 export interface CardFit {
+  /** Size of the text line. The heading is `headingScale` of it. */
   size: number;
-  lineHeight: number;
-  /** y of the first line's baseline. */
-  baseline: number;
+  /** Each line's own size and baseline, in the order given. */
+  lines: { size: number; baseline: number }[];
   fits: boolean;
 }
 
 /**
  * The largest size at which every line fits the card's width and the lines together fit
- * its height. Lines are never wrapped: each typed line is one line.
+ * its height. Lines are never wrapped. The block is centred vertically in the card.
  */
 export function fitCard(
   ctx: MeasureContext,
@@ -95,21 +90,27 @@ export function fitCard(
   const t = TEXT_CARD;
   const maxWidth = rect.w - 2 * t.padding;
   const maxHeight = rect.h - 2 * t.padding;
+  const sizeOf = (l: { heading: boolean }, size: number) => size * (l.heading ? t.headingScale : 1);
+  const heightAt = (size: number) =>
+    lines.reduce((sum, l) => sum + sizeOf(l, size) * t.lineHeightRatio, 0);
   const fitsAt = (size: number): boolean =>
-    lines.length * size * t.lineHeightRatio <= maxHeight &&
+    heightAt(size) <= maxHeight &&
     lines.every(
-      (l) => measureLine(ctx, l.text, l.heading ? t.headingFont : t.font, size).width <= maxWidth,
+      (l) =>
+        measureLine(ctx, l.text, l.heading ? t.headingFont : t.font, sizeOf(l, size)).width <=
+        maxWidth,
     );
   let size: number = t.size;
   while (size > t.minSize && !fitsAt(size)) size -= 1;
-  const lineHeight = size * t.lineHeightRatio;
-  return {
-    size,
-    lineHeight,
-    baseline:
-      rect.y + rect.h / 2 - ((lines.length - 1) * lineHeight) / 2 + size * t.baselineShiftEm,
-    fits: fitsAt(size),
-  };
+  let top = rect.y + rect.h / 2 - heightAt(size) / 2;
+  const placed = lines.map((l) => {
+    const lineSize = sizeOf(l, size);
+    const lineHeight = lineSize * t.lineHeightRatio;
+    const baseline = top + lineHeight / 2 + lineSize * t.baselineShiftEm;
+    top += lineHeight;
+    return { size: lineSize, baseline };
+  });
+  return { size, lines: placed, fits: fitsAt(size) };
 }
 
 /** Draw the card and its text. Returns a blocking warning when the text doesn't fit. */
@@ -126,23 +127,25 @@ export function drawTextCard(
   const lines = cardLines(card);
   if (lines.length === 0) return [];
   const fit = fitCard(ctx, lines, rect);
-  lines.forEach((line, i) =>
+  lines.forEach((line, i) => {
+    const placed = fit.lines[i];
+    if (!placed) return;
     drawLines(ctx, [line.text], {
       font: line.heading ? t.headingFont : t.font,
-      size: fit.size,
-      lineHeight: fit.lineHeight,
+      size: placed.size,
+      lineHeight: placed.size * t.lineHeightRatio,
       x: rect.x + rect.w / 2,
-      baseline: fit.baseline + i * fit.lineHeight,
+      baseline: placed.baseline,
       align: "center",
       color: t.color,
-    }),
-  );
+    });
+  });
   return fit.fits
     ? []
     : [
         {
           field: "textCard",
-          message: "The card text doesn't fit. Use fewer or shorter lines.",
+          message: "The card text is too long to fit.",
           blocking: true,
         },
       ];

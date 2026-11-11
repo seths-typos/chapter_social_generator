@@ -64,7 +64,7 @@ export function slotDraftOps<K extends SlotTemplateId>(
         slots: filled.map(({ photoId, panX, panY, zoom }) => ({ photoId, panX, panY, zoom })),
         texture: draft.texture,
         grain: draft.grain,
-        ...(card ? { textCard: { heading: card.heading, lines: card.lines } } : {}),
+        ...(card ? { textCard: { heading: card.heading, text: card.text } } : {}),
       } as PhotoPost;
     },
     fromPost: (post, base) =>

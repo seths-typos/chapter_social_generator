@@ -33,20 +33,20 @@ function fakeCtx(): MeasureContext {
 }
 
 const line = (text: string) => ({ text, heading: false });
-const withCard = (draft: PhotoDraft, heading: string, lines: string): PhotoDraft =>
-  ({ ...draft, textCard: { on: true, heading, lines } }) as PhotoDraft;
+const withCard = (draft: PhotoDraft, heading: string, text: string): PhotoDraft =>
+  ({ ...draft, textCard: { on: true, heading, text } }) as PhotoDraft;
 const none = { lastUsedTexture: null };
 
 describe("cardLines", () => {
   it("puts the heading first and drops blank lines", () => {
-    expect(
-      cardLines({ heading: " food and art: ", lines: "Nom  Wah\n\n Wild Mannered\r\n" }),
-    ).toEqual([
+    expect(cardLines({ heading: " food and art: ", text: "Nom  Wah" })).toEqual([
       { text: "food and art:", heading: true },
       { text: "Nom Wah", heading: false },
-      { text: "Wild Mannered", heading: false },
     ]);
-    expect(cardLines({ heading: "", lines: " \n " })).toEqual([]);
+    expect(cardLines({ heading: "", text: "Nom Wah" })).toEqual([
+      { text: "Nom Wah", heading: false },
+    ]);
+    expect(cardLines({ heading: " ", text: " " })).toEqual([]);
   });
 });
 
@@ -88,27 +88,29 @@ describe("textCardRect and condense", () => {
 });
 
 describe("fitCard", () => {
-  const rect = { x: 116, y: 48, w: 848, h: 502 };
+  const rect = textCardRect(TEXT_CARD.split);
+  const heading = { text: "food and art:", heading: true };
 
-  it("uses the full size when everything fits, centred on the card", () => {
-    const fit = fitCard(fakeCtx(), [line("Nom Wah")], rect);
+  it("holds the heading and the text at full size in the built-in card", () => {
+    const fit = fitCard(fakeCtx(), [heading, line("Nom Wah")], rect);
     expect(fit).toMatchObject({ size: TEXT_CARD.size, fits: true });
-    expect(fit.baseline).toBeCloseTo(
+    expect(fit.lines[0]!.size).toBeCloseTo(TEXT_CARD.size * TEXT_CARD.headingScale);
+    expect(fit.lines[1]!.size).toBe(TEXT_CARD.size);
+    expect(fit.lines[1]!.baseline).toBeGreaterThan(fit.lines[0]!.baseline);
+  });
+
+  it("centres a lone line on the card", () => {
+    const fit = fitCard(fakeCtx(), [line("Nom Wah")], rect);
+    expect(fit.lines[0]!.baseline).toBeCloseTo(
       rect.y + rect.h / 2 + TEXT_CARD.size * TEXT_CARD.baselineShiftEm,
     );
   });
 
-  it("shrinks for a long line and for many lines", () => {
-    const wide = fitCard(fakeCtx(), [line("x".repeat(20))], rect);
-    expect(wide.fits).toBe(true);
-    expect(20 * wide.size * 0.5).toBeLessThanOrEqual(rect.w - 2 * TEXT_CARD.padding);
-    const tall = fitCard(
-      fakeCtx(),
-      Array.from({ length: 6 }, () => line("ab")),
-      rect,
-    );
-    expect(tall.fits).toBe(true);
-    expect(6 * tall.lineHeight).toBeLessThanOrEqual(rect.h - 2 * TEXT_CARD.padding);
+  it("shrinks for a long line", () => {
+    const fit = fitCard(fakeCtx(), [heading, line("x".repeat(20))], rect);
+    expect(fit.fits).toBe(true);
+    expect(fit.size).toBeLessThan(TEXT_CARD.size);
+    expect(20 * fit.size * 0.5).toBeLessThanOrEqual(rect.w - 2 * TEXT_CARD.padding);
   });
 
   it("reports text that doesn't fit at the minimum size", () => {
@@ -131,16 +133,16 @@ describe("text card in drafts and posts", () => {
 
   it("round-trips through a post", () => {
     const post = toPost(withCard(filled, "food and art:", "Nom Wah"))!;
-    expect(post).toMatchObject({ textCard: { heading: "food and art:", lines: "Nom Wah" } });
+    expect(post).toMatchObject({ textCard: { heading: "food and art:", text: "Nom Wah" } });
     expect(fromPost(post)).toMatchObject({
-      textCard: { on: true, heading: "food and art:", lines: "Nom Wah" },
+      textCard: { on: true, heading: "food and art:", text: "Nom Wah" },
     });
   });
 
   it("carries over between Photo and Multi-Photo, and warns before it would be lost", () => {
     const draft = withCard(filled, "", "Nom Wah");
     expect(convertDraft(draft, "multi-photo", none)).toMatchObject({
-      textCard: { on: true, lines: "Nom Wah" },
+      textCard: { on: true, text: "Nom Wah" },
     });
     expect(losesTypedText(draft, "multi-photo")).toBe(false);
     expect(losesTypedText(draft, "cover")).toBe(true);

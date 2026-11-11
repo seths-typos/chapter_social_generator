@@ -202,8 +202,11 @@ export const INFO_TEXT_COLOR = "#000000";
  * layout is drawn scaled down into the part below. docs/template-spec.md#text-card
  */
 export const TEXT_CARD = {
-  /** Share of the canvas height given to the text area: the smaller golden-ratio part. *tune* */
-  split: 0.382,
+  /**
+   * Share of the canvas height given to the text area: just tall enough for the heading and
+   * the one line of text at full size, with the padding. *tune*
+   */
+  split: 0.26,
   /** Gap between the top of the canvas and the card. */
   marginTop: 48,
   /** Same left edge and width as the polaroid and the Info card. */
@@ -217,6 +220,8 @@ export const TEXT_CARD = {
   headingFont: FONTS.drukMediumItalic,
   size: 120,
   minSize: 40,
+  /** The heading is 16% smaller than the text. */
+  headingScale: 0.84,
   lineHeightRatio: 1.15,
   /** Baselines sit this far (in em) below an even split around the card's centre. */
   baselineShiftEm: 0.36,

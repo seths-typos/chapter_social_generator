@@ -47,10 +47,10 @@ export interface TextureRef {
  * docs/template-spec.md#text-card
  */
 export interface TextCard {
-  /** Optional first line, drawn in italic. */
+  /** Optional first line, drawn smaller and in italic. */
   heading: string;
-  /** The remaining lines, one per typed line. */
-  lines: string;
+  /** The one line of text. */
+  text: string;
 }
 
 /** Colour of the Cover wordmark: light on dark photos, dark on light photos. */

@@ -31,7 +31,7 @@ export interface InfoFields {
 /** The text card while editing: its text is kept when the card is switched off. */
 export type TextCardDraft = TextCard & { on: boolean };
 
-export const emptyTextCard = (): TextCardDraft => ({ on: false, heading: "", lines: "" });
+export const emptyTextCard = (): TextCardDraft => ({ on: false, heading: "", text: "" });
 
 export interface DraftBase {
   texture: TextureRef;
