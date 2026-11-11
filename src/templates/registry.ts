@@ -129,7 +129,9 @@ export function convertDraft(
   const carried = draft.slots.filter((s) => s.photoId !== null).map((s) => ({ ...s }));
   const n = clamp(carried.length, range.min, range.max);
   const slots = Array.from({ length: n }, (_, i) => carried[i] ?? emptySlot());
-  return { ...next, grain: draft.grain, slots } as Draft;
+  const textCard =
+    "textCard" in draft && "textCard" in next ? { textCard: { ...draft.textCard } } : {};
+  return { ...next, grain: draft.grain, slots, ...textCard } as Draft;
 }
 
 /**
@@ -145,5 +147,8 @@ export function fixtureDraft(template: TemplateId): Draft {
 /** True when switching this draft to another template would throw away typed text. */
 export function losesTypedText(draft: Draft, template: TemplateId): boolean {
   if (draft.template === template) return false;
-  return templateFor(draft.template).hasTypedText?.(draft) ?? false;
+  if (!(templateFor(draft.template).hasTypedText?.(draft) ?? false)) return false;
+  // Nothing is lost when the text is carried over (the text card, Photo ↔ Multi-Photo).
+  const converted = convertDraft(draft, template, { lastUsedTexture: null });
+  return !(templateFor(template).hasTypedText?.(converted) ?? false);
 }

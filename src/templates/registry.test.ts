@@ -36,9 +36,11 @@ describe("newDraft", () => {
       template: "photo",
       slots: [{ photoId: null, panX: 0, panY: 0, zoom: 1 }],
       grain: false,
+      textCard: { on: false, heading: "", lines: "" },
       texture: wood,
       textureChosen: false,
     });
+    expect(newDraft("cover")).not.toHaveProperty("textCard");
     expect(newDraft("multi-photo")).toMatchObject({ template: "multi-photo", grain: false });
     expect(slotCount(newDraft("multi-photo"))).toBe(2);
     expect(newDraft("graphic")).toEqual({

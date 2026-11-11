@@ -13,6 +13,8 @@ export interface TextFont {
   /** CSS font-family as declared in fonts.css */
   family: string;
   weight: number;
+  /** Set for an italic face. */
+  style?: "italic";
   /** CSS family list used when `family` isn't available (a font that is only used if installed). */
   fallback?: string;
 }
@@ -68,7 +70,7 @@ export interface TextFit {
 
 /** CSS font shorthand for canvas `ctx.font`. */
 export const fontString = (font: TextFont, size: number): string =>
-  `${font.weight} ${size}px "${font.family}"${font.fallback ? `, ${font.fallback}` : ""}`;
+  `${font.style ? `${font.style} ` : ""}${font.weight} ${size}px "${font.family}"${font.fallback ? `, ${font.fallback}` : ""}`;
 
 /** Unify line endings and drop leading/trailing whitespace (including blank lines). */
 const normalize = (text: string): string => text.replace(/\r\n?/g, "\n").trim();

@@ -9,7 +9,7 @@
  * and `src/templates/registry.ts` dispatches to it. See docs/decisions/0003-*.md
  */
 
-import type { Post, TemplateId, TextureRef, WordmarkTone } from "./types";
+import type { Post, TemplateId, TextCard, TextureRef, WordmarkTone } from "./types";
 
 export interface DraftSlot {
   photoId: string | null;
@@ -28,6 +28,11 @@ export interface InfoFields {
   location: string;
 }
 
+/** The text card while editing: its text is kept when the card is switched off. */
+export type TextCardDraft = TextCard & { on: boolean };
+
+export const emptyTextCard = (): TextCardDraft => ({ on: false, heading: "", lines: "" });
+
 export interface DraftBase {
   texture: TextureRef;
   /** True once the user has picked a texture for this draft (stops template defaults overriding it). */
@@ -36,8 +41,18 @@ export interface DraftBase {
 
 export type Draft =
   | (DraftBase & { template: "cover"; slots: [DraftSlot]; grain: boolean; wordmark: WordmarkTone })
-  | (DraftBase & { template: "photo"; slots: [DraftSlot]; grain: boolean })
-  | (DraftBase & { template: "multi-photo"; slots: DraftSlot[] /* 2–4 */; grain: boolean })
+  | (DraftBase & {
+      template: "photo";
+      slots: [DraftSlot];
+      grain: boolean;
+      textCard: TextCardDraft;
+    })
+  | (DraftBase & {
+      template: "multi-photo";
+      slots: DraftSlot[] /* 2–4 */;
+      grain: boolean;
+      textCard: TextCardDraft;
+    })
   | (DraftBase & { template: "graphic"; graphicId: string | null })
   | (DraftBase & { template: "info"; info: InfoFields });
 

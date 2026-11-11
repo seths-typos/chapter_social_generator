@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAppStore } from "@/store/store";
 import { FILM_LOOK } from "@/templates/constants";
 import { TEMPLATE_LIST } from "@/templates/registry";
+import { getTextCardSplit, subscribeTextCardSplit } from "@/templates/textCard";
 import {
   ensureLibraryTexture,
   getPhotosSnapshot,
@@ -78,6 +79,12 @@ export function useRenderAssets(): RenderAssets {
   const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
   const frame = useSyncExternalStore(subscribeFrame, getFrameSnapshot, getFrameSnapshot);
   useEffect(() => void ensureFrame(), []);
+  // TEMPORARY: redraw when the text-area tuning slider (`?tune`) changes the split.
+  const cardSplit = useSyncExternalStore(
+    subscribeTextCardSplit,
+    getTextCardSplit,
+    getTextCardSplit,
+  );
   return useMemo(
     () => ({
       textures,
@@ -87,6 +94,7 @@ export function useRenderAssets(): RenderAssets {
       effects: FILM_LOOK,
       ...(frame ? { frame } : {}),
     }),
-    [textures, photos, frame],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `cardSplit` forces a redraw
+    [textures, photos, frame, cardSplit],
   );
 }

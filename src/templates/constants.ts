@@ -174,6 +174,13 @@ export const DRUK_FALLBACK = 'Impact, "Arial Narrow", sans-serif';
  */
 export const FONTS = {
   drukMedium: { family: "Chapter Druk", weight: 500, fallback: DRUK_FALLBACK },
+  /** No italic face is declared, so the browser slants Druk Medium (or the fallback). */
+  drukMediumItalic: {
+    family: "Chapter Druk",
+    weight: 500,
+    style: "italic",
+    fallback: DRUK_FALLBACK,
+  },
   drukBold: { family: "Chapter Druk", weight: 700, fallback: DRUK_FALLBACK },
   instrumentSerif: { family: "Instrument Serif", weight: 400 },
 } as const;
@@ -188,6 +195,32 @@ export const INFO_CARD = {
 } as const;
 
 export const INFO_TEXT_COLOR = "#000000";
+
+/**
+ * The optional text card above the photos in Photo and Multi-Photo. The canvas is split
+ * at `split` of its height: the card sits in the part above, and the template's usual
+ * layout is drawn scaled down into the part below. docs/template-spec.md#text-card
+ */
+export const TEXT_CARD = {
+  /** Share of the canvas height given to the text area: the smaller golden-ratio part. *tune* */
+  split: 0.382,
+  /** Gap between the top of the canvas and the card. */
+  marginTop: 48,
+  /** Same left edge and width as the polaroid and the Info card. */
+  x: 116,
+  w: 848,
+  fill: INFO_CARD.fill,
+  color: INFO_TEXT_COLOR,
+  /** Space kept clear between the card's edges and its text. */
+  padding: 36,
+  font: FONTS.drukMedium,
+  headingFont: FONTS.drukMediumItalic,
+  size: 120,
+  minSize: 40,
+  lineHeightRatio: 1.15,
+  /** Baselines sit this far (in em) below an even split around the card's centre. */
+  baselineShiftEm: 0.36,
+} as const;
 
 /** The `ch. N` badge. The stroke is centred on the circle's edge, so the outer diameter is 213. */
 export const INFO_BADGE = {

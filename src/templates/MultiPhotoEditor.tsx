@@ -3,6 +3,7 @@ import { emptySlot } from "@/store/draft";
 import { MULTI_PHOTO_MAX, MULTI_PHOTO_MIN } from "./constants";
 import type { EditorProps } from "./definition";
 import { PhotoSlotEditor } from "./PhotoSlotEditor";
+import { TextCardEditor } from "./TextCardEditor";
 
 const COUNTS = Array.from(
   { length: MULTI_PHOTO_MAX - MULTI_PHOTO_MIN + 1 },
@@ -42,6 +43,10 @@ export function MultiPhotoEditor(props: EditorProps<"multi-photo">) {
         </div>
       </div>
       {createElement(PhotoSlotEditor as ComponentType<EditorProps<"multi-photo">>, props)}
+      <TextCardEditor
+        card={draft.textCard}
+        onCard={(textCard) => onChange((d) => ({ ...d, textCard }))}
+      />
     </div>
   );
 }

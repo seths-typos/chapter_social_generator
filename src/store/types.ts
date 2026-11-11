@@ -42,6 +42,17 @@ export interface TextureRef {
   id: string;
 }
 
+/**
+ * The optional text card above the photos (Photo and Multi-Photo).
+ * docs/template-spec.md#text-card
+ */
+export interface TextCard {
+  /** Optional first line, drawn in italic. */
+  heading: string;
+  /** The remaining lines, one per typed line. */
+  lines: string;
+}
+
 /** Colour of the Cover wordmark: light on dark photos, dark on light photos. */
 export type WordmarkTone = "light" | "dark";
 
@@ -57,8 +68,20 @@ export type Post =
       /** Light for dark photos (the default), dark for light photos. */
       wordmark: WordmarkTone;
     }
-  | { template: "photo"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean }
-  | { template: "multi-photo"; slots: PhotoSlot[] /* 2–4 */; texture: TextureRef; grain: boolean }
+  | {
+      template: "photo";
+      slots: [PhotoSlot];
+      texture: TextureRef;
+      grain: boolean;
+      textCard?: TextCard;
+    }
+  | {
+      template: "multi-photo";
+      slots: PhotoSlot[] /* 2–4 */;
+      texture: TextureRef;
+      grain: boolean;
+      textCard?: TextCard;
+    }
   | { template: "graphic"; graphicId: string; texture: TextureRef }
   | {
       template: "info";
