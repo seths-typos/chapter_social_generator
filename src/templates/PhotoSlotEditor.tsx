@@ -20,6 +20,8 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
   const [active, setActive] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<number | null>(null);
   const index = Math.min(active, draft.slots.length - 1);
   const slot = draft.slots[index];
   const current = pool.find((p) => p.id === slot?.photoId);
@@ -46,10 +48,14 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
         }) as typeof d,
     );
 
-  /** Exchange the active slot's photo with another slot's, and follow it there. */
-  const swapWith = (other: number) => {
-    onChange((d) => ({ ...d, slots: swapSlots(d.slots, index, other) }) as typeof d);
-    setActive(other);
+  /** Exchange two slots' photos. The selection stays on the same photo. */
+  const swap = (from: number, to: number) => {
+    onChange((d) => ({ ...d, slots: swapSlots(d.slots, from, to) }) as typeof d);
+    setActive((a) => (a === from ? to : a === to ? from : a));
+  };
+  const endDrag = () => {
+    setDragging(null);
+    setDropTarget(null);
   };
 
   async function onUpload(e: ChangeEvent<HTMLInputElement>) {
@@ -89,43 +95,73 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
       </div>
 
       {draft.slots.length > 1 && (
-        <div className="flex gap-1">
-          {draft.slots.map((slot, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-pressed={i === index}
-              onClick={() => setActive(i)}
-              className={`rounded-md border px-2 py-1 text-xs ${
-                i === index ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-300"
-              }`}
-            >
-              {i + 1}
-              {slot.photoId ? "" : " (empty)"}
-            </button>
-          ))}
-        </div>
-      )}
-      {draft.slots.length > 1 && (
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-neutral-500">Swap photo {index + 1} with</span>
-          {draft.slots.map(
-            (_, i) =>
-              i !== index && (
+        <div className="flex flex-col gap-1">
+          <div className="flex gap-2">
+            {draft.slots.map((s, i) => {
+              const photo = pool.find((p) => p.id === s.photoId);
+              const label = photo ? photo.name || "photo" : "empty";
+              return (
                 <button
                   key={i}
                   type="button"
-                  aria-label={`Swap photo ${index + 1} with photo ${i + 1}`}
-                  onClick={() => swapWith(i)}
-                  className="rounded-md border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-50"
+                  draggable
+                  aria-pressed={i === index}
+                  aria-label={`Photo ${i + 1}: ${label}`}
+                  data-testid={`slot-${i + 1}`}
+                  onClick={() => setActive(i)}
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", String(i));
+                    setDragging(i);
+                  }}
+                  onDragOver={(e) => {
+                    if (dragging === null || dragging === i) return;
+                    e.preventDefault();
+                    setDropTarget(i);
+                  }}
+                  onDragLeave={() => setDropTarget((t) => (t === i ? null : t))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragging !== null) swap(dragging, i);
+                    endDrag();
+                  }}
+                  onDragEnd={endDrag}
+                  className={`relative block h-16 w-16 shrink-0 cursor-grab overflow-hidden rounded-sm border bg-neutral-100 ${
+                    i === index
+                      ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
+                      : photo
+                        ? "border-neutral-200 hover:border-neutral-400"
+                        : "border-dashed border-neutral-300 hover:border-neutral-400"
+                  } ${dropTarget === i ? "outline-2 outline-offset-2 outline-blue-500" : ""} ${
+                    dragging === i ? "opacity-40" : ""
+                  }`}
                 >
-                  {i + 1}
+                  {photo && (
+                    <img
+                      src={previewUrl(photo.thumbnail)}
+                      alt=""
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                  <span className="absolute top-0.5 left-0.5 rounded-sm bg-neutral-900/80 px-1 text-[10px] leading-4 font-medium text-white">
+                    {i + 1}
+                  </span>
                 </button>
-              ),
-          )}
+              );
+            })}
+          </div>
+          <p className="text-xs text-neutral-400">
+            Click a position to fill or adjust it. Drag one onto another to swap them.
+          </p>
         </div>
       )}
 
+      {draft.slots.length > 1 && (
+        <span className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
+          Choose photo {index + 1}
+        </span>
+      )}
       {pool.length > 0 ? (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {pool.map((photo) => {
