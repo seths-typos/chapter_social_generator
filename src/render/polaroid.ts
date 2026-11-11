@@ -7,9 +7,10 @@
  * unrotated polaroid at scale 1; Multi-Photo scatters several.
  */
 
-import { POLAROID, type Rect } from "@/templates/constants";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, POLAROID, type Rect } from "@/templates/constants";
 import { viewFit, type View } from "./fit";
 import { drawGrain, type GrainAsset } from "./grain";
+import { drawFade, drawGlow, type PhotoEffects } from "./photoEffects";
 import { drawShadow } from "./shadow";
 
 export interface PolaroidPlacement {
@@ -110,12 +111,14 @@ export interface PolaroidOptions {
   view: View;
   /** The grain field to blend over the photo (not the frame). Omit for no grain. */
   grain?: GrainAsset | undefined;
+  /** Experimental looks from the tuning panel (glow, fade). Omit for none. */
+  effects?: PhotoEffects | undefined;
   /** The scanned frame with its window cut out. Without it a flat paper colour is drawn. */
   frame?: CanvasImageSource | undefined;
 }
 
 export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOptions): void {
-  const { placement, photo, view, frame, grain } = opts;
+  const { placement, photo, view, frame, grain, effects } = opts;
   const win = POLAROID.window;
 
   ctx.save();
@@ -135,7 +138,12 @@ export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOption
     const r = photoRectInPolaroid(photo, view);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(photo, r.x, r.y, r.w, r.h);
+    const drawPhoto = () => ctx.drawImage(photo, r.x, r.y, r.w, r.h);
+    drawPhoto();
+    if (effects) {
+      drawGlow(ctx, effects, drawPhoto);
+      drawFade(ctx, effects, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
     if (grain) drawGrain(ctx, grain);
   } else {
     ctx.fillStyle = POLAROID.emptyWindowColor;

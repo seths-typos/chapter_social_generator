@@ -1,5 +1,6 @@
 import type { Rect } from "@/templates/constants";
 import type { GrainAsset } from "./grain";
+import type { PhotoEffects } from "./photoEffects";
 import type { Draft, DraftFor } from "@/store/draft";
 import type { TemplateId, TextureRef } from "@/store/types";
 
@@ -18,6 +19,8 @@ export interface RenderAssets {
   frame?: CanvasImageSource;
   /** The film-grain noise field and its strength. Absent outside a browser. */
   grain?: GrainAsset | undefined;
+  /** Experimental photo looks set by the temporary tuning panel. Absent or all zero: none. */
+  effects?: PhotoEffects | undefined;
   /** The `chapter` wordmark as vector paths. Absent outside a browser (unit tests). */
   wordmark?: WordmarkAsset | undefined;
 }

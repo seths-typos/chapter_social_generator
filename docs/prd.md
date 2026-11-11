@@ -172,7 +172,7 @@ flowchart TD
 | # | Question | Notes |
 |---|---|---|
 | 1 | **Multi-Photo layout** | Needs a design: how many photos (2–4?), arrangement, overlap and rotation of polaroids. To be resolved in the Template Spec. |
-| 2 | **Grain filter values** | Built with starting values (see [Grain](template-spec.md#grain)). Final strength to be tuned by eye. |
+| 2 | **Grain and other photo looks** | Grain values are set (see [Grain](template-spec.md#grain)). The founder asked for "a couple of film grainy filters": soft glow and faded film are being tried out, not yet offered per post. |
 | 3 | ~~UI typeface~~ | **Resolved:** Druk for UI titles, Geist for UI body. |
 | 4 | ~~Phone support~~ | **Resolved:** not a v1 target. Laptop-first. |
 | 5 | ~~HEIC photos~~ | **Resolved:** HEIC is accepted. Chrome can't decode it, so it is converted in the browser with `heic2any`, loaded only when needed. See [Image handling](technical-requirements.md#image-handling). |

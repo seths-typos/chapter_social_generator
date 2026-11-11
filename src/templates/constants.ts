@@ -58,7 +58,7 @@ export const SHADOW = {
  * `amplitude` is how far a grain can sit from mid-grey (0–127); `opacity` is how strongly
  * the noise is overlaid. Marked *tune* in the spec.
  */
-export const GRAIN = { seed: 1986, amplitude: 127, opacity: 0.3 } as const;
+export const GRAIN = { seed: 1986, amplitude: 87, opacity: 0.45 } as const;
 
 /** Polaroid object and its photo window. docs/template-spec.md#polaroid */
 export const POLAROID = {

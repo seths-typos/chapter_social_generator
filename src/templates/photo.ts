@@ -14,6 +14,7 @@ export const renderPhoto: RendererFor<"photo" | "cover"> = (ctx, draft, assets) 
     view: slot ?? { panX: 0, panY: 0, zoom: 1 },
     frame: assets.frame,
     grain: draft.grain ? assets.grain : undefined,
+    effects: assets.effects,
   });
   return [];
 };

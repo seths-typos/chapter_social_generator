@@ -74,7 +74,8 @@ A polaroid is an **848×1021** object (about the 88×107 mm Polaroid 600 ratio).
 - **Toggle:** off by default. One toggle per post applies to every photo in that post.
 - **Applies to:** the photo window only (regular mode) or the whole scan (scan mode). It never applies to the texture, frame, card or text.
 - **Algorithm:** one monochrome noise value per canvas pixel from a seeded generator (`mulberry32`, seed **1986**), so the preview and export match exactly. Each value is mid-grey plus or minus up to the amplitude (two random numbers averaged, so most grains are subtle). The field is blended over the photo with `overlay`, inside the photo clip, before the frame is drawn. It is drawn in canvas pixels, so the grain is the same size on every polaroid whatever its scale or rotation.
-- **Values:** amplitude **127**, opacity **0.30**. *tune*: these are starting values (`GRAIN` in `src/templates/constants.ts`).
+- **Values:** amplitude **87**, opacity **0.45**, tuned by eye with the owner on 2026-11-10 (`GRAIN` in `src/templates/constants.ts`).
+- **Other looks (experimental):** a soft glow (a blurred copy of the photo screened over it) and a faded-film look (lifted blacks, lowered whites, muted colour) exist in `src/render/photoEffects.ts`. They are off unless turned up in the temporary tuning panel (`?tune` in the URL) and are not stored on posts. Values and how they are offered per post are still to be decided.
 
 ## Templates
 
@@ -249,7 +250,7 @@ Adding a template means adding a variant to both unions and one definition file.
 
 | # | Item | Notes |
 |---|---|---|
-| 1 | Grain values | Algorithm built. Amplitude and opacity are starting values, to be tuned by eye. |
+| 1 | Photo looks | Grain values are final. Soft glow and faded film are experimental: values and per-post controls to be decided. |
 | 2 | Shadow blur and offset | Starting values above. Verify against the reference renders. |
 | 3 | Multi-Photo presets | Starting positions above. Tune visually. A future "shuffle" option could add variety. |
 | 4 | Textures (10, including terrazzo) | Supplied by the user during the build. Solid-color placeholders until then. |
