@@ -18,7 +18,7 @@ Measurements come from the Illustrator files `CoverPost.ai`, `GraphicPost.ai` an
 1. Background texture
 2. Drop shadow(s)
 3. Content object(s): polaroid, graphic, or card
-4. Grain (photo areas only, when enabled)
+4. Film look (photo areas only, when enabled)
 5. Overlays: wordmark (Cover), badge (Info)
 
 ## Shared elements
@@ -69,13 +69,17 @@ A polaroid is an **848×1021** object (about the 88×107 mm Polaroid 600 ratio).
 | Frame | None. The scan *is* the polaroid. |
 | Shadow | Follows the scan's actual rectangle |
 
-### Grain
+### Film look
 
-- **Toggle:** off by default. One toggle per post applies to every photo in that post.
-- **Applies to:** the photo window only (regular mode) or the whole scan (scan mode). It never applies to the texture, frame, card or text.
-- **Algorithm:** one monochrome noise value per canvas pixel from a seeded generator (`mulberry32`, seed **1986**), so the preview and export match exactly. Each value is mid-grey plus or minus up to the amplitude (two random numbers averaged, so most grains are subtle). The field is blended over the photo with `overlay`, inside the photo clip, before the frame is drawn. It is drawn in canvas pixels, so the grain is the same size on every polaroid whatever its scale or rotation.
-- **Values:** amplitude **87**, opacity **0.45**, tuned by eye with the owner on 2026-11-10 (`GRAIN` in `src/templates/constants.ts`).
-- **Other looks (experimental):** a soft glow (a blurred copy of the photo screened over it) and a faded-film look (lifted blacks, lowered whites, muted colour) exist in `src/render/photoEffects.ts`. They are off unless turned up in the temporary tuning panel (`?tune` in the URL) and are not stored on posts. Values and how they are offered per post are still to be decided.
+One toggle per post, off by default, labelled **Film look**. It adds three things to every photo in the post, in this order, and never touches the texture, frame, card or text. In regular mode it applies to the photo window only; in scan mode, to the whole scan. All values are fixed in code and were tuned by eye with the owner on 2026-11-10. In the data model the toggle is the `grain` field (named for its first part).
+
+| Part | How | Values |
+|---|---|---|
+| Soft glow | The photo drawn again, blurred, and blended over itself with `screen`, so bright areas bloom. The blur scales with the polaroid. Needs canvas filters (Chrome, Firefox); skipped where they don't exist. | radius **14 px** (at full polaroid size), strength **0.31** |
+| Fade | Colour muted (`saturation` blend with mid-grey), whites pulled down (`multiply` with a light grey), blacks lifted (`screen` with a dark grey) | colour **0.42**, whites **0.05**, blacks **0.03** |
+| Grain | One monochrome noise value per canvas pixel from a seeded generator (`mulberry32`, seed **1986**), so the preview and export match exactly. Each value is mid-grey plus or minus up to the amplitude (two random numbers averaged, so most grains are subtle). Blended with `overlay`. Drawn in canvas pixels, so the grain is the same size on every polaroid whatever its scale or rotation. | amplitude **64**, opacity **0.30** |
+
+Constants: `GRAIN` and `FILM_LOOK` in `src/templates/constants.ts`. A temporary tuning panel (`?tune` in the URL) can change them live for one page load.
 
 ## Templates
 
@@ -89,7 +93,7 @@ Reference: `CoverPost.ai`, `First Post@2x.png`
 | Polaroid | Rect **(116, 210) 848×1021**, with shadow |
 | Wordmark | The `chapter` wordmark (vector, `assets/wordmark/chapter.svg`), fill **`#F4F6F9`** (light, the default and the reference) or **`#000000`** (dark, for photos too light for the wordmark to read), chosen per post, bounding box **x 190 → 890, y 481 → 786** (700×305, including the `p` descender). Not clipped to the photo window. |
 
-**Parameters:** 1 photo slot, wordmark colour (light or dark), texture, grain.
+**Parameters:** 1 photo slot, wordmark colour (light or dark), texture, film look.
 
 ### Photo (`photo`)
 
@@ -97,7 +101,7 @@ Reference: `polaroidArtboard 3@2x.png`. This is an Instagram mock-up on a differ
 
 Identical to **Cover**, without the wordmark.
 
-**Parameters:** 1 photo slot, texture, grain.
+**Parameters:** 1 photo slot, texture, film look.
 
 ### Multi-Photo (`multi-photo`)
 
@@ -120,7 +124,7 @@ New template, not in the original designs. Concept: 2–4 polaroids scattered on
 
 **Editing:** changing the count keeps the photos already placed (fewer drops the last slots). A photo clicked in the pool goes to the first empty slot. Each photo is dragged and zoomed in the preview on its own; the zoom slider acts on the slot selected in the controls.
 
-**Parameters:** photo count, 2–4 photo slots (pan and zoom per slot), texture, grain. Swapping two slots' photos is a nice-to-have.
+**Parameters:** photo count, 2–4 photo slots (pan and zoom per slot), texture, film look. Swapping two slots' photos is a nice-to-have.
 
 ### Graphic (`graphic`)
 
@@ -133,7 +137,7 @@ Reference: `GraphicPost.ai`, `graphic.png`
 | Max height | **1240 px**. A taller graphic is scaled to 1240 tall, keeps its aspect ratio, and stays centered horizontally. |
 | Shadow | Standard shadow on the graphic's rectangle |
 | Empty state | Before a graphic is chosen, a blank `#C9CCD1` card with the standard shadow fills the reference slot (117,278 → 964,1139). It is never exported. |
-| Grain | Not available (the graphic is artwork, not a photo) |
+| Film look | Not available (the graphic is artwork, not a photo) |
 
 **Parameters:** graphic image (from the pool or uploaded), texture.
 
@@ -250,7 +254,7 @@ Adding a template means adding a variant to both unions and one definition file.
 
 | # | Item | Notes |
 |---|---|---|
-| 1 | Photo looks | Grain values are final. Soft glow and faded film are experimental: values and per-post controls to be decided. |
+| 1 | Film look | Values tuned with the owner. Offered as one toggle; could become a choice of named looks later. |
 | 2 | Shadow blur and offset | Starting values above. Verify against the reference renders. |
 | 3 | Multi-Photo presets | Starting positions above. Tune visually. A future "shuffle" option could add variety. |
 | 4 | Textures (10, including terrazzo) | Supplied by the user during the build. Solid-color placeholders until then. |

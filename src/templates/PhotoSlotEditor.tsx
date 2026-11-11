@@ -174,9 +174,10 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
           checked={draft.grain}
           onChange={(e) => onChange((d) => ({ ...d, grain: e.target.checked }))}
         />
-        Film grain
+        Film look
         <span className="text-xs text-neutral-400">
-          {draft.slots.length > 1 ? "on every photo in this post" : "on the photo"}
+          grain, soft glow and a slight fade
+          {draft.slots.length > 1 ? ", on every photo" : ""}
         </span>
       </label>
 

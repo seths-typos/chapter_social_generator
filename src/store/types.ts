@@ -52,6 +52,7 @@ export type Post =
       template: "cover";
       slots: [PhotoSlot];
       texture: TextureRef;
+      /** The film look (grain, soft glow, slight fade) on the photo. Named for its first part. */
       grain: boolean;
       /** Light for dark photos (the default), dark for light photos. */
       wordmark: WordmarkTone;

@@ -54,11 +54,23 @@ export const SHADOW = {
 } as const;
 
 /**
- * Film grain on photos. docs/template-spec.md#grain
- * `amplitude` is how far a grain can sit from mid-grey (0–127); `opacity` is how strongly
- * the noise is overlaid. Marked *tune* in the spec.
+ * The film look: one per-post toggle that adds grain, a soft glow and a slight fade to
+ * the photo. Values tuned by eye with the owner. docs/template-spec.md#film-look
+ *
+ * Grain: `amplitude` is how far a grain can sit from mid-grey (0–127); `opacity` is how
+ * strongly the noise is overlaid.
  */
-export const GRAIN = { seed: 1986, amplitude: 87, opacity: 0.45 } as const;
+export const GRAIN = { seed: 1986, amplitude: 64, opacity: 0.3 } as const;
+
+/** The glow and fade parts of the film look. Fields are described in `PhotoEffects`. */
+export const FILM_LOOK = {
+  /** Blur of the glow layer in px, for a full-size polaroid. Scales with the polaroid. */
+  glowRadius: 14,
+  glowStrength: 0.31,
+  fadeLift: 0.03,
+  fadeHighlights: 0.05,
+  fadeDesaturate: 0.42,
+} as const;
 
 /** Polaroid object and its photo window. docs/template-spec.md#polaroid */
 export const POLAROID = {

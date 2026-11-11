@@ -1,7 +1,7 @@
 /**
  * Film grain for photos: a fixed field of monochrome noise, blended over the photo with
  * "overlay". The seed is fixed, so the preview and the export get exactly the same grain.
- * docs/template-spec.md#grain
+ * docs/template-spec.md#film-look
  */
 
 import { CANVAS_HEIGHT, CANVAS_WIDTH, GRAIN } from "@/templates/constants";

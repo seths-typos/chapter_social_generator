@@ -38,7 +38,7 @@ const renderMultiPhoto: RendererFor<"multi-photo"> = (ctx, draft, assets) => {
       view: slot,
       frame: assets.frame,
       grain: draft.grain ? assets.grain : undefined,
-      effects: assets.effects,
+      effects: draft.grain ? assets.effects : undefined,
     });
   });
   return [];

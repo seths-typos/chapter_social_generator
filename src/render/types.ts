@@ -19,7 +19,7 @@ export interface RenderAssets {
   frame?: CanvasImageSource;
   /** The film-grain noise field and its strength. Absent outside a browser. */
   grain?: GrainAsset | undefined;
-  /** Experimental photo looks set by the temporary tuning panel. Absent or all zero: none. */
+  /** The glow and fade values of the film look. */
   effects?: PhotoEffects | undefined;
   /** The `chapter` wordmark as vector paths. Absent outside a browser (unit tests). */
   wordmark?: WordmarkAsset | undefined;

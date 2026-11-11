@@ -135,7 +135,7 @@ Related docs: [PRD](prd.md) · [Template Spec](template-spec.md) · [Technical R
 
 | # | Task | Acceptance criteria | Spec |
 |---|---|---|---|
-| 6.1 | **Grain** (#30) | `grain.ts` with seeded noise in overlay blend, applied to the photo area only. Strength tuned by eye with the owner. Values recorded in the Template Spec. | [Grain](template-spec.md#grain) |
+| 6.1 | **Film look** (#30) | One per-post toggle applying seeded grain (`grain.ts`, overlay blend), a soft glow and a slight fade (`photoEffects.ts`) to the photo area only. Values tuned by eye with the owner and recorded in the Template Spec. | [Film look](template-spec.md#film-look) |
 | 6.2 | **Shadow fine-tune** (#31) | Blur, offset and opacity confirmed against all references in the comparison view. Final values recorded in the Template Spec. | [Drop shadow](template-spec.md#drop-shadow) |
 | 6.3 | **Real texture library** (#32) | *Largely done early in #8 with 16 Unsplash textures (decision 0002).* Remaining: swap in or add textures photographed at real venues if the founder wants them. | [Texture library](template-spec.md#texture-library) |
 | 6.4 | **UX/UI pass (owner)** (#33) | The owner reviews and restyles the tool UI. Claude Code implements the resulting issues. | [Generator UI notes](prd.md#generator-ui-notes) |

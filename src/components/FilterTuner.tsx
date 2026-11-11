@@ -2,12 +2,11 @@ import { useSyncExternalStore } from "react";
 import { getGrainSettings, setGrainSettings, subscribeGrain } from "@/render/grain";
 import {
   getPhotoEffects,
-  NO_EFFECTS,
   setPhotoEffects,
   subscribePhotoEffects,
   type PhotoEffects,
 } from "@/render/photoEffects";
-import { GRAIN } from "@/templates/constants";
+import { FILM_LOOK, GRAIN } from "@/templates/constants";
 
 /**
  * TEMPORARY: live sliders for the photo looks, shown with `?tune` in the URL, so the
@@ -71,7 +70,8 @@ export function FilterTuner() {
   return (
     <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50 p-3">
       <p className="text-xs font-medium text-amber-900">
-        Look tuning (temporary). Applies to every photo on this page until you reload.
+        Film look tuning (temporary). Tick “Film look” on a post to see it. Changes last until you
+        reload.
       </p>
 
       <p className={heading}>Soft glow and faded film</p>
@@ -86,7 +86,7 @@ export function FilterTuner() {
         />
       ))}
 
-      <p className={heading}>Grain (tick “Film grain” on the post)</p>
+      <p className={heading}>Grain</p>
       <Slider
         label="Opacity"
         value={grain.opacity}
@@ -105,12 +105,12 @@ export function FilterTuner() {
       <button
         type="button"
         onClick={() => {
-          setPhotoEffects(NO_EFFECTS);
+          setPhotoEffects(FILM_LOOK);
           setGrainSettings({ amplitude: GRAIN.amplitude, opacity: GRAIN.opacity });
         }}
         className="self-start rounded-md border border-amber-400 px-2 py-1 text-xs font-medium text-amber-900"
       >
-        Reset all
+        Back to built-in
       </button>
     </div>
   );

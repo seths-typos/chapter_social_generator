@@ -1,12 +1,13 @@
 /**
- * EXPERIMENTAL photo looks, tried out through the temporary tuning panel (`?tune`):
- * a soft glow and a faded-film look. They are off (all zero) unless the panel turns them
- * up, and they are not stored on posts yet. Once the values are chosen they become
- * constants and a per-post choice.
+ * The glow and fade parts of the film look (grain is in `grain.ts`). The values in use
+ * start as `FILM_LOOK`; the temporary tuning panel (`?tune`) can change them live.
+ * docs/template-spec.md#film-look
  */
 
+import { FILM_LOOK } from "@/templates/constants";
+
 export interface PhotoEffects {
-  /** Soft glow: blur radius of the glow layer, in canvas px. */
+  /** Soft glow: blur radius of the glow layer in px, for a full-size polaroid. */
   glowRadius: number;
   /** Soft glow: how strongly the blurred copy is screened over the photo, 0–1. */
   glowStrength: number;
@@ -18,15 +19,7 @@ export interface PhotoEffects {
   fadeDesaturate: number;
 }
 
-export const NO_EFFECTS: PhotoEffects = {
-  glowRadius: 0,
-  glowStrength: 0,
-  fadeLift: 0,
-  fadeHighlights: 0,
-  fadeDesaturate: 0,
-};
-
-let effects: PhotoEffects = NO_EFFECTS;
+let effects: PhotoEffects = { ...FILM_LOOK };
 const listeners = new Set<() => void>();
 
 export const getPhotoEffects = (): PhotoEffects => effects;
@@ -49,16 +42,18 @@ const grey = (level: number): string => {
 /**
  * Soft glow: the photo drawn again, blurred, and screened over itself, so bright areas
  * bloom. `draw` must draw the photo exactly as it was first drawn. Needs canvas filters
- * (Chrome, Firefox); where they don't exist the glow is skipped.
+ * (Chrome, Firefox); where they don't exist the glow is skipped. `scale` is the polaroid's.
  */
 export function drawGlow(
   ctx: CanvasRenderingContext2D,
   effects: PhotoEffects,
+  scale: number,
   draw: () => void,
 ): void {
   if (effects.glowStrength <= 0 || effects.glowRadius <= 0 || !("filter" in ctx)) return;
   ctx.save();
-  ctx.filter = `blur(${effects.glowRadius}px)`;
+  // The blur is in canvas px, so it is scaled to keep the same look on a smaller polaroid.
+  ctx.filter = `blur(${effects.glowRadius * scale}px)`;
   ctx.globalCompositeOperation = "screen";
   ctx.globalAlpha = Math.min(1, effects.glowStrength);
   draw();

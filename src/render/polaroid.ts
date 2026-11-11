@@ -111,7 +111,7 @@ export interface PolaroidOptions {
   view: View;
   /** The grain field to blend over the photo (not the frame). Omit for no grain. */
   grain?: GrainAsset | undefined;
-  /** Experimental looks from the tuning panel (glow, fade). Omit for none. */
+  /** The glow and fade of the film look. Omit for none. */
   effects?: PhotoEffects | undefined;
   /** The scanned frame with its window cut out. Without it a flat paper colour is drawn. */
   frame?: CanvasImageSource | undefined;
@@ -141,7 +141,7 @@ export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOption
     const drawPhoto = () => ctx.drawImage(photo, r.x, r.y, r.w, r.h);
     drawPhoto();
     if (effects) {
-      drawGlow(ctx, effects, drawPhoto);
+      drawGlow(ctx, effects, placement.scale, drawPhoto);
       drawFade(ctx, effects, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
     if (grain) drawGrain(ctx, grain);
