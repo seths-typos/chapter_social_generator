@@ -10,7 +10,7 @@ const COUNTS = Array.from(
   (_, i) => PHOTO_SLOTS.min + i,
 );
 
-/** The Photo form: how many polaroids, the photo for each, then the optional text card. */
+/** The Photo form: how many photos, the photo for each, the frame option and the text card. */
 export function PhotoEditor(props: EditorProps<"photo">) {
   const { draft, onChange, activeSlot, onActiveSlot } = props;
   // Fewer photos drops the last slots; more adds empty ones. Existing photos stay put.
@@ -48,6 +48,14 @@ export function PhotoEditor(props: EditorProps<"photo">) {
         </div>
       </div>
       {createElement(PhotoSlotEditor as ComponentType<EditorProps<"photo">>, props)}
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={draft.frame}
+          onChange={(e) => onChange((d) => ({ ...d, frame: e.target.checked }))}
+        />
+        Polaroid frames
+      </label>
       <TextCardEditor
         card={draft.textCard}
         onCard={(textCard) => onChange((d) => ({ ...d, textCard }))}

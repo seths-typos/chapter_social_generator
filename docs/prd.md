@@ -53,7 +53,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | ID | Template | Purpose | Inputs | Reference |
 |---|---|---|---|---|
 | `cover` | **Cover** | Hero post with the brand front and center | 1 photo (in a polaroid), background texture. The `chapter` wordmark overlays the photo. | `CoverPost.ai`, `First Post@2x.png` |
-| `photo` | **Photo** | Post-event photos: one polaroid, or two to four scattered in one image | 1–4 photos (in polaroids), background texture, optional text card | `polaroidArtboard 3@2x.png` |
+| `photo` | **Photo** | Post-event photos: one polaroid, or two to four scattered in one image | 1–4 photos (in polaroids, or unframed), background texture, optional text card | `polaroidArtboard 3@2x.png` |
 | `graphic` | **Graphic** | Upcoming event with an event graphic | 1 graphic image, background texture | `GraphicPost.ai`, `graphic.png` |
 | `info` | **Info** | Upcoming event details. Usually slide 2 after Graphic. | Event number, title, body, date/time, location, background texture | `InfoPost.ai`, `text_preferred.png` |
 
@@ -85,6 +85,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Photo lets him choose how many photos, one to four. |
 | Swap photos between slots. | In a post with more than one photo, the slot editor shows one numbered thumbnail per position. Clicking one selects that position, to fill from the Photos panel or adjust. Dragging one onto another swaps the two photos, and each keeps its own pan and zoom. Dragging onto an empty position moves the photo there. The selected position is outlined in the preview (never in the export), and clicking a polaroid in the preview selects it. |
 | Add a text card above the photos. | Photo has an optional text card: a smaller italic heading and one line of text, on a white card across the top of the post, with the photos scaled down below it. The text shrinks to fit; text that still doesn't fit blocks the post until it is shortened. |
+| Show photos without the polaroid frame. | Photo has a "Polaroid frames" option, on by default, for the whole post. Off, each photo is shown on its own with the standard shadow, cropped to the same shape as in the polaroid and as wide as the polaroid was. |
 | Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
 | Optionally reposition and zoom a photo. | He drags the photo in the preview to pan, and zooms with a slider in the controls or by scrolling over the photo. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
 | Optional film look. | A per-post "Film look" toggle, off by default, that adds grain, a soft glow and a slight fade to every photo in the post (not the frame, texture or text). The values are fixed in code. |

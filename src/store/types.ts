@@ -73,6 +73,8 @@ export type Post =
       slots: PhotoSlot[] /* 1–4 */;
       texture: TextureRef;
       grain: boolean;
+      /** False shows the photos without the polaroid frame. */
+      frame: boolean;
       textCard?: TextCard;
     }
   | { template: "graphic"; graphicId: string; texture: TextureRef }

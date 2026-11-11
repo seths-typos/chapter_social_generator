@@ -28,6 +28,7 @@ const photoPost = (photoId: string): Post => ({
   slots: [slot(photoId)],
   texture: tile,
   grain: false,
+  frame: true,
 });
 
 describe("newDraft", () => {
@@ -36,6 +37,7 @@ describe("newDraft", () => {
       template: "photo",
       slots: [{ photoId: null, panX: 0, panY: 0, zoom: 1 }],
       grain: false,
+      frame: true,
       textCard: { on: false, heading: "", text: "" },
       texture: wood,
       textureChosen: false,
@@ -148,6 +150,7 @@ describe("toPost / missingInputs", () => {
       slots: [{ photoId: "p1", panX: 0, panY: 0, zoom: 1.5 }],
       texture: wood,
       grain: false,
+      frame: true,
     });
   });
 
@@ -237,6 +240,7 @@ describe("fromPost", () => {
         ],
         texture: tile,
         grain: false,
+        frame: true,
       },
       { template: "graphic", graphicId: "g", texture: tile },
       {
@@ -347,6 +351,7 @@ describe("photoIdsInDraft and photoUsage", () => {
       slots: [slot("a"), slot("a"), slot("b")],
       texture: tile,
       grain: false,
+      frame: true,
     };
     const usage = photoUsage([photoPost("a"), multi]);
     expect(usage.get("a")).toBe(2);
@@ -358,7 +363,13 @@ describe("photoIdsInDraft and photoUsage", () => {
 describe("photoIdsInPost", () => {
   it("lists slot photos, the graphic, or nothing", () => {
     expect(
-      photoIdsInPost({ template: "photo", slots: [slot("a")], texture: tile, grain: false }),
+      photoIdsInPost({
+        template: "photo",
+        slots: [slot("a")],
+        texture: tile,
+        grain: false,
+        frame: true,
+      }),
     ).toEqual(["a"]);
     expect(
       photoIdsInPost({
@@ -366,6 +377,7 @@ describe("photoIdsInPost", () => {
         slots: [slot("a"), slot("b")],
         texture: tile,
         grain: false,
+        frame: true,
       }),
     ).toEqual(["a", "b"]);
     expect(photoIdsInPost({ template: "graphic", graphicId: "g", texture: tile })).toEqual(["g"]);

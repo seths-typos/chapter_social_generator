@@ -1,4 +1,9 @@
-import { drawPolaroid, placementFromRect, type PolaroidPlacement } from "@/render/polaroid";
+import {
+  drawPolaroid,
+  placementFromRect,
+  unframed,
+  type PolaroidPlacement,
+} from "@/render/polaroid";
 import type { RenderAssets, RendererFor } from "@/render/types";
 import type { DraftFor } from "@/store/draft";
 import {
@@ -32,8 +37,10 @@ export function photoPlacements(count: number, withCard = false): PolaroidPlacem
 
 type PhotoLike = DraftFor<"photo" | "cover">;
 
-const placementsFor = (draft: PhotoLike): PolaroidPlacement[] =>
-  photoPlacements(draft.slots.length, activeTextCard(draft) !== null);
+const placementsFor = (draft: PhotoLike): PolaroidPlacement[] => {
+  const placements = photoPlacements(draft.slots.length, activeTextCard(draft) !== null);
+  return "frame" in draft && !draft.frame ? placements.map(unframed) : placements;
+};
 
 /**
  * Photo: one polaroid, or two to four scattered ones, on a texture. Cover draws its one
@@ -65,11 +72,20 @@ export function photoTargets(draft: PhotoLike, assets: RenderAssets): PhotoTarge
   });
 }
 
+const slotOps = slotDraftOps("photo", PHOTO_SLOTS, { textCard: true });
+
 export const photoTemplate: TemplateDefinition<"photo"> = {
   id: "photo",
   label: "Photo",
   defaultTexture: LIBRARY_TEXTURE.woodDarkWorn,
-  ...slotDraftOps("photo", PHOTO_SLOTS, { textCard: true }),
+  ...slotOps,
+  // The slot operations don't know about the frame option, so it is added around them.
+  newDraft: (base) => ({ ...slotOps.newDraft(base), frame: true }),
+  toPost: (draft) => {
+    const post = slotOps.toPost(draft);
+    return post && { ...post, frame: draft.frame };
+  },
+  fromPost: (post, base) => ({ ...slotOps.fromPost(post, base), frame: post.frame }),
   Editor: PhotoEditor,
   render: renderPhoto,
   photoTargets,

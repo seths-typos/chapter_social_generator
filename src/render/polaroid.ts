@@ -21,6 +21,8 @@ export interface PolaroidPlacement {
   rotation: number;
   /** 1 = 848×1021. */
   scale: number;
+  /** Set when the photo is shown without the polaroid frame: only the window is drawn. */
+  frameless?: true;
 }
 
 const SIZE = { w: POLAROID.rect.w, h: POLAROID.rect.h };
@@ -32,6 +34,31 @@ export const placementFromRect = (rect: Rect): PolaroidPlacement => ({
   rotation: 0,
   scale: rect.w / SIZE.w,
 });
+
+/**
+ * The same position without the frame: the photo window alone, enlarged to the width the
+ * whole polaroid had and centred where the polaroid's centre was.
+ * docs/template-spec.md#without-the-frame
+ */
+export function unframed(placement: PolaroidPlacement): PolaroidPlacement {
+  const win = POLAROID.window;
+  const scale = placement.scale * (SIZE.w / win.w);
+  // From the window's centre to the polaroid's centre, in the polaroid's own space.
+  const dx = (SIZE.w / 2 - (win.x + win.w / 2)) * scale;
+  const dy = (SIZE.h / 2 - (win.y + win.h / 2)) * scale;
+  const a = (placement.rotation * Math.PI) / 180;
+  return {
+    ...placement,
+    cx: placement.cx + dx * Math.cos(a) - dy * Math.sin(a),
+    cy: placement.cy + dx * Math.sin(a) + dy * Math.cos(a),
+    scale,
+    frameless: true,
+  };
+}
+
+/** What is visible of a position, in the polaroid's own space: all of it, or just the window. */
+const visibleRect = (placement: PolaroidPlacement): Rect =>
+  placement.frameless ? POLAROID.window : { x: 0, y: 0, ...SIZE };
 
 /** Where the photo is drawn, in the polaroid's own space, for a pan and zoom. */
 export const photoRectInPolaroid = (photo: { width: number; height: number }, view: View): Rect =>
@@ -51,14 +78,16 @@ export function toCanvasSpace(
   };
 }
 
-/** The polaroid's four corners on the canvas: TL, TR, BR, BL. */
-export const polaroidCorners = (placement: PolaroidPlacement): { x: number; y: number }[] =>
-  [
-    { x: 0, y: 0 },
-    { x: SIZE.w, y: 0 },
-    { x: SIZE.w, y: SIZE.h },
-    { x: 0, y: SIZE.h },
+/** The four corners of what is visible (the polaroid, or its photo alone): TL, TR, BR, BL. */
+export function polaroidCorners(placement: PolaroidPlacement): { x: number; y: number }[] {
+  const r = visibleRect(placement);
+  return [
+    { x: r.x, y: r.y },
+    { x: r.x + r.w, y: r.y },
+    { x: r.x + r.w, y: r.y + r.h },
+    { x: r.x, y: r.y + r.h },
   ].map((corner) => toCanvasSpace(placement, corner));
+}
 
 /** True when a canvas point is on the polaroid (frame or photo). */
 export function isOverPolaroid(
@@ -66,7 +95,8 @@ export function isOverPolaroid(
   point: { x: number; y: number },
 ): boolean {
   const p = toPolaroidSpace(placement, point);
-  return p.x >= 0 && p.x <= SIZE.w && p.y >= 0 && p.y <= SIZE.h;
+  const r = visibleRect(placement);
+  return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
 }
 
 /** A canvas point in the polaroid's own 848×1021 space. */
@@ -127,7 +157,9 @@ export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOption
   ctx.scale(placement.scale, placement.scale);
   ctx.translate(-SIZE.w / 2, -SIZE.h / 2);
 
-  drawShadow(ctx, { x: 0, y: 0, ...SIZE }, placement.scale);
+  // Without the frame the shadow belongs to the photo, sized for how large the photo is drawn.
+  if (placement.frameless) drawShadow(ctx, win, placement.scale * (win.w / SIZE.w));
+  else drawShadow(ctx, { x: 0, y: 0, ...SIZE }, placement.scale);
 
   // The photo, clipped to the window so nothing shows past the frame's cut.
   ctx.save();
@@ -152,6 +184,10 @@ export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOption
   }
   ctx.restore();
 
+  if (placement.frameless) {
+    ctx.restore();
+    return;
+  }
   if (frame) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";

@@ -119,7 +119,11 @@ One to four polaroids on a texture. Photo and the former Multi-Photo template ar
 
 **Editing:** changing the count keeps the photos already placed (fewer drops the last slots). A photo clicked in the pool goes to the selected position. Each photo is dragged and zoomed in the preview on its own; the zoom slider acts on the slot selected in the controls. With more than one photo, dragging one numbered thumbnail onto another swaps them.
 
-**Parameters:** photo count, 1–4 photo slots (pan and zoom per slot), texture, film look, optional text card.
+#### Without the frame
+
+A per-post option, on by default, shows every photo in the post with or without the polaroid frame. Without it, each position draws only the photo window (726×753, the same shape and crop as in the polaroid), enlarged to the width the whole polaroid had (× 848/726) and centred where the polaroid's centre was. Rotation, pan, zoom and the film look are unchanged. The shadow belongs to the photo and is sized as it would be for a polaroid of that width. Unframed photos always fit inside the polaroid's footprint, so they stay on the canvas; because each photo is larger, neighbours overlap more than they do with frames. Cover always has the frame.
+
+**Parameters:** photo count, 1–4 photo slots (pan and zoom per slot), frame on or off, texture, film look, optional text card.
 
 ### Text card
 
@@ -216,7 +220,7 @@ interface TextureRef { kind: "library" | "upload"; id: string; }
 type Post =
   | { template: "cover"; slots: [PhotoSlot]; texture: TextureRef; grain: boolean;
       wordmark: "light" | "dark" }
-  | { template: "photo"; slots: PhotoSlot[] /* 1–4 */; texture: TextureRef; grain: boolean; textCard?: TextCard }
+  | { template: "photo"; slots: PhotoSlot[] /* 1–4 */; texture: TextureRef; grain: boolean; frame: boolean; textCard?: TextCard }
   | { template: "graphic"; graphicId: string; texture: TextureRef }
   | { template: "info"; eventNumber: number; title: string; body: string;
       date: string /* YYYY-MM-DD */; startTime: string /* HH:mm */; endTime?: string;

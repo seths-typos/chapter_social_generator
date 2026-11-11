@@ -45,6 +45,7 @@ export type Draft =
       template: "photo";
       slots: DraftSlot[] /* 1–4 */;
       grain: boolean;
+      frame: boolean;
       textCard: TextCardDraft;
     })
   | (DraftBase & { template: "graphic"; graphicId: string | null })

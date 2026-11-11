@@ -30,6 +30,7 @@ describe("missingAssets", () => {
       slots: [{ photoId: "p1", panX: 0, panY: 0, zoom: 1 }],
       texture: tile,
       grain: false,
+      frame: true,
     };
     const loaded = assets(["library:plaster-white"], ["p1"]);
     expect(missingAssets(photo, loaded)).toEqual(["polaroid frame"]);
