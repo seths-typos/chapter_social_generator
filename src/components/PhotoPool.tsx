@@ -186,7 +186,7 @@ export function PhotoPool() {
                   <div
                     className={`group relative aspect-square overflow-hidden rounded-sm border bg-neutral-100 ${
                       isActive(photo.id)
-                        ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
+                        ? "border-blue-500 ring-2 ring-blue-500 ring-offset-1"
                         : inDraft.has(photo.id)
                           ? "border-neutral-900"
                           : "border-neutral-200"
