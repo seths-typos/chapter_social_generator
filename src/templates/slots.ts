@@ -67,10 +67,11 @@ export function slotDraftOps<K extends SlotTemplateId>(
     photoIds: (post) => post.slots.map((s) => s.photoId),
     draftPhotoIds: (draft) => draft.slots.filter(isFilled).map((s) => s.photoId),
     Editor: PhotoSlotEditor,
-    // The first empty slot, or the last slot when all are full (so one-slot templates swap).
-    acceptPhoto: (draft, photoId) => {
+    // The given slot; without one, the first empty slot, or the last when all are full.
+    acceptPhoto: (draft, photoId, slot) => {
       const empty = draft.slots.findIndex((s) => !isFilled(s));
-      const target = empty === -1 ? draft.slots.length - 1 : empty;
+      const fallback = empty === -1 ? draft.slots.length - 1 : empty;
+      const target = slot !== undefined && slot in draft.slots ? slot : fallback;
       return {
         ...draft,
         slots: draft.slots.map((s, i) => (i === target ? { ...emptySlot(), photoId } : s)),

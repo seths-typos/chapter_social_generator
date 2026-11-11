@@ -75,9 +75,9 @@ export function photoUsage(posts: readonly Post[]): Map<string, number> {
   return usage;
 }
 
-/** The draft with a pool photo put in its next free place. Unchanged if the template takes no images. */
-export function acceptPhotoInDraft(draft: Draft, photoId: string): Draft {
-  return templateFor(draft.template).acceptPhoto(draft, photoId);
+/** The draft with a pool photo put in position `slot`, or failing that its next free place. Unchanged if the template takes no images. */
+export function acceptPhotoInDraft(draft: Draft, photoId: string, slot?: number): Draft {
+  return templateFor(draft.template).acceptPhoto(draft, photoId, slot);
 }
 
 /** True when the draft's template uses pool images at all. */

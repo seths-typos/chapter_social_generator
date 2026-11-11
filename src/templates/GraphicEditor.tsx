@@ -1,6 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { PHOTO_ACCEPT } from "@/image/limits";
-import { previewUrl } from "@/image/previewUrl";
 import { GRAPHIC } from "./constants";
 import type { EditorProps } from "./definition";
 
@@ -47,32 +46,10 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
         />
       </div>
 
-      {pool.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {pool.map((photo) => {
-            const active = photo.id === draft.graphicId;
-            return (
-              <button
-                key={photo.id}
-                type="button"
-                aria-pressed={active}
-                aria-label="Use this image as the graphic"
-                onClick={() => choose(photo.id)}
-                className={`block h-16 w-16 shrink-0 overflow-hidden rounded-sm border bg-neutral-100 ${
-                  active
-                    ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
-                    : "border-neutral-200 hover:border-neutral-400"
-                }`}
-              >
-                <img
-                  src={previewUrl(photo.thumbnail)}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            );
-          })}
-        </div>
+      {!current && pool.length > 0 && (
+        <p className="text-xs text-neutral-400">
+          Or click an image in the Photos panel to use it as the graphic.
+        </p>
       )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}

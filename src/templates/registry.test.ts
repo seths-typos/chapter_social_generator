@@ -310,6 +310,14 @@ describe("acceptPhotoInDraft", () => {
     expect(photoIdsInDraft(multi)).toEqual(["a", "c"]);
   });
 
+  it("fills the given position when there is one", () => {
+    let multi = acceptPhotoInDraft(newDraft("multi-photo"), "a", 1);
+    expect(multi).toMatchObject({ slots: [{ photoId: null }, { photoId: "a" }] });
+    multi = acceptPhotoInDraft(multi, "b", 1);
+    expect(multi).toMatchObject({ slots: [{ photoId: null }, { photoId: "b" }] });
+    expect(photoIdsInDraft(acceptPhotoInDraft(multi, "c", 9))).toEqual(["c", "b"]);
+  });
+
   it("swaps the photo of a one-slot template and resets its view", () => {
     const first = acceptPhotoInDraft(newDraft("cover"), "a");
     const zoomed = { ...first, slots: [{ photoId: "a", panX: 1, panY: 0, zoom: 2 }] } as Draft;

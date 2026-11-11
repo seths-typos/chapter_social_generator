@@ -183,6 +183,25 @@ describe("choosing and switching templates", () => {
     expect(s().draft).toMatchObject({ graphicId: "g1" });
   });
 
+  it("addPhotoToDraft fills the selected position, then selects the next empty one", () => {
+    s().setTemplate("multi-photo");
+    s().setPhotoCount(3);
+    s().setActiveSlot(1);
+    s().addPhotoToDraft("b");
+    expect(slots().map((sl) => sl.photoId)).toEqual([null, "b", null]);
+    expect(s().activeSlot).toBe(0);
+    s().addPhotoToDraft("a");
+    expect(s().activeSlot).toBe(2);
+    s().addPhotoToDraft("c");
+    expect(slots().map((sl) => sl.photoId)).toEqual(["a", "b", "c"]);
+    // All full: the selection stays, and another click replaces that photo.
+    expect(s().activeSlot).toBe(2);
+    s().addPhotoToDraft("d");
+    expect(slots().map((sl) => sl.photoId)).toEqual(["a", "b", "d"]);
+    s().setTemplate("photo");
+    expect(s().activeSlot).toBe(0);
+  });
+
   it("editDraft edits only a draft of the named template", () => {
     s().setTemplate("graphic");
     const before = s().draft;

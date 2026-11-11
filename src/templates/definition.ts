@@ -44,9 +44,10 @@ export interface TemplateDefinition<K extends TemplateId> {
   draftPhotoIds(draft: DraftFor<K>): string[];
   /**
    * The draft with a pool photo put where the template wants one next (clicking a photo in
-   * the pool). Templates without images return the draft unchanged.
+   * the pool). Templates without images return the draft unchanged. `slot` is the position
+   * selected in the editor, for templates with more than one.
    */
-  acceptPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
+  acceptPhoto(draft: DraftFor<K>, photoId: string, slot?: number): DraftFor<K>;
   /** The draft with a (removed) pool photo taken out. */
   clearPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
 
@@ -88,8 +89,11 @@ export interface PhotoTarget {
 export interface EditorProps<K extends TemplateId> {
   draft: DraftFor<K>;
   onChange: (fn: (draft: DraftFor<K>) => DraftFor<K>) => void;
-  /** The session's photo pool, to choose images from. */
+  /** The session's photo pool, to look up the draft's images. */
   pool: readonly PoolPhoto[];
+  /** The photo position selected in the editor (shared with the Photos panel). */
+  activeSlot: number;
+  onActiveSlot: (slot: number) => void;
   /** Add an image file to the pool. Resolves with its id, or a message to show. */
   importImage: (file: File) => Promise<ImportOutcome>;
 }

@@ -23,6 +23,7 @@ import {
 import {
   emptySlot,
   hasSlots,
+  slotCount,
   type Draft,
   type DraftFor,
   type DraftSlot,
@@ -69,7 +70,13 @@ export interface AppState {
   setGrain: (grain: boolean) => void;
   setPhotoCount: (count: MultiPhotoCount) => void;
   setSlotPhoto: (index: number, photoId: string | null) => void;
-  /** Put a pool photo into the draft wherever its template wants one next. */
+  /** The photo position selected in the editor. Always 0 for one-photo templates. */
+  activeSlot: number;
+  setActiveSlot: (slot: number) => void;
+  /**
+   * Put a pool photo into the selected position of the draft, then select the next empty
+   * position, so clicking photos one after another fills the post.
+   */
   addPhotoToDraft: (photoId: string) => void;
   setSlotView: (index: number, view: { panX?: number; panY?: number; zoom?: number }) => void;
   resetSlotView: (index: number) => void;
@@ -159,15 +166,26 @@ export function createAppStore(): StoreApi<AppState> {
       editingId: null,
       setTemplate: (template) =>
         set((s) => ({
+          activeSlot: 0,
           draft: s.draft
             ? convertDraft(s.draft, template, { lastUsedTexture: s.lastUsedTexture })
             : newDraft(template, s.lastUsedTexture ?? undefined),
         })),
-      clearDraft: () => set({ draft: null, editingId: null }),
+      clearDraft: () => set({ draft: null, editingId: null, activeSlot: 0 }),
       setTexture: (texture) => updateDraft((d) => ({ ...d, texture, textureChosen: true })),
       setGrain: (grain) => updatePhotoDraft((d) => ({ ...d, grain })),
       setPhotoCount: (count) => updateDraft((d) => withPhotoCount(d, count)),
-      addPhotoToDraft: (photoId) => updateDraft((d) => acceptPhotoInDraft(d, photoId)),
+      activeSlot: 0,
+      setActiveSlot: (slot) => set({ activeSlot: Math.max(0, slot) }),
+      addPhotoToDraft: (photoId) =>
+        set((s) => {
+          if (!s.draft) return {};
+          const count = slotCount(s.draft);
+          const slot = Math.min(s.activeSlot, Math.max(0, count - 1));
+          const draft = acceptPhotoInDraft(s.draft, photoId, slot);
+          const empty = hasSlots(draft) ? draft.slots.findIndex((sl) => sl.photoId === null) : -1;
+          return { draft, activeSlot: empty === -1 ? slot : empty };
+        }),
       setSlotPhoto: (index, photoId) =>
         updatePhotoDraft((d) => mapSlot(d, index, () => ({ ...emptySlot(), photoId }))),
       setSlotView: (index, view) =>
@@ -201,13 +219,14 @@ export function createAppStore(): StoreApi<AppState> {
           lastUsedTexture: post.texture,
           draft: null,
           editingId: null,
+          activeSlot: 0,
         });
         return item.id;
       },
       loadForEdit: (id) => {
         const item = get().batch.find((b) => b.id === id);
         if (!item) return;
-        set({ draft: fromPost(item.post), editingId: id });
+        set({ draft: fromPost(item.post), editingId: id, activeSlot: 0 });
       },
       saveEdit: () => {
         const { draft, editingId, batch } = get();
@@ -219,10 +238,11 @@ export function createAppStore(): StoreApi<AppState> {
           lastUsedTexture: post.texture,
           draft: null,
           editingId: null,
+          activeSlot: 0,
         });
         return true;
       },
-      cancelEdit: () => set({ draft: null, editingId: null }),
+      cancelEdit: () => set({ draft: null, editingId: null, activeSlot: 0 }),
 
       // ── Batch
       batch: [],

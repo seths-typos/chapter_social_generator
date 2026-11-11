@@ -23,6 +23,8 @@ const buttonClass =
 export function Editor({ warnings, assets }: EditorProps) {
   const draft = useAppStore((s) => s.draft);
   const pool = useAppStore((s) => s.pool);
+  const activeSlot = useAppStore((s) => s.activeSlot);
+  const setActiveSlot = useAppStore((s) => s.setActiveSlot);
   const batch = useAppStore((s) => s.batch);
   const editDraft = useAppStore((s) => s.editDraft);
   const addToBatch = useAppStore((s) => s.addToBatch);
@@ -87,6 +89,8 @@ export function Editor({ warnings, assets }: EditorProps) {
           draft,
           onChange: (fn) => editDraft(draft.template, fn),
           pool,
+          activeSlot,
+          onActiveSlot: setActiveSlot,
           importImage: addImage,
         })}
 

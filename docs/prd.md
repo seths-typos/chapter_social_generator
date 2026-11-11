@@ -68,7 +68,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Photos stay in the pool for the whole session. | After a post is added to the batch, all pool photos are still available for the next post. |
 | Indicate which photos have been used. | A photo used in any batch post shows a "used" marker and a count. It stays selectable. |
 | Remove a photo from the pool. | A photo that a batch post uses can't be removed until those posts are removed (the button is disabled and says why). Removing a photo that is in the post being edited asks for confirmation first, then empties that slot. |
-| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. Clicking a photo in the Photos panel also puts it into the post being edited. |
+| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. Photos are chosen by clicking them in the Photos panel (there is no second list of photos inside the post): the click fills the selected position, then the next empty position is selected, so clicking photos one after another fills the post. In the panel, the photo in the selected position has a halo, other photos in the post have a dark border and their position number, and a photo used by a batch post is tagged "Used in batch". |
 
 ### Photo input modes
 
@@ -84,7 +84,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 |---|---|
 | Choose a template. | The editor opens on the template picker. All five templates are selectable, each with a thumbnail. Switching template mid-post keeps compatible inputs: the texture, and photos between Cover, Photo and Multi-Photo. Info text and a graphic don't carry over, and switching away from typed text asks for confirmation. |
 | Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Multi-Photo lets him choose how many photos (range TBD in the Template Spec). |
-| Swap photos between slots. | In a post with more than one photo, the slot editor shows one numbered thumbnail per position. Clicking one selects that position to fill or adjust. Dragging one onto another swaps the two photos, and each keeps its own pan and zoom. Dragging onto an empty position moves the photo there. |
+| Swap photos between slots. | In a post with more than one photo, the slot editor shows one numbered thumbnail per position. Clicking one selects that position, to fill from the Photos panel or adjust. Dragging one onto another swaps the two photos, and each keeps its own pan and zoom. Dragging onto an empty position moves the photo there. |
 | Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
 | Optionally reposition and zoom a photo. | He drags the photo in the preview to pan, and zooms with a slider in the controls or by scrolling over the photo. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
 | Optional film look. | A per-post "Film look" toggle, off by default, that adds grain, a soft glow and a slight fade to every photo in the post (not the frame, texture or text). The values are fixed in code. |

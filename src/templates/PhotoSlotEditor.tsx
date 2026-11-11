@@ -12,12 +12,18 @@ import { swapSlots } from "./swapSlots";
 type SlotTemplate = PhotoDraft["template"];
 
 /**
- * The form for a template with photo slots: for each slot, pick a photo from the pool or
- * upload one (which also adds it to the pool). docs/prd.md#session-photo-pool
+ * The form for a template with photo slots: select a position, then fill it by clicking a
+ * photo in the Photos panel or by uploading one (which also adds it to the pool). docs/prd.md#session-photo-pool
  */
-export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorProps<SlotTemplate>) {
+export function PhotoSlotEditor({
+  draft,
+  onChange,
+  pool,
+  importImage,
+  activeSlot: active,
+  onActiveSlot: setActive,
+}: EditorProps<SlotTemplate>) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [active, setActive] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState<number | null>(null);
@@ -51,7 +57,7 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
   /** Exchange two slots' photos. The selection stays on the same photo. */
   const swap = (from: number, to: number) => {
     onChange((d) => ({ ...d, slots: swapSlots(d.slots, from, to) }) as typeof d);
-    setActive((a) => (a === from ? to : a === to ? from : a));
+    setActive(index === from ? to : index === to ? from : index);
   };
   const endDrag = () => {
     setDragging(null);
@@ -152,45 +158,17 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
             })}
           </div>
           <p className="text-xs text-neutral-400">
-            Click a position to fill or adjust it. Drag one onto another to swap them.
+            Click a position, then click a photo in the Photos panel to fill it. Drag one position
+            onto another to swap them.
           </p>
         </div>
       )}
 
-      {draft.slots.length > 1 && (
-        <span className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-          Choose photo {index + 1}
-        </span>
-      )}
-      {pool.length > 0 ? (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {pool.map((photo) => {
-            const chosen = photo.id === draft.slots[index]?.photoId;
-            return (
-              <button
-                key={photo.id}
-                type="button"
-                aria-pressed={chosen}
-                aria-label={`Use ${photo.name || "this photo"}`}
-                onClick={() => setPhoto(index, photo.id)}
-                className={`block h-16 w-16 shrink-0 overflow-hidden rounded-sm border bg-neutral-100 ${
-                  chosen
-                    ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
-                    : "border-neutral-200 hover:border-neutral-400"
-                }`}
-              >
-                <img
-                  src={previewUrl(photo.thumbnail)}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            );
-          })}
-        </div>
-      ) : (
+      {!current && draft.slots.length === 1 && (
         <p className="text-xs text-neutral-400">
-          Upload a photo here, or add several in the Photos panel and pick one.
+          {pool.length > 0
+            ? "Click a photo in the Photos panel to use it here, or upload one."
+            : "Upload a photo here, or add several in the Photos panel and click one."}
         </p>
       )}
 

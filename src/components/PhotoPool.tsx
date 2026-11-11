@@ -4,6 +4,7 @@ import { importToPool } from "@/image/importToPool";
 import { LOW_RES_SHORT_EDGE, PHOTO_ACCEPT } from "@/image/limits";
 import { previewUrl, releasePreviewUrl } from "@/image/previewUrl";
 import { removePhotoAsset } from "@/render/assetCache";
+import { hasSlots } from "@/store/draft";
 import { useAppStore } from "@/store/store";
 import type { PhotoMode, PoolPhoto } from "@/store/types";
 import { photoIdsInDraft, photoUsage, takesPhotos } from "@/templates/registry";
@@ -25,6 +26,14 @@ export function PhotoPool() {
   const canUse = draft !== null && takesPhotos(draft);
   const addPhotoToDraft = useAppStore((s) => s.addPhotoToDraft);
   const inDraft = useMemo(() => new Set(draft ? photoIdsInDraft(draft) : []), [draft]);
+  const activeSlot = useAppStore((s) => s.activeSlot);
+  const slots = draft && hasSlots(draft) ? draft.slots : null;
+  /** In a post with several photos, the one in the selected position; otherwise any in the post. */
+  const isActive = (id: string) =>
+    slots && slots.length > 1 ? slots[activeSlot]?.photoId === id : inDraft.has(id);
+  /** Which positions (1-based) of a several-photo post a photo is in. */
+  const positionsOf = (id: string) =>
+    slots && slots.length > 1 ? slots.flatMap((sl, i) => (sl.photoId === id ? [i + 1] : [])) : [];
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [failures, setFailures] = useState<readonly string[]>([]);
@@ -166,9 +175,11 @@ export function PhotoPool() {
                 <li key={photo.id} className="flex flex-col gap-1">
                   <div
                     className={`relative aspect-square overflow-hidden rounded-sm border bg-neutral-100 ${
-                      inDraft.has(photo.id)
+                      isActive(photo.id)
                         ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
-                        : "border-neutral-200"
+                        : inDraft.has(photo.id)
+                          ? "border-neutral-900"
+                          : "border-neutral-200"
                     }`}
                   >
                     <button
@@ -190,7 +201,15 @@ export function PhotoPool() {
                         title={`In ${used} ${used === 1 ? "post" : "posts"} in the batch`}
                         className="absolute top-1 left-1 rounded-sm bg-neutral-900 px-1 text-[10px] font-medium text-white"
                       >
-                        Used ×{used}
+                        Used in batch
+                      </span>
+                    )}
+                    {positionsOf(photo.id).length > 0 && (
+                      <span
+                        title="Its position in this post"
+                        className="absolute right-1 bottom-1 rounded-sm bg-neutral-900/80 px-1 text-[10px] leading-4 font-medium text-white"
+                      >
+                        {positionsOf(photo.id).join(", ")}
                       </span>
                     )}
                     {isLowResolution(photo) && (
