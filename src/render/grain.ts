@@ -41,32 +41,7 @@ export interface GrainAsset {
   opacity: number;
 }
 
-export interface GrainSettings {
-  /** How far a grain can sit from mid-grey, 0–127. */
-  amplitude: number;
-  /** How strongly the noise is overlaid, 0–1. */
-  opacity: number;
-}
-
-// The values in use. They start as the constants; the temporary tuning panel
-// (`?tune=grain`) changes them live so the final numbers can be chosen by eye.
-let settings: GrainSettings = { amplitude: GRAIN.amplitude, opacity: GRAIN.opacity };
 let asset: GrainAsset | undefined;
-const listeners = new Set<() => void>();
-
-export const getGrainSettings = (): GrainSettings => settings;
-
-export function subscribeGrain(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-/** Change the grain values for this page load and redraw everything that uses them. */
-export function setGrainSettings(next: Partial<GrainSettings>): void {
-  settings = { ...settings, ...next };
-  asset = undefined;
-  for (const l of listeners) l();
-}
 
 function buildField(amplitude: number): HTMLCanvasElement | undefined {
   const canvas = document.createElement("canvas");
@@ -87,11 +62,11 @@ function buildField(amplitude: number): HTMLCanvasElement | undefined {
   return canvas;
 }
 
-/** The grain asset, one noise value per canvas pixel, built once per setting. Undefined outside a browser. */
+/** The grain asset, one noise value per canvas pixel, built once. Undefined outside a browser. */
 export function getGrain(): GrainAsset | undefined {
   if (asset || typeof document === "undefined") return asset;
-  const field = buildField(settings.amplitude);
-  asset = field && { field, opacity: settings.opacity };
+  const field = buildField(GRAIN.amplitude);
+  asset = field && { field, opacity: GRAIN.opacity };
   return asset;
 }
 

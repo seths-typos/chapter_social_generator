@@ -5,6 +5,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAppStore } from "@/store/store";
+import { FILM_LOOK } from "@/templates/constants";
 import { TEMPLATE_LIST } from "@/templates/registry";
 import {
   ensureLibraryTexture,
@@ -14,8 +15,8 @@ import {
   subscribeTextures,
 } from "./assetCache";
 import { ensureFrame, getFrameSnapshot, subscribeFrame } from "./frame";
-import { getGrain, subscribeGrain } from "./grain";
-import { getPhotoEffects, subscribePhotoEffects } from "./photoEffects";
+import { getGrain } from "./grain";
+import { getShadowSettings, subscribeShadow } from "./shadow";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
 import type { RenderAssets } from "./types";
 import { getWordmark } from "./wordmark";
@@ -78,17 +79,18 @@ export function useRenderAssets(): RenderAssets {
   const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
   const frame = useSyncExternalStore(subscribeFrame, getFrameSnapshot, getFrameSnapshot);
   useEffect(() => void ensureFrame(), []);
-  const grain = useSyncExternalStore(subscribeGrain, getGrain, getGrain);
-  const effects = useSyncExternalStore(subscribePhotoEffects, getPhotoEffects, getPhotoEffects);
+  // TEMPORARY: redraw when the shadow tuning panel (`?tune`) changes a value.
+  const shadow = useSyncExternalStore(subscribeShadow, getShadowSettings, getShadowSettings);
   return useMemo(
     () => ({
       textures,
       photos,
       wordmark: getWordmark(),
-      grain,
-      effects,
+      grain: getGrain(),
+      effects: FILM_LOOK,
       ...(frame ? { frame } : {}),
     }),
-    [textures, photos, frame, grain, effects],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `shadow` forces a redraw
+    [textures, photos, frame, shadow],
   );
 }

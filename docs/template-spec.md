@@ -38,7 +38,7 @@ Every content object (polaroid, graphic, Info card) gets the same shadow. It's t
 | Color | `#000000` |
 | Opacity | 0.75 |
 | Offset | x **0**, y **+6 px** |
-| Blur | Gaussian, σ ≈ **6 px** (canvas `shadowBlur: 12`). Fades out about 14 px beyond the object's edge. *tune* |
+| Blur | Gaussian, σ ≈ **6 px** (canvas `shadowBlur: 12`). Fades out about 14 px beyond the object's edge. *tune*: measured against `docs/reference/info.png` on 2026-11-10 and within a few percent of the reference falloff on all four sides; a temporary panel (`?tune` in the URL) lets the owner adjust opacity, blur and offset by eye before the values are locked (#31). |
 | Shape | Same rectangle as the object, unrotated relative to it |
 | Scaling | In Multi-Photo, offset and blur scale with the polaroid's scale factor |
 
@@ -75,11 +75,11 @@ One toggle per post, off by default, labelled **Film look**. It adds three thing
 
 | Part | How | Values |
 |---|---|---|
-| Soft glow | The photo drawn again, blurred, and blended over itself with `screen`, so bright areas bloom. The blur scales with the polaroid. Needs canvas filters (Chrome, Firefox); skipped where they don't exist. | radius **14 px** (at full polaroid size), strength **0.31** |
+| Soft glow | The photo drawn again, blurred, and blended over itself with `screen`, so bright areas bloom. The blur scales with the polaroid. Uses the canvas blur filter in Chrome and Firefox. Safari has no canvas filters, so there the copy is blurred in code (three box blurs on a reduced-size copy), which matches the filter to within a few levels per pixel. | radius **14 px** (at full polaroid size), strength **0.31** |
 | Fade | Colour muted (`saturation` blend with mid-grey), whites pulled down (`multiply` with a light grey), blacks lifted (`screen` with a dark grey) | colour **0.42**, whites **0.05**, blacks **0.03** |
 | Grain | One monochrome noise value per canvas pixel from a seeded generator (`mulberry32`, seed **1986**), so the preview and export match exactly. Each value is mid-grey plus or minus up to the amplitude (two random numbers averaged, so most grains are subtle). Blended with `overlay`. Drawn in canvas pixels, so the grain is the same size on every polaroid whatever its scale or rotation. | amplitude **64**, opacity **0.30** |
 
-Constants: `GRAIN` and `FILM_LOOK` in `src/templates/constants.ts`. A temporary tuning panel (`?tune` in the URL) can change them live for one page load.
+Constants: `GRAIN` and `FILM_LOOK` in `src/templates/constants.ts`.
 
 ## Templates
 

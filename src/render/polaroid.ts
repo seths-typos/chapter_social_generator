@@ -138,7 +138,8 @@ export function drawPolaroid(ctx: CanvasRenderingContext2D, opts: PolaroidOption
     const r = photoRectInPolaroid(photo, view);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    const drawPhoto = () => ctx.drawImage(photo, r.x, r.y, r.w, r.h);
+    const drawPhoto = (target: CanvasRenderingContext2D = ctx) =>
+      target.drawImage(photo, r.x, r.y, r.w, r.h);
     drawPhoto();
     if (effects) {
       drawGlow(ctx, effects, placement.scale, drawPhoto);

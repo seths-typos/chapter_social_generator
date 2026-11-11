@@ -174,7 +174,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 |---|---|
 | **Chrome** (current), macOS | **Primary target.** Must be fully working. |
 | Edge (current) | Should work (same engine as Chrome). Not actively tested. |
-| **Safari** (current), macOS | **Supported, with the fallback headline typeface.** Everything must work, but Safari can't see an installed Druk (see [Fonts](#fonts)), so on-brand posts need Chrome. |
+| **Safari** (current), macOS | **Supported, with the fallback headline typeface.** Everything must work, but Safari can't see an installed Druk (see [Fonts](#fonts)), so on-brand posts need Chrome. Safari also has no canvas blur filter; the Film look's glow uses a coded blur there. Checked on 2026-11-10 in Playwright's WebKit 26.4 build (import, pan and zoom, all templates, batch, PNG and ZIP download; renders match Chrome apart from the headline typeface). |
 | Firefox (current) | Should work. Not actively tested. |
 | Mobile | Not a v1 target. The layout is designed for a laptop. Nothing actively prevents use on a phone, but the four-corner crop and the three-panel layout aren't optimized for it. |
 
