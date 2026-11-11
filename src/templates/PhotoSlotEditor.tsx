@@ -134,7 +134,7 @@ export function PhotoSlotEditor({
                   onDragEnd={endDrag}
                   className={`relative block h-16 w-16 shrink-0 cursor-grab overflow-hidden rounded-sm border bg-neutral-100 ${
                     i === index
-                      ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
+                      ? "border-[#3B82F6] ring-2 ring-[#3B82F6] ring-offset-1"
                       : photo
                         ? "border-neutral-200 hover:border-neutral-400"
                         : "border-dashed border-neutral-300 hover:border-neutral-400"
