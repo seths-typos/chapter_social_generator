@@ -7,6 +7,7 @@ import type { PhotoDraft } from "@/store/draft";
 import { emptySlot } from "@/store/draft";
 import { POLAROID, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from "./constants";
 import type { EditorProps } from "./definition";
+import { swapSlots } from "./swapSlots";
 
 type SlotTemplate = PhotoDraft["template"];
 
@@ -44,6 +45,12 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
           slots: d.slots.map((s, i) => (i === slot ? { ...emptySlot(), photoId } : s)),
         }) as typeof d,
     );
+
+  /** Exchange the active slot's photo with another slot's, and follow it there. */
+  const swapWith = (other: number) => {
+    onChange((d) => ({ ...d, slots: swapSlots(d.slots, index, other) }) as typeof d);
+    setActive(other);
+  };
 
   async function onUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -97,6 +104,25 @@ export function PhotoSlotEditor({ draft, onChange, pool, importImage }: EditorPr
               {slot.photoId ? "" : " (empty)"}
             </button>
           ))}
+        </div>
+      )}
+      {draft.slots.length > 1 && (
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-neutral-500">Swap photo {index + 1} with</span>
+          {draft.slots.map(
+            (_, i) =>
+              i !== index && (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Swap photo ${index + 1} with photo ${i + 1}`}
+                  onClick={() => swapWith(i)}
+                  className="rounded-md border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-50"
+                >
+                  {i + 1}
+                </button>
+              ),
+          )}
         </div>
       )}
 
