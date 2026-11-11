@@ -38,6 +38,8 @@ export const ZOOM_MIN = 1.0;
 export const ZOOM_MAX = 3.0;
 /** Scroll-to-zoom speed: the zoom is multiplied by e^(−deltaY × this) per wheel event. */
 export const WHEEL_ZOOM_RATE = 0.002;
+/** Outline of the selected photo position, drawn in the preview only (canvas px). */
+export const SELECTION_OUTLINE = { color: "#3B82F6", width: 8 } as const;
 /** Step of the zoom slider. */
 export const ZOOM_STEP = 0.01;
 

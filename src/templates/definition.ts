@@ -64,6 +64,11 @@ export interface TemplateDefinition<K extends TemplateId> {
    * without adjustable photos omit it.
    */
   photoTargets?(draft: DraftFor<K>, assets: RenderAssets): PhotoTarget[];
+  /**
+   * Where every photo position sits, filled or not, bottom to top, so the preview can show
+   * and change which one is selected. Only templates with more than one position need it.
+   */
+  slotPlacements?(draft: DraftFor<K>): PolaroidPlacement[];
 
   /** The template's own form fields. Templates with nothing beyond the shared controls omit it. */
   Editor?: ComponentType<EditorProps<K>>;

@@ -3,12 +3,23 @@ import { RENDER_CANVAS_CLASS } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
 import type { RenderAssets, RenderResult } from "@/render/types";
 import { panByPixels, zoomTo, type Size, type View } from "@/render/fit";
-import { deltaToPolaroidSpace, isOverWindow } from "@/render/polaroid";
+import {
+  deltaToPolaroidSpace,
+  isOverPolaroid,
+  isOverWindow,
+  polaroidCorners,
+} from "@/render/polaroid";
 import { hasSlots } from "@/store/draft";
 import { appStore, useAppStore } from "@/store/store";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, POLAROID, WHEEL_ZOOM_RATE } from "@/templates/constants";
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  POLAROID,
+  SELECTION_OUTLINE,
+  WHEEL_ZOOM_RATE,
+} from "@/templates/constants";
 import type { PhotoTarget } from "@/templates/definition";
-import { photoTargets } from "@/templates/registry";
+import { photoTargets, slotPlacements } from "@/templates/registry";
 
 interface PreviewProps {
   assets: RenderAssets;
@@ -24,6 +35,7 @@ interface PreviewProps {
  */
 export function Preview({ assets, onResult }: PreviewProps) {
   const draft = useAppStore((s) => s.draft);
+  const activeSlot = useAppStore((s) => s.activeSlot);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const emitResult = useEffectEvent((result: RenderResult) => onResult?.(result));
 
@@ -38,9 +50,24 @@ export function Preview({ assets, onResult }: PreviewProps) {
     const frame = requestAnimationFrame(() => {
       const result = renderPost(ctx, draft, assets);
       emitResult(result);
+      // Preview only: outline the selected position. Export renders on its own canvas.
+      const selected = slotPlacements(draft)[activeSlot];
+      if (selected) {
+        const [first, ...rest] = polaroidCorners(selected);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(first!.x, first!.y);
+        for (const corner of rest) ctx.lineTo(corner.x, corner.y);
+        ctx.closePath();
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = SELECTION_OUTLINE.color;
+        ctx.lineWidth = SELECTION_OUTLINE.width;
+        ctx.stroke();
+        ctx.restore();
+      }
     });
     return () => cancelAnimationFrame(frame);
-  }, [draft, assets]);
+  }, [draft, assets, activeSlot]);
 
   // Drag a photo to reposition it, scroll over it to zoom. docs/prd.md#template-selection-and-editing
   const [overPhoto, setOverPhoto] = useState(false);
@@ -73,6 +100,12 @@ export function Preview({ assets, onResult }: PreviewProps) {
   function onPointerDown(e: PointerEvent<HTMLCanvasElement>) {
     if (e.button !== 0) return;
     const point = canvasPoint(e);
+    // Clicking a polaroid (photo or frame, filled or empty) selects its position.
+    const { draft: current, setActiveSlot } = appStore.getState();
+    const placements = current ? slotPlacements(current) : [];
+    // Later positions sit on top, so the last match is the one under the pointer.
+    const clicked = placements.map((p) => isOverPolaroid(p, point)).lastIndexOf(true);
+    if (clicked !== -1) setActiveSlot(clicked);
     const target = targetAt(point);
     if (!target) return;
     drag.current = { target, ...point };

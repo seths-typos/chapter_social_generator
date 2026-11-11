@@ -59,6 +59,7 @@ export const multiPhotoTemplate: TemplateDefinition<"multi-photo"> = {
   ...slotDraftOps("multi-photo", MULTI_PHOTO_SLOTS),
   render: renderMultiPhoto,
   photoTargets,
+  slotPlacements: (draft) => multiPhotoPlacements(draft.slots.length),
   Editor: MultiPhotoEditor,
   // No reference design exists; the two fixture photos just show the layout (dev builds only).
   fixture: (draft) =>

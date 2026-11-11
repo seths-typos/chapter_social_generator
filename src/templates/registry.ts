@@ -4,6 +4,7 @@
  * instead of switching on the template id. docs/decisions/0003-template-definitions.md
  */
 
+import type { PolaroidPlacement } from "@/render/polaroid";
 import type { RenderAssets } from "@/render/types";
 import { emptySlot, hasSlots, type Draft } from "@/store/draft";
 import type { Post, TemplateId, TextureRef } from "@/store/types";
@@ -87,6 +88,11 @@ export const takesPhotos = (draft: Draft): boolean =>
 /** The draft's adjustable photos (see `TemplateDefinition.photoTargets`), bottom to top. */
 export function photoTargets(draft: Draft, assets: RenderAssets): PhotoTarget[] {
   return templateFor(draft.template).photoTargets?.(draft, assets) ?? [];
+}
+
+/** Where each selectable photo position sits (see `TemplateDefinition.slotPlacements`). */
+export function slotPlacements(draft: Draft): PolaroidPlacement[] {
+  return templateFor(draft.template).slotPlacements?.(draft) ?? [];
 }
 
 /** The draft with a pool photo taken out of wherever it was used. */
