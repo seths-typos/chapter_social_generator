@@ -6,7 +6,7 @@ import { previewUrl, releasePreviewUrl } from "@/image/previewUrl";
 import { removePhotoAsset } from "@/render/assetCache";
 import { hasSlots } from "@/store/draft";
 import { useAppStore } from "@/store/store";
-import type { PhotoMode, PoolPhoto } from "@/store/types";
+import type { PoolPhoto } from "@/store/types";
 import { photoIdsInDraft, photoUsage, takesPhotos } from "@/templates/registry";
 import { Panel } from "./Panel";
 import { COMPACT_BUTTON } from "@/templates/formStyles";
@@ -22,7 +22,6 @@ export function PhotoPool() {
   const batch = useAppStore((s) => s.batch);
   const draft = useAppStore((s) => s.draft);
   const removePhoto = useAppStore((s) => s.removePhoto);
-  const setPhotoMode = useAppStore((s) => s.setPhotoMode);
   const usage = useMemo(() => photoUsage(batch.map((b) => b.post)), [batch]);
   const canUse = draft !== null && takesPhotos(draft);
   const addPhotoToDraft = useAppStore((s) => s.addPhotoToDraft);
@@ -253,17 +252,6 @@ export function PhotoPool() {
                       ×
                     </button>
                   </div>
-                  <select
-                    value={photo.mode}
-                    onChange={(e) => setPhotoMode(photo.id, e.target.value as PhotoMode)}
-                    aria-label={`How to use ${label}`}
-                    className="w-full rounded-sm border border-[#8c8c8c] bg-white px-1 py-0.5 text-[11px] text-neutral-600"
-                  >
-                    <option value="regular">Regular photo</option>
-                    <option value="scan" disabled>
-                      Polaroid scan (soon)
-                    </option>
-                  </select>
                 </li>
               );
             })}

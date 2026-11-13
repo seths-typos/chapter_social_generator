@@ -73,7 +73,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 | Requirement | Acceptance criteria |
 |---|---|
-| Each photo has a mode: **Regular photo** (default) or **Polaroid scan**. | The mode can be toggled per photo, in the pool or in the slot editor. |
+| Each photo has a mode: **Regular photo** (default) or **Polaroid scan**. | The mode can be toggled per photo, in the pool or in the slot editor. Until Polaroid scan is built the control is hidden, since Regular photo is the only choice ([#39](https://github.com/seths-typos/chapter_social_generator/issues/39)). |
 | **Regular photo:** the template draws the polaroid frame. | The photo fills the polaroid's image window, and the generated frame matches the reference designs. |
 | **Polaroid scan:** the user crops out the real polaroid with a four-corner crop. | Dragging four corner handles defines a quadrilateral, which is perspective-corrected into a rectangle. The result replaces the whole polaroid in the template, and no generated frame is drawn. |
 
