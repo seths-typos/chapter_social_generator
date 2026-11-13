@@ -28,18 +28,18 @@ export const HINT = `${UI_TEXT} ${MUTED}`;
 export const ERROR_TEXT = `${UI_TEXT} text-red-700`;
 
 /** A checkbox with its label. */
-export const CHECK_ROW = `flex items-center gap-2 ${UI_TEXT} text-[#191919]`;
+export const CHECK_ROW = `flex items-center gap-2 touch:min-h-11 ${UI_TEXT} text-[#191919]`;
 export const CHECKBOX = "size-[13px] accent-[#2f78ff]";
 
 /** The border is 3.36:1 on white, so the field's edge is visible (WCAG 1.4.11). */
-export const INPUT = `w-full rounded-lg border border-[#8c8c8c] bg-white px-[9px] py-[7px] ${UI_TEXT} text-[#191919] placeholder:text-[#707070] focus:border-[#2f78ff] focus:outline-none`;
+export const INPUT = `w-full touch:min-h-11 rounded-lg border border-[#8c8c8c] bg-white px-[9px] py-[7px] ${UI_TEXT} text-[#191919] placeholder:text-[#707070] focus:border-[#2f78ff] focus:outline-none`;
 
 /** A small button inside a card: Upload photo…, Reset. Its corners match the secondary button. */
-export const COMPACT_BUTTON = `wipe rounded-tl-[2px] rounded-tr-lg rounded-br-[2px] rounded-bl-lg border border-[#8c8c8c] bg-white px-2 py-1 [--wipe:#6b6b6b] ${UI_TEXT} text-[#191919] enabled:hover:border-[#6b6b6b] enabled:hover:text-white disabled:opacity-40`;
+export const COMPACT_BUTTON = `wipe touch:min-h-11 touch:px-3 rounded-tl-[2px] rounded-tr-lg rounded-br-[2px] rounded-bl-lg border border-[#8c8c8c] bg-white px-2 py-1 [--wipe:#6b6b6b] ${UI_TEXT} text-[#191919] enabled:hover:border-[#6b6b6b] enabled:hover:text-white disabled:opacity-40`;
 
 /** One choice in a row of choices: the photo count, the wordmark colour. */
 export const segment = (selected: boolean) =>
-  `rounded-sm px-2 py-1 ${UI_TEXT} ${
+  `rounded-sm px-2 py-1 touch:min-h-11 touch:min-w-11 ${UI_TEXT} ${
     selected
       ? "border border-[#191919] bg-[#191919] text-white"
       : "wipe border border-[#8c8c8c] bg-white text-[#555] [--wipe:#6b6b6b] hover:border-[#6b6b6b] hover:text-white"
@@ -51,7 +51,7 @@ export const thumbFrame = (selected: boolean) =>
     selected ? "outline-[#191919]" : "outline-transparent hover:outline-[#d1d1d1]"
   }`;
 
-const ACTION = `wipe min-w-[116px] px-3 py-2 text-center ${UI_TEXT}`;
+const ACTION = `wipe min-w-[116px] px-3 py-2 text-center touch:min-h-11 ${UI_TEXT}`;
 /** Download PNG, under the preview's right corner: its two outer corners are nearly square. Light blue with a blue border and dark blue text (6.06:1); disabled is a pale cool grey with a faint grey-blue border and greyed text (about 2.8:1; WCAG exempts disabled controls). The active state passes AA. */
 export const PRIMARY_BUTTON = `${ACTION} rounded-tl-lg rounded-tr-[2px] rounded-br-lg rounded-bl-[2px] border border-[#2f78ff] bg-[#d6e4ff] text-[#174ab8] [--wipe:#1f5fe0] enabled:hover:border-[#1f5fe0] enabled:hover:text-white disabled:border-[#d3d9e3] disabled:bg-[#f1f3f6] disabled:text-[#8b93a1]`;
 /** Add to batch and Cancel, under the left corner: the mirror image of the primary. */

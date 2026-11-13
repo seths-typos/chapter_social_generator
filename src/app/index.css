@@ -11,7 +11,15 @@
   /* UI titles and headings: Druk. */
   --font-display: "Chapter Druk", Impact, "Arial Narrow", "Geist", sans-serif;
   --font-serif: "Instrument Serif", Georgia, serif;
+
+  /* The editor lays itself out by its own width, not the window's (a drawer can take
+     room from it): one column, then preview | controls, then texture | preview | form. */
+  --container-two: 30rem;
+  --container-three: 60rem;
 }
+
+/* Fingers rather than a mouse: larger targets, and inputs that don't make iOS zoom. */
+@custom-variant touch (@media (pointer: coarse));
 
 /* Anything clickable shows the pointer; disabled buttons set their own cursor.
    In the base layer so a utility such as cursor-grab still wins. */
@@ -58,6 +66,15 @@
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+
+@media (pointer: coarse) {
+  /* iOS Safari zooms the page when a focused field's text is under 16px. */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
   }
 }
 

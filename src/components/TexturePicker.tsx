@@ -86,7 +86,8 @@ export function TexturePicker() {
       {error && <p className={ERROR_TEXT}>Couldn’t load the texture library: {error}</p>}
       {loading && !error && <p className={HINT}>Loading textures…</p>}
 
-      <div className="grid grid-cols-4 gap-2">
+      {/* As many columns as fit: four in the desktop column, more on a wide phone or tablet. */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] gap-2">
         {entries.map((entry) => {
           const ref: TextureRef = { kind: "library", id: entry.id };
           return (

@@ -58,7 +58,7 @@ export function TemplatePicker({ assets }: { assets: RenderAssets }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex shrink-0 flex-col items-center gap-2">
       <span className={LABEL}>Template</span>
       <div className="flex justify-center gap-[11px]">
         {TEMPLATE_LIST.map((t) => {

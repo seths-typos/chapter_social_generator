@@ -25,7 +25,7 @@ Chapter Social Generator is a single-purpose, browser-based tool for making Inst
 - Carousel management. The tool outputs individual PNGs, and he assembles carousels in Instagram.
 - Posting or scheduling to Instagram.
 - Accounts, saved drafts, or any persistence, including browser storage (`localStorage`, IndexedDB). Closing the tab ends the session.
-- Mobile-optimized layout. The tool is designed for a laptop.
+- A phone-first experience. The tool is designed for a laptop; it adapts to tablets and phones ([decision 0012](decisions/0012-responsive-layout.md)) but isn't optimized around them.
 - Persisting uploaded textures. Uploaded textures are usable only during the session.
 - Auto-incrementing the event number.
 - Automatic polaroid edge detection.
@@ -148,7 +148,7 @@ flowchart TD
     J -. edit post .-> G
 ```
 
-**Layout:** one screen that doesn't scroll at laptop sizes ([decision 0011](decisions/0011-ui-ux-pass.md)):
+**Layout at laptop sizes:** one screen that doesn't scroll ([decision 0011](decisions/0011-ui-ux-pass.md)):
 
 1. **Top:** the template picker.
 2. **Middle, left to right:** the texture picker; the live preview, as large as fits, with **Add to batch** under its left corner and **Download PNG** under its right; the template's form (photos or graphic, options, text fields), one white card per input.
@@ -157,13 +157,15 @@ flowchart TD
 
 Both drawers start closed and show a count on their handle. Opening one closes the other, so the preview keeps its room.
 
+**Narrower screens** ([decision 0012](decisions/0012-responsive-layout.md)): the editor rearranges by its own width. In the middle range the preview and its buttons stay pinned on the left while the form and then the texture scroll on the right. On a phone the preview is pinned at the top, the form and texture scroll under it, and Add to batch and Download PNG are pinned at the bottom. Below 1024px the two drawers become tabs along the bottom that open as sheets rising over the editor.
+
 ## Generator UI notes
 
 - **The UI is a tool, not a template.** It should be clean, neutral and quiet so the preview is the most colorful thing on screen. Hints of the brand are welcome, such as the `ch.` mark in the header or the lavender accent from the Info badge, but the UI must not compete with the post.
 - **UI typography:** **Druk** for titles and headings (the app title "Chapter Post Generator", card headings such as "Texture" and "Photos", drawer titles). **Geist** (free, OFL) for body text, field labels, inputs and buttons.
 - **Required fields** are marked with an asterisk. A disabled Add to batch or Download PNG says why in a tooltip.
 - **Accessibility:** the target is WCAG 2.2 AA (text contrast, visible focus, labelled required fields, reduced motion honoured). Known gap: swapping and repositioning photos are drag-only.
-- **Device:** designed for laptop and desktop, with a minimum width of 1200px. Phones aren't a v1 target.
+- **Device:** designed for laptop and desktop first. It works from 360px wide upwards, with larger targets and field text on touch screens.
 - **Errors in plain language:** for example "That file isn't an image" or "Photo is too small for a crisp export (min 1080px)". Show a warning, not a block, for low-resolution photos.
 - **Fast path by default:** sensible defaults everywhere, so he can make a good post by choosing a template, choosing a photo and clicking Add. Fine-tuning controls are there when wanted, never required.
 
@@ -181,7 +183,7 @@ Both drawers start closed and show a count on their handle. Opening one closes t
 | 1 | **Multi-Photo layout** | Needs a design: how many photos (2–4?), arrangement, overlap and rotation of polaroids. To be resolved in the Template Spec. |
 | 2 | ~~Grain filter values~~ | **Resolved:** grain, soft glow and a slight fade are combined into one "Film look" toggle with values tuned by the owner. See [Film look](template-spec.md#film-look). The founder asked for "a couple of film grainy filters"; more named looks could be added later. |
 | 3 | ~~UI typeface~~ | **Resolved:** Druk for UI titles, Geist for UI body. |
-| 4 | ~~Phone support~~ | **Resolved:** not a v1 target. Laptop-first. |
+| 4 | ~~Phone support~~ | **Resolved:** laptop-first, and responsive down to 360px since [decision 0012](decisions/0012-responsive-layout.md). |
 | 5 | ~~HEIC photos~~ | **Resolved:** HEIC is accepted. Chrome can't decode it, so it is converted in the browser with `heic2any`, loaded only when needed. See [Image handling](technical-requirements.md#image-handling). |
 | 6 | ~~Druk licensing~~ | **Resolved:** Druk is not bundled or downloadable. The tool uses the copy installed on the computer, with a system fallback. See [decision 0005](decisions/0005-druk-local-only.md). |
 | 7 | ~~Hosting and access~~ | **Resolved:** GitHub Pages from a public repo, no login. |

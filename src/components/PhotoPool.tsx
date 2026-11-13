@@ -178,7 +178,7 @@ export function PhotoPool() {
             <span className="text-xs">JPEG, PNG, WebP or HEIC</span>
           </p>
         ) : (
-          <ul className="grid grid-cols-2 gap-2">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-2">
             {pool.map((photo) => {
               const used = usage.get(photo.id) ?? 0;
               const label = photo.name || "photo";

@@ -177,7 +177,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 | Edge (current) | Should work (same engine as Chrome). Not actively tested. |
 | **Safari** (current), macOS | **Supported, with the fallback headline typeface.** Everything must work, but Safari can't see an installed Druk (see [Fonts](#fonts)), so on-brand posts need Chrome. Safari also has no canvas blur filter; the Film look's glow uses a coded blur there. Checked on 2026-11-10 in Playwright's WebKit 26.4 build (import, pan and zoom, all templates, batch, PNG and ZIP download; renders match Chrome apart from the headline typeface). |
 | Firefox (current) | Should work. Not actively tested. |
-| Mobile | Not a v1 target. The layout is designed for a laptop. Nothing actively prevents use on a phone, but the four-corner crop and the one-screen layout (minimum width 1200px) aren't optimized for it. |
+| Mobile | **Supported layout, laptop-first.** The interface is responsive from 360px ([decision 0012](decisions/0012-responsive-layout.md)): the editor arranges itself by its own width with container queries, and the drawers become bottom sheets below 1024px. Checked at emulated phone and tablet sizes in Chromium and WebKit, not on a physical device. Dragging to swap photo positions doesn't work on touch (issue #38), and the four-corner crop isn't designed for it. |
 
 The minimum required features are WebGL2, `createImageBitmap` with `imageOrientation`, `OffscreenCanvas` (optional), the async clipboard API, and `document.fonts`.
 
@@ -240,7 +240,7 @@ Unit tests cover the pure logic:
 
 ## Out of scope (v1)
 
-Analytics, error tracking, backend or APIs, accounts, any storage, PWA or offline support, mobile-optimized layout, and internationalization.
+Analytics, error tracking, backend or APIs, accounts, any storage, PWA or offline support, a phone-first design, and internationalization.
 
 ## Open items
 

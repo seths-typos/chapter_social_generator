@@ -202,7 +202,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                       disabled={index === 0}
                       onClick={() => moveItem(index, index - 1)}
                       aria-label={`Move ${item.name} up`}
-                      className="ml-auto px-1 disabled:opacity-30"
+                      className="ml-auto px-1 touch:min-h-11 touch:min-w-11 disabled:opacity-30"
                     >
                       ↑
                     </button>
@@ -211,7 +211,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                       disabled={index === batch.length - 1}
                       onClick={() => moveItem(index, index + 1)}
                       aria-label={`Move ${item.name} down`}
-                      className="px-1 disabled:opacity-30"
+                      className="px-1 touch:min-h-11 touch:min-w-11 disabled:opacity-30"
                     >
                       ↓
                     </button>
@@ -221,7 +221,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                     value={item.name}
                     onChange={(e) => updateItem(item.id, { name: e.target.value })}
                     aria-label="Post name (used as the filename)"
-                    className="w-full rounded-md border border-[#8c8c8c] bg-white px-2 py-1 text-sm focus:border-[#2f78ff] focus:outline-none"
+                    className="w-full touch:min-h-11 rounded-md border border-[#8c8c8c] bg-white px-2 py-1 text-sm focus:border-[#2f78ff] focus:outline-none"
                   />
                   <div className="flex flex-wrap gap-1">
                     <button type="button" className={smallButton} onClick={() => edit(item)}>
