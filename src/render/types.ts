@@ -1,5 +1,6 @@
 import type { Rect } from "@/templates/constants";
 import type { GrainAsset } from "./grain";
+import type { PolaroidPlacement } from "./polaroid";
 import type { PhotoEffects } from "./photoEffects";
 import type { Draft, DraftFor } from "@/store/draft";
 import type { TemplateId, TextureRef } from "@/store/types";
@@ -51,6 +52,11 @@ export type TemplateRenderer<D extends Draft = Draft> = (
   ctx: CanvasRenderingContext2D,
   draft: D,
   assets: RenderAssets,
+  /**
+   * Preview only: where to draw each polaroid instead of where the draft puts it, while a
+   * layout change is being animated. Export never passes it.
+   */
+  layout?: readonly PolaroidPlacement[],
 ) => FitWarning[];
 
 /**

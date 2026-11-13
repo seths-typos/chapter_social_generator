@@ -77,6 +77,7 @@ function renderPost(ctx: CanvasRenderingContext2D, post: Post, assets: RenderAss
 
 - **Pure:** output depends only on `post` and `assets` (decoded images, frame, textures, wordmark paths). No reading from the store, the DOM or the clock.
 - **One code path:** the preview canvas is a real **1080×1440** canvas, scaled down with CSS (`width: 100%`). Export calls `renderPost` on a fresh, hidden 1080×1440 canvas and then `canvas.toBlob("image/png")`.
+- **Preview-only layout:** the preview passes an optional fourth argument, the polaroid placements part-way between two layouts, so a change in the photo count or the text card animates (300ms, `LAYOUT_MOTION` in `constants.ts`; skipped when the system asks for reduced motion). A template that supports this exposes `layout(draft)`. The export never passes it, so exported output is unaffected.
 - **Template code** lives in `src/templates/{cover,photo,multiPhoto,graphic,info}.ts`, one definition per file (see [Template definitions](#template-definitions)). Every coordinate, size and color comes from `src/templates/constants.ts`, which mirrors the Template Spec one-to-one.
 - **Draws from a `Draft`:** templates render the editor's `Draft`, so a half-filled post can be previewed. `renderPost` loads a stored `Post` into a draft first, so preview and export still share one code path.
 - **Text smoothing:** canvas text takes its smoothing from the canvas element's CSS, and only while the element is in the document. Every canvas the renderer draws on (preview, export, thumbnails) is therefore in the document with `-webkit-font-smoothing: antialiased`; the export canvas is created hidden by `createRenderCanvas()` in `src/render/canvas.ts`. A detached canvas draws text heavier on macOS, which would make the PNG differ from the preview. Antialiased is also what matches the reference renders.
@@ -176,7 +177,7 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 | Edge (current) | Should work (same engine as Chrome). Not actively tested. |
 | **Safari** (current), macOS | **Supported, with the fallback headline typeface.** Everything must work, but Safari can't see an installed Druk (see [Fonts](#fonts)), so on-brand posts need Chrome. Safari also has no canvas blur filter; the Film look's glow uses a coded blur there. Checked on 2026-11-10 in Playwright's WebKit 26.4 build (import, pan and zoom, all templates, batch, PNG and ZIP download; renders match Chrome apart from the headline typeface). |
 | Firefox (current) | Should work. Not actively tested. |
-| Mobile | Not a v1 target. The layout is designed for a laptop. Nothing actively prevents use on a phone, but the four-corner crop and the three-panel layout aren't optimized for it. |
+| Mobile | Not a v1 target. The layout is designed for a laptop. Nothing actively prevents use on a phone, but the four-corner crop and the one-screen layout (minimum width 1200px) aren't optimized for it. |
 
 The minimum required features are WebGL2, `createImageBitmap` with `imageOrientation`, `OffscreenCanvas` (optional), the async clipboard API, and `document.fonts`.
 
@@ -192,10 +193,11 @@ The minimum required features are WebGL2, `createImageBitmap` with `imageOrienta
 │  └─ textures/               textures.json, *.jpg, *-thumb.jpg
 ├─ src/
 │  ├─ app/                    App shell, layout, font-loading gate
-│  ├─ components/             PhotoPool, TemplatePicker, Editor, SlotEditor,
-│  │                          PerspectiveCrop, TexturePicker, BatchList, ...
+│  ├─ components/             PhotoPool, TemplatePicker, Editor, Preview, Drawer,
+│  │                          TexturePicker, BatchList, ...
 │  ├─ store/                  Zustand store + types (Post, Draft, BatchItem, PoolPhoto)
-│  ├─ templates/              constants.ts, definition.ts, registry.ts + one file per template
+│  ├─ templates/              constants.ts, definition.ts, registry.ts + one file per template;
+│  │                          formStyles.ts (shared UI classes), Card.tsx (animated card)
 │  ├─ render/                 renderPost + primitives
 │  ├─ image/                  import, heic, homography, warp
 │  ├─ export/                 png, zip, captions, filenames

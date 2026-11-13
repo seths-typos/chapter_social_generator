@@ -46,8 +46,8 @@ const placementsFor = (draft: PhotoLike): PolaroidPlacement[] => {
  * Photo: one polaroid, or two to four scattered ones, on a texture. Cover draws its one
  * polaroid through this too. docs/template-spec.md#photo-photo
  */
-export const renderPhoto: RendererFor<"photo" | "cover"> = (ctx, draft, assets) => {
-  placementsFor(draft).forEach((placement, i) => {
+export const renderPhoto: RendererFor<"photo" | "cover"> = (ctx, draft, assets, layout) => {
+  (layout ?? placementsFor(draft)).forEach((placement, i) => {
     const slot = draft.slots[i];
     if (!slot) return;
     drawPolaroid(ctx, {
@@ -76,7 +76,7 @@ const slotOps = slotDraftOps("photo", PHOTO_SLOTS, { textCard: true });
 
 export const photoTemplate: TemplateDefinition<"photo"> = {
   id: "photo",
-  label: "Photo",
+  label: "Photo(s)",
   defaultTexture: LIBRARY_TEXTURE.woodDarkWorn,
   ...slotOps,
   // The slot operations don't know about the frame option, so it is added around them.
@@ -89,6 +89,7 @@ export const photoTemplate: TemplateDefinition<"photo"> = {
   Editor: PhotoEditor,
   render: renderPhoto,
   photoTargets,
+  layout: placementsFor,
   // One polaroid needs no selecting, so it gets no outline in the preview.
   slotPlacements: (draft) => (draft.slots.length > 1 ? placementsFor(draft) : []),
   // The photo in `polaroidArtboard 3@2x.png`. The image itself is only loaded in dev builds.

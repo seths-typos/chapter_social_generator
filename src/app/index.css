@@ -13,6 +13,54 @@
   --font-serif: "Instrument Serif", Georgia, serif;
 }
 
+/* Anything clickable shows the pointer; disabled buttons set their own cursor.
+   In the base layer so a utility such as cursor-grab still wins. */
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Button hover: a deeper shade of the border colour (--wipe), dark enough for white text,
+   fills the button from the left. */
+@layer components {
+  .wipe {
+    background-image: linear-gradient(var(--wipe), var(--wipe));
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    transition:
+      background-size 150ms ease-out,
+      color 150ms ease-out,
+      border-color 150ms ease-out,
+      transform 100ms ease-out;
+  }
+  .wipe:hover:not(:disabled) {
+    background-size: 100% 100%;
+  }
+  /* Pressed: the button shrinks 10% towards its middle. */
+  .wipe:active:not(:disabled) {
+    transform: scale(0.9);
+  }
+}
+
+/* Keyboard focus: one blue ring everywhere. Unlayered, so it wins over utilities that use
+   the outline for something else (a selected thumbnail) or remove it (text inputs). */
+:focus-visible {
+  outline: 2px solid #2f78ff;
+  outline-offset: 2px;
+}
+
+/* With "reduce motion" on, nothing slides or wipes: every transition lands at once. The
+   preview's layout tween checks the same setting in code. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;

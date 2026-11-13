@@ -9,6 +9,7 @@ import { useAppStore } from "@/store/store";
 import type { PhotoMode, PoolPhoto } from "@/store/types";
 import { photoIdsInDraft, photoUsage, takesPhotos } from "@/templates/registry";
 import { Panel } from "./Panel";
+import { COMPACT_BUTTON } from "@/templates/formStyles";
 
 const hasFiles = (e: DragEvent): boolean => e.dataTransfer?.types.includes("Files") ?? false;
 
@@ -123,7 +124,8 @@ export function PhotoPool() {
 
   return (
     <Panel
-      title="Photos"
+      title="Photo Library"
+      flat
       className={dragging ? "ring-2 ring-neutral-900" : ""}
       actions={
         <>
@@ -131,7 +133,7 @@ export function PhotoPool() {
             type="button"
             disabled={busy}
             onClick={() => inputRef.current?.click()}
-            className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium hover:bg-neutral-50 disabled:opacity-40"
+            className={COMPACT_BUTTON}
           >
             Add photos…
           </button>
@@ -149,7 +151,7 @@ export function PhotoPool() {
     >
       <div className="flex flex-col gap-3">
         {progress && (
-          <p role="status" className="text-xs text-neutral-500">
+          <p role="status" className="text-xs text-[#666]">
             Adding {Math.min(progress.done + 1, progress.total)} of {progress.total}…
           </p>
         )}
@@ -171,7 +173,7 @@ export function PhotoPool() {
         )}
 
         {pool.length === 0 && !busy ? (
-          <p className="rounded-md border border-dashed border-neutral-300 p-4 text-center text-sm text-neutral-400">
+          <p className="rounded-md border border-dashed border-neutral-300 p-4 text-center text-sm text-[#666]">
             {dragging ? "Drop to add" : "Drop photos here, or use Add photos."}
             <br />
             <span className="text-xs">JPEG, PNG, WebP or HEIC</span>
@@ -255,7 +257,7 @@ export function PhotoPool() {
                     value={photo.mode}
                     onChange={(e) => setPhotoMode(photo.id, e.target.value as PhotoMode)}
                     aria-label={`How to use ${label}`}
-                    className="w-full rounded-sm border border-neutral-200 bg-white px-1 py-0.5 text-[11px] text-neutral-600"
+                    className="w-full rounded-sm border border-[#8c8c8c] bg-white px-1 py-0.5 text-[11px] text-neutral-600"
                   >
                     <option value="regular">Regular photo</option>
                     <option value="scan" disabled>

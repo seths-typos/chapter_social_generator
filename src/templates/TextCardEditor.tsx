@@ -2,51 +2,52 @@ import { useSyncExternalStore } from "react";
 import type { TextCardDraft } from "@/store/draft";
 import { TEXT_CARD } from "./constants";
 import { getTextCardSplit, setTextCardSplit, subscribeTextCardSplit } from "./textCard";
+import { REQUIRED_MARK, FIELD_LABEL, CHECK_ROW, CHECKBOX, INPUT } from "./formStyles";
+import { Card } from "./Card";
 
 interface Props {
   card: TextCardDraft;
   onCard: (card: TextCardDraft) => void;
 }
 
-const inputClass =
-  "w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm focus:border-neutral-900 focus:outline-none";
-
 /** The optional text card's fields. */
 export function TextCardEditor({ card, onCard }: Props) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-2 text-sm">
+    <Card className="flex flex-col gap-2">
+      <label className={CHECK_ROW}>
         <input
           type="checkbox"
+          className={CHECKBOX}
           checked={card.on}
           onChange={(e) => onCard({ ...card, on: e.target.checked })}
         />
-        Text card above the photos
+        Add text card
       </label>
       {card.on && (
         <>
-          <label className="flex flex-col gap-1 text-xs text-neutral-600">
+          <label className={`flex flex-col gap-1 ${FIELD_LABEL}`}>
             Heading (optional, smaller and italic)
             <input
               type="text"
               value={card.heading}
               onChange={(e) => onCard({ ...card, heading: e.target.value })}
-              className={inputClass}
+              className={INPUT}
             />
           </label>
-          <label className="flex flex-col gap-1 text-xs text-neutral-600">
-            Text
+          <label className={`flex flex-col gap-1 ${FIELD_LABEL}`}>
+            <span>Text{REQUIRED_MARK}</span>
             <input
               type="text"
               value={card.text}
               onChange={(e) => onCard({ ...card, text: e.target.value })}
-              className={inputClass}
+              className={INPUT}
+              aria-required
             />
           </label>
           <SplitTuner />
         </>
       )}
-    </div>
+    </Card>
   );
 }
 

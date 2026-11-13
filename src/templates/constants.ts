@@ -37,6 +37,9 @@ export const ZOOM_MAX = 3.0;
 /** Scroll-to-zoom speed: the zoom is multiplied by e^(−deltaY × this) per wheel event. */
 export const WHEEL_ZOOM_RATE = 0.002;
 /** Outline of the selected photo position, drawn in the preview only (canvas px). */
+/** How the preview moves polaroids to a new layout: duration in ms and a cubic-bezier curve. */
+export const LAYOUT_MOTION = { duration: 300, curve: [0.843, 0.166, 0, 1.079] } as const;
+
 export const SELECTION_OUTLINE = { color: "#3B82F6", width: 8 } as const;
 /** Step of the zoom slider. */
 export const ZOOM_STEP = 0.01;

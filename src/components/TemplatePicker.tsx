@@ -6,6 +6,7 @@ import { useAppStore } from "@/store/store";
 import type { TemplateId } from "@/store/types";
 import { THUMBNAIL } from "@/templates/constants";
 import { losesTypedText, TEMPLATE_LIST, templateFor, fixtureDraft } from "@/templates/registry";
+import { LABEL, FIELD_LABEL, thumbFrame } from "@/templates/formStyles";
 
 /** A template's thumbnail: the real renderer on a plain grey background, drawn at full size and scaled down. */
 function Thumbnail({ template, assets }: { template: TemplateId; assets: RenderAssets }) {
@@ -57,9 +58,9 @@ export function TemplatePicker({ assets }: { assets: RenderAssets }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium tracking-wide text-neutral-500 uppercase">Template</span>
-      <div className="grid grid-cols-5 gap-2">
+    <div className="flex flex-col items-center gap-2">
+      <span className={LABEL}>Template</span>
+      <div className="flex justify-center gap-[11px]">
         {TEMPLATE_LIST.map((t) => {
           const active = draft?.template === t.id;
           return (
@@ -70,20 +71,14 @@ export function TemplatePicker({ assets }: { assets: RenderAssets }) {
               aria-pressed={active}
               title={t.placeholder ? `${t.label}: coming soon` : t.label}
               onClick={() => choose(t.id)}
-              className="group flex flex-col items-center gap-1 disabled:cursor-not-allowed disabled:opacity-40"
+              className="group flex w-[66px] flex-col items-center gap-1 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <span
-                className={`block w-full overflow-hidden rounded-sm border ${
-                  active
-                    ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
-                    : "border-neutral-200 group-enabled:group-hover:border-neutral-400"
-                }`}
-              >
+              <span className={`block w-full overflow-hidden ${thumbFrame(active)}`}>
                 <Thumbnail template={t.id} assets={assets} />
               </span>
-              <span className="text-[11px] leading-tight text-neutral-600">
+              <span className={FIELD_LABEL}>
                 {t.label}
-                {t.placeholder && <span className="block text-neutral-400">Soon</span>}
+                {t.placeholder && <span className="block text-[#707070]">Soon</span>}
               </span>
             </button>
           );

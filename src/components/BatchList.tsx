@@ -10,9 +10,9 @@ import type { BatchItem, Post } from "@/store/types";
 import { BATCH_THUMBNAIL } from "@/templates/constants";
 import { templateFor } from "@/templates/registry";
 import { Panel } from "./Panel";
+import { COMPACT_BUTTON, PRIMARY_BUTTON } from "@/templates/formStyles";
 
-const smallButton =
-  "rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40";
+const smallButton = COMPACT_BUTTON;
 const COPIED_MS = 2000;
 
 /** A batch post drawn by the real renderer from its stored data, then scaled down. */
@@ -123,12 +123,13 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
   return (
     <Panel
       title="Batch"
+      flat
       actions={
         <button
           type="button"
           disabled={!hasPosts || exporting || stillLoading.length > 0}
           onClick={() => void downloadAll()}
-          className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className={PRIMARY_BUTTON}
         >
           {exporting ? `Preparing ${progress.index + 1} of ${progress.total}…` : "Download all"}
         </button>
@@ -141,10 +142,10 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
           </p>
         )}
         {stillLoading.length > 0 && (
-          <p className="text-xs text-neutral-500">Still loading: {stillLoading.join(", ")}</p>
+          <p className="text-xs text-[#666]">Still loading: {stillLoading.join(", ")}</p>
         )}
         {!hasPosts && (
-          <p className="rounded-md border border-dashed border-neutral-300 p-4 text-center text-sm text-neutral-400">
+          <p className="rounded-md border border-dashed border-neutral-300 p-4 text-center text-sm text-[#666]">
             Posts you add appear here.
             <br />
             <span className="text-xs">
@@ -178,7 +179,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
               <div className="flex gap-2">
                 <BatchThumbnail post={item.post} assets={assets} />
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <div className="flex items-center gap-1 text-xs text-neutral-500">
+                  <div className="flex items-center gap-1 text-xs text-[#666]">
                     <span
                       draggable
                       onDragStart={(e) => {
@@ -189,7 +190,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                       onDragEnd={endDrag}
                       title="Drag to reorder"
                       aria-hidden="true"
-                      className="cursor-grab px-0.5 text-neutral-400 select-none"
+                      className="cursor-grab px-0.5 text-[#666] select-none"
                     >
                       ⠿
                     </span>
@@ -220,7 +221,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                     value={item.name}
                     onChange={(e) => updateItem(item.id, { name: e.target.value })}
                     aria-label="Post name (used as the filename)"
-                    className="w-full rounded-md border border-neutral-300 px-2 py-1 text-sm focus:border-neutral-900 focus:outline-none"
+                    className="w-full rounded-md border border-[#8c8c8c] bg-white px-2 py-1 text-sm focus:border-[#2f78ff] focus:outline-none"
                   />
                   <div className="flex flex-wrap gap-1">
                     <button type="button" className={smallButton} onClick={() => edit(item)}>
@@ -253,7 +254,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                 rows={3}
                 placeholder="Instagram caption"
                 aria-label={`Caption for ${item.name}`}
-                className="w-full resize-y rounded-md border border-neutral-300 px-2 py-1 text-sm placeholder:text-neutral-400 focus:border-neutral-900 focus:outline-none"
+                className="w-full resize-y rounded-md border border-[#8c8c8c] bg-white px-2 py-1 text-sm placeholder:text-[#707070] focus:border-[#2f78ff] focus:outline-none"
               />
               <button
                 type="button"

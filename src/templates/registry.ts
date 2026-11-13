@@ -16,10 +16,10 @@ import { photoTemplate } from "./photo";
 
 /** Every template. Key order is the template picker's display order. */
 export const TEMPLATES: { readonly [K in TemplateId]: TemplateDefinition<K> } = {
-  cover: coverTemplate,
   photo: photoTemplate,
   graphic: graphicTemplate,
   info: infoTemplate,
+  cover: coverTemplate,
 };
 
 /** The definition for a template id, typed for code that doesn't know which one it is. */
@@ -91,6 +91,11 @@ export function photoTargets(draft: Draft, assets: RenderAssets): PhotoTarget[] 
 /** Where each selectable photo position sits (see `TemplateDefinition.slotPlacements`). */
 export function slotPlacements(draft: Draft): PolaroidPlacement[] {
   return templateFor(draft.template).slotPlacements?.(draft) ?? [];
+}
+
+/** Where every polaroid is drawn (see `TemplateDefinition.layout`). Empty if not animated. */
+export function layoutOf(draft: Draft): PolaroidPlacement[] {
+  return templateFor(draft.template).layout?.(draft) ?? [];
 }
 
 /** The draft with a pool photo taken out of wherever it was used. */

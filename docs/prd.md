@@ -67,7 +67,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Photos stay in the pool for the whole session. | After a post is added to the batch, all pool photos are still available for the next post. |
 | Indicate which photos have been used. | A photo used in any batch post shows a "used" marker and a count. It stays selectable. |
 | Remove a photo from the pool. | A photo that a batch post uses can't be removed until those posts are removed (the button is disabled and says why). Removing a photo that is in the post being edited asks for confirmation first, then empties that slot. |
-| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. Photos are chosen by clicking them in the Photos panel (there is no second list of photos inside the post): the click fills the selected position, then the next empty position is selected, so clicking photos one after another fills the post. In the panel, the photo in the selected position has a halo, other photos in the post have a dark border and their position number, and a photo used by a batch post is tagged "Used in batch". Hovering a photo says what a click will do: "Put in position 2", "Replace photo 2", "Use in post" or "Replace". |
+| Upload from inside a post. | When a template needs a photo or graphic, the slot picker also offers an upload, which adds the file to the pool and fills the slot. He never has to leave the post to add a photo. Photos are chosen by clicking them in the Photo Library (the drawer on the left; there is no second list of photos inside the post): the click fills the selected position, then the next empty position is selected, so clicking photos one after another fills the post. In the panel, the photo in the selected position has a halo, other photos in the post have a dark border and their position number, and a photo used by a batch post is tagged "Used in batch". Hovering a photo says what a click will do: "Put in position 2", "Replace photo 2", "Use in post" or "Replace". |
 
 ### Photo input modes
 
@@ -81,14 +81,14 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 | Requirement | Acceptance criteria |
 |---|---|
-| Choose a template. | The editor opens on the template picker. All four templates are selectable, each with a thumbnail. Switching template mid-post keeps compatible inputs: the texture, and photos between Cover and Photo. Info text and a graphic don't carry over, and switching away from typed text asks for confirmation. |
+| Choose a template. | The editor opens on the template picker. All four templates are selectable, each with a thumbnail, in the order Photo(s), Graphic, Info, Cover. Switching template mid-post keeps compatible inputs: the texture, and photos between Cover and Photo. Info text and a graphic don't carry over, and switching away from typed text asks for confirmation. |
 | Choose photos for photo slots. | Each photo slot is filled by choosing from the pool. Photo lets him choose how many photos, one to four. |
-| Swap photos between slots. | In a post with more than one photo, the slot editor shows one numbered thumbnail per position. Clicking one selects that position, to fill from the Photos panel or adjust. Dragging one onto another swaps the two photos, and each keeps its own pan and zoom. Dragging onto an empty position moves the photo there. The selected position is outlined in the preview (never in the export), and clicking a polaroid in the preview selects it. |
-| Add a text card above the photos. | Photo has an optional text card: a smaller italic heading and one line of text, on a white card across the top of the post, with the photos scaled down below it. The text shrinks to fit; text that still doesn't fit blocks the post until it is shortened. |
-| Show photos without the polaroid frame. | Photo has a "Polaroid frames" option, on by default, for the whole post. Off, each photo is shown on its own with the standard shadow, cropped to the same shape as in the polaroid and as wide as the polaroid was. |
+| Swap photos between slots. | In a post with more than one photo, the slot editor shows one numbered thumbnail per position. Clicking one selects that position, to fill from the Photo Library or adjust. Dragging one onto another swaps the two photos, and each keeps its own pan and zoom. Dragging onto an empty position moves the photo there. The selected position is outlined in the preview (never in the export), and clicking a polaroid in the preview selects it. |
+| Add a text card above the photos. | Photo has an optional text card ("Add text card"): a smaller italic heading and one line of text, on a white card across the top of the post, with the photos scaled down below it. The text shrinks to fit; text that still doesn't fit blocks the post until it is shortened. |
+| Show photos without the polaroid frame. | Photo has a "Remove polaroid frames" option, unchecked by default, for the whole post. Checked, each photo is shown on its own with the standard shadow, cropped to the same shape as in the polaroid and as wide as the polaroid was. |
 | Auto-fit photos. | By default each photo is center-cropped to fill its slot. |
 | Optionally reposition and zoom a photo. | He drags the photo in the preview to pan, and zooms with a slider in the controls or by scrolling over the photo. The photo can never be panned to leave an empty gap in the slot. There is a "Reset" button. |
-| Optional film look. | A per-post "Film look" toggle, off by default, that adds grain, a soft glow and a slight fade to every photo in the post (not the frame, texture or text). The values are fixed in code. |
+| Optional film look. | A per-post "Add film filter" option, off by default, that adds grain, a soft glow and a slight fade to every photo in the post (not the frame, texture or text). The values are fixed in code. |
 | Fill text fields (Info template). | Fields: event number (numeric, rendered as `ch. N`), title, body, date/time, location. The preview updates as he types. Overflow behavior is defined in the Template Spec. |
 | Choose a background texture. | Pick from the bundled texture library, shown as thumbnails. |
 | Upload a one-off texture. | An uploaded image is added to the texture picker for this session only. It is never saved. |
@@ -117,7 +117,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 
 ## App flow
 
-There are two flows. The photo pool is a side panel, not a step: he can fill it before, during or between posts. The main flow starts from the template picker.
+There are two flows. The photo pool (the Photo Library) is a drawer, not a step: he can fill it before, during or between posts. The main flow starts from the template picker.
 
 **Flow 0: Photo pool (optional, any time)**
 
@@ -148,17 +148,22 @@ flowchart TD
     J -. edit post .-> G
 ```
 
-**Layout:** one screen with three regions:
+**Layout:** one screen that doesn't scroll at laptop sizes ([decision 0011](decisions/0011-ui-ux-pass.md)):
 
-1. **Left:** the photo pool, with upload and thumbnails.
-2. **Center:** the large live preview and the template's controls (template picker, photo slots, text fields, texture picker, grain and zoom).
-3. **Right or bottom:** the batch list, with name, caption and copy for each post, plus **Download all**.
+1. **Top:** the template picker.
+2. **Middle, left to right:** the texture picker; the live preview, as large as fits, with **Add to batch** under its left corner and **Download PNG** under its right; the template's form (photos or graphic, options, text fields), one white card per input.
+3. **Left edge:** the Photo Library drawer (the photo pool, with upload and thumbnails).
+4. **Right edge:** the Batch drawer (name, caption and copy for each post, plus **Download all**).
+
+Both drawers start closed and show a count on their handle. Opening one closes the other, so the preview keeps its room.
 
 ## Generator UI notes
 
 - **The UI is a tool, not a template.** It should be clean, neutral and quiet so the preview is the most colorful thing on screen. Hints of the brand are welcome, such as the `ch.` mark in the header or the lavender accent from the Info badge, but the UI must not compete with the post.
-- **UI typography:** **Druk** for titles and headings (app name, section headers such as "Photos", "Batch"). **Geist** (free, OFL) for body text, labels, inputs and buttons.
-- **Device:** designed for laptop and desktop. Phones aren't a v1 target.
+- **UI typography:** **Druk** for titles and headings (the app title "Chapter Post Generator", card headings such as "Texture" and "Photos", drawer titles). **Geist** (free, OFL) for body text, field labels, inputs and buttons.
+- **Required fields** are marked with an asterisk. A disabled Add to batch or Download PNG says why in a tooltip.
+- **Accessibility:** the target is WCAG 2.2 AA (text contrast, visible focus, labelled required fields, reduced motion honoured). Known gap: swapping and repositioning photos are drag-only.
+- **Device:** designed for laptop and desktop, with a minimum width of 1200px. Phones aren't a v1 target.
 - **Errors in plain language:** for example "That file isn't an image" or "Photo is too small for a crisp export (min 1080px)". Show a warning, not a block, for low-resolution photos.
 - **Fast path by default:** sensible defaults everywhere, so he can make a good post by choosing a template, choosing a photo and clicking Add. Fine-tuning controls are there when wanted, never required.
 

@@ -1,9 +1,12 @@
-import { createElement, type ComponentType } from "react";
+import { createElement, type ComponentType, type ReactNode } from "react";
 import { emptySlot } from "@/store/draft";
 import { PHOTO_SLOTS } from "./constants";
 import type { EditorProps } from "./definition";
 import { PhotoSlotEditor } from "./PhotoSlotEditor";
 import { TextCardEditor } from "./TextCardEditor";
+import { CARD, REQUIRED_MARK, LABEL, CHECK_ROW, CHECKBOX, segment } from "./formStyles";
+
+type SlotEditorProps = EditorProps<"photo"> & { header?: ReactNode };
 
 const COUNTS = Array.from(
   { length: PHOTO_SLOTS.max - PHOTO_SLOTS.min + 1 },
@@ -25,41 +28,41 @@ export function PhotoEditor(props: EditorProps<"photo">) {
     if (next !== activeSlot) onActiveSlot(next);
   };
 
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-medium tracking-wide text-neutral-500 uppercase">Photos</span>
-        <div role="group" aria-label="Number of photos" className="ml-auto flex gap-1">
-          {COUNTS.map((count) => (
-            <button
-              key={count}
-              type="button"
-              aria-pressed={draft.slots.length === count}
-              onClick={() => setCount(count)}
-              className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
-                draft.slots.length === count
-                  ? "border-neutral-900 bg-neutral-900 text-white"
-                  : "border-neutral-300 hover:bg-neutral-50"
-              }`}
-            >
-              {count}
-            </button>
-          ))}
-        </div>
+  // The count sits at the top of the photo card, so choosing and filling read as one input.
+  const header = (
+    <div className="flex items-center gap-2">
+      <span className={LABEL}>Photos{REQUIRED_MARK}</span>
+      <div role="group" aria-label="Number of photos" className="ml-auto flex gap-1">
+        {COUNTS.map((count) => (
+          <button
+            key={count}
+            type="button"
+            aria-pressed={draft.slots.length === count}
+            onClick={() => setCount(count)}
+            className={segment(draft.slots.length === count)}
+          >
+            {count}
+          </button>
+        ))}
       </div>
-      {createElement(PhotoSlotEditor as ComponentType<EditorProps<"photo">>, props)}
-      <label className="flex items-center gap-2 text-sm">
+    </div>
+  );
+  return (
+    <>
+      {createElement(PhotoSlotEditor as ComponentType<SlotEditorProps>, { ...props, header })}
+      <label className={`${CHECK_ROW} ${CARD}`}>
         <input
           type="checkbox"
-          checked={draft.frame}
-          onChange={(e) => onChange((d) => ({ ...d, frame: e.target.checked }))}
+          className={CHECKBOX}
+          checked={!draft.frame}
+          onChange={(e) => onChange((d) => ({ ...d, frame: !e.target.checked }))}
         />
-        Polaroid frames
+        Remove polaroid frames
       </label>
       <TextCardEditor
         card={draft.textCard}
         onCard={(textCard) => onChange((d) => ({ ...d, textCard }))}
       />
-    </div>
+    </>
   );
 }

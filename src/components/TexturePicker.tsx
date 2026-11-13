@@ -5,6 +5,8 @@ import { decodeImage, textureThumbUrl } from "@/render/textureLibrary";
 import { newId, useAppStore } from "@/store/store";
 import type { TextureRef } from "@/store/types";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/templates/constants";
+import { LABEL, HINT, ERROR_TEXT, COMPACT_BUTTON, thumbFrame } from "@/templates/formStyles";
+import { Card } from "@/templates/Card";
 
 /**
  * Background texture picker: the bundled library as thumbnails, plus session-only
@@ -56,23 +58,19 @@ export function TexturePicker() {
   }
 
   const thumbClass = (active: boolean) =>
-    `relative block aspect-[3/4] w-14 shrink-0 overflow-hidden rounded-sm border bg-neutral-100 transition ${
-      active
-        ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-1"
-        : "border-neutral-200 hover:border-neutral-400"
-    } disabled:cursor-not-allowed disabled:opacity-40`;
+    `relative block aspect-[3/4] w-full overflow-hidden bg-neutral-100 ${thumbFrame(
+      active,
+    )} disabled:cursor-not-allowed disabled:opacity-40`;
 
   return (
-    <div className="flex flex-col gap-2">
+    <Card className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-          Texture
-        </span>
+        <span className={LABEL}>Texture</span>
         <button
           type="button"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
-          className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className={COMPACT_BUTTON}
         >
           Upload texture…
         </button>
@@ -85,10 +83,10 @@ export function TexturePicker() {
         />
       </div>
 
-      {error && <p className="text-xs text-red-600">Couldn’t load the texture library: {error}</p>}
-      {loading && !error && <p className="text-xs text-neutral-400">Loading textures…</p>}
+      {error && <p className={ERROR_TEXT}>Couldn’t load the texture library: {error}</p>}
+      {loading && !error && <p className={HINT}>Loading textures…</p>}
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="grid grid-cols-4 gap-2">
         {entries.map((entry) => {
           const ref: TextureRef = { kind: "library", id: entry.id };
           return (
@@ -138,6 +136,6 @@ export function TexturePicker() {
       </div>
 
       {notice && <p className="text-xs text-amber-700">{notice}</p>}
-    </div>
+    </Card>
   );
 }

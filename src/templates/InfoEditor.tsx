@@ -2,26 +2,27 @@ import type { ReactNode } from "react";
 import type { InfoFields } from "@/store/draft";
 import { EVENT_NUMBER_MAX, EVENT_NUMBER_MIN } from "./constants";
 import type { EditorProps } from "./definition";
-
-const inputClass =
-  "w-full rounded-md border border-neutral-300 bg-white px-2.5 py-1.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-900 focus:outline-none";
+import { CARD, REQUIRED_MARK, FIELD_LABEL, INPUT, MUTED } from "./formStyles";
 
 function Field({
   label,
   hint,
+  required,
   className = "",
   children,
 }: {
   label: string;
   hint?: string;
+  required?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   return (
-    <label className={`flex flex-col gap-1 ${className}`}>
-      <span className="text-xs font-medium text-neutral-600">
+    <label className={`flex flex-col gap-1 ${CARD} ${className}`}>
+      <span className={FIELD_LABEL}>
         {label}
-        {hint && <span className="font-normal text-neutral-400"> · {hint}</span>}
+        {required && REQUIRED_MARK}
+        {hint && <span className={MUTED}> · {hint}</span>}
       </span>
       {children}
     </label>
@@ -43,18 +44,20 @@ export function InfoEditor({ draft, onChange }: EditorProps<"info">) {
 
   return (
     <div className="grid grid-cols-6 gap-3">
-      <Field label="Event no." className="col-span-2">
+      <Field label="Event no." required className="col-span-2">
         <input
-          className={inputClass}
+          className={INPUT}
+          aria-required
           inputMode="numeric"
           placeholder="1"
           value={info.eventNumber ?? ""}
           onChange={(e) => set({ eventNumber: parseEventNumber(e.target.value) })}
         />
       </Field>
-      <Field label="Title" className="col-span-4">
+      <Field label="Title" required className="col-span-4">
         <input
-          className={inputClass}
+          className={INPUT}
+          aria-required
           placeholder="Recess At Night!"
           value={info.title}
           onChange={(e) => set({ title: e.target.value })}
@@ -62,24 +65,26 @@ export function InfoEditor({ draft, onChange }: EditorProps<"info">) {
       </Field>
       <Field label="Body" hint="optional" className="col-span-6">
         <textarea
-          className={`${inputClass} resize-none`}
+          className={`${INPUT} resize-none`}
           rows={4}
           placeholder="A few sentences about the event."
           value={info.body}
           onChange={(e) => set({ body: e.target.value })}
         />
       </Field>
-      <Field label="Date" className="col-span-6">
+      <Field label="Date" required className="col-span-6">
         <input
-          className={inputClass}
+          className={INPUT}
+          aria-required
           type="date"
           value={info.date}
           onChange={(e) => set({ date: e.target.value })}
         />
       </Field>
-      <Field label="Start time" className="col-span-3">
+      <Field label="Start time" required className="col-span-3">
         <input
-          className={inputClass}
+          className={INPUT}
+          aria-required
           type="time"
           value={info.startTime}
           onChange={(e) => set({ startTime: e.target.value })}
@@ -87,15 +92,16 @@ export function InfoEditor({ draft, onChange }: EditorProps<"info">) {
       </Field>
       <Field label="End time" hint="optional" className="col-span-3">
         <input
-          className={inputClass}
+          className={INPUT}
           type="time"
           value={info.endTime}
           onChange={(e) => set({ endTime: e.target.value })}
         />
       </Field>
-      <Field label="Location" className="col-span-6">
+      <Field label="Location" required className="col-span-6">
         <input
-          className={inputClass}
+          className={INPUT}
+          aria-required
           placeholder="Anew Café & Goods, New York, NY"
           value={info.location}
           onChange={(e) => set({ location: e.target.value })}

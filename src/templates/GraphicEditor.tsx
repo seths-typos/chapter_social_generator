@@ -2,6 +2,8 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { PHOTO_ACCEPT } from "@/image/limits";
 import { GRAPHIC } from "./constants";
 import type { EditorProps } from "./definition";
+import { REQUIRED_MARK, LABEL, HINT, ERROR_TEXT, COMPACT_BUTTON } from "./formStyles";
+import { Card } from "./Card";
 
 /** The Graphic template's form: upload the event graphic, or pick an image already in the pool. */
 export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProps<"graphic">) {
@@ -24,16 +26,14 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <Card className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-          Graphic
-        </span>
+        <span className={LABEL}>Graphic{REQUIRED_MARK}</span>
         <button
           type="button"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
-          className="rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium hover:bg-neutral-50 disabled:opacity-40"
+          className={COMPACT_BUTTON}
         >
           {busy ? "Opening…" : current ? "Upload another…" : "Upload graphic…"}
         </button>
@@ -47,12 +47,10 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
       </div>
 
       {!current && pool.length > 0 && (
-        <p className="text-xs text-neutral-400">
-          Or click an image in the Photos panel to use it as the graphic.
-        </p>
+        <p className={HINT}>Or select an image in the Photo Library.</p>
       )}
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className={ERROR_TEXT}>{error}</p>}
       {current && current.width < GRAPHIC.width && (
         <p className="text-xs text-amber-700">
           Low resolution: {current.width}×{current.height}. Under {GRAPHIC.width}px wide it will
@@ -60,10 +58,10 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
         </p>
       )}
       {!current && !error && (
-        <p className="text-xs text-neutral-400">
+        <p className={HINT}>
           Any shape works. It is placed {GRAPHIC.width}px wide and keeps its proportions.
         </p>
       )}
-    </div>
+    </Card>
   );
 }

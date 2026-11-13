@@ -70,6 +70,13 @@ export interface TemplateDefinition<K extends TemplateId> {
    */
   slotPlacements?(draft: DraftFor<K>): PolaroidPlacement[];
 
+  /**
+   * Where every polaroid is drawn. With it, the preview animates the polaroids to their
+   * new places when the layout changes (more photos, the text card), by passing the
+   * in-between placements to `render`.
+   */
+  layout?(draft: DraftFor<K>): PolaroidPlacement[];
+
   /** The template's own form fields. Templates with nothing beyond the shared controls omit it. */
   Editor?: ComponentType<EditorProps<K>>;
   /**

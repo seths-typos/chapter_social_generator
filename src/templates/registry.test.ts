@@ -266,7 +266,7 @@ describe("fromPost", () => {
 describe("registry", () => {
   it("keys every definition by its own id, in picker order", () => {
     for (const id of TEMPLATE_IDS) expect(TEMPLATES[id].id).toBe(id);
-    expect(TEMPLATE_LIST.map((t) => t.id)).toEqual(["cover", "photo", "graphic", "info"]);
+    expect(TEMPLATE_LIST.map((t) => t.id)).toEqual(["photo", "graphic", "info", "cover"]);
   });
 
   it("gives every template a unique label and a library default texture", () => {
