@@ -35,7 +35,10 @@ export const CHECKBOX = "size-[13px] accent-[#2f78ff]";
 export const INPUT = `w-full touch:min-h-11 rounded-lg border border-[#8c8c8c] bg-white px-[9px] py-[7px] ${UI_TEXT} text-[#191919] placeholder:text-[#707070] focus:border-[#2f78ff] focus:outline-none`;
 
 /** A small button inside a card: Upload photo…, Reset. Its corners match the secondary button. */
-export const COMPACT_BUTTON = `wipe touch:min-h-11 touch:px-3 rounded-tl-[2px] rounded-tr-lg rounded-br-[2px] rounded-bl-lg border border-[#8c8c8c] bg-white px-2 py-1 [--wipe:#6b6b6b] ${UI_TEXT} text-[#191919] enabled:hover:border-[#6b6b6b] enabled:hover:text-white disabled:opacity-40`;
+const COMPACT = `wipe touch:min-h-11 touch:px-3 border border-[#8c8c8c] bg-white px-2 py-1 [--wipe:#6b6b6b] ${UI_TEXT} text-[#191919] enabled:hover:border-[#6b6b6b] enabled:hover:text-white disabled:opacity-40`;
+export const COMPACT_BUTTON = `${COMPACT} rounded-tl-[2px] rounded-tr-lg rounded-br-[2px] rounded-bl-lg`;
+/** The same small button with the primary button's corners: for one that sits bottom right. */
+export const COMPACT_BUTTON_MIRRORED = `${COMPACT} rounded-tl-lg rounded-tr-[2px] rounded-br-lg rounded-bl-[2px]`;
 
 /** One choice in a row of choices: the photo count, the wordmark colour. */
 export const segment = (selected: boolean) =>

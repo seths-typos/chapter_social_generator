@@ -91,6 +91,7 @@ All templates output **1080×1440 PNG** (3:4). Exact layout, sizes, colors and f
 | Optional film look. | A per-post "Add film filter" option, off by default, that adds grain, a soft glow and a slight fade to every photo in the post (not the frame, texture or text). The values are fixed in code. |
 | Fill text fields (Info template). | Fields: event number (numeric, rendered as `ch. N`), title, body, date/time, location. The preview updates as he types. Overflow behavior is defined in the Template Spec. |
 | Choose a background texture. | Pick from the bundled texture library, shown as thumbnails. |
+| Download the texture library. | "Download all textures" under the picker saves one ZIP, `chapter-textures.zip`, with every bundled texture at full size and the attribution file. It works without a template chosen. Uploaded textures aren't included. |
 | Upload a one-off texture. | An uploaded image is added to the texture picker for this session only. It is never saved. |
 
 ### Preview and render
