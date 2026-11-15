@@ -2,6 +2,8 @@
 
 /** Photos are downscaled on import so their long edge is at most this many px. */
 export const MAX_LONG_EDGE = 3000;
+/** An uploaded texture is downscaled to this long edge: the height of a library texture. */
+export const TEXTURE_MAX_LONG_EDGE = 2880;
 /** A photo whose short edge is under this is flagged as low resolution (not blocked). */
 export const LOW_RES_SHORT_EDGE = 1080;
 /** Width of the pool thumbnail, in px. */

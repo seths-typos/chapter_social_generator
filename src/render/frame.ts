@@ -8,6 +8,7 @@ import { decodeImage } from "./textureLibrary";
 
 let frame: ImageBitmap | undefined;
 let loading: Promise<void> | undefined;
+let failed = false;
 const listeners = new Set<() => void>();
 
 export function subscribeFrame(listener: () => void): () => void {
@@ -17,8 +18,18 @@ export function subscribeFrame(listener: () => void): () => void {
 
 export const getFrameSnapshot = (): ImageBitmap | undefined => frame;
 
-/** Start loading the frame if it isn't loaded or in flight. A failure can be retried. */
+/** True when the last attempt to load the frame failed and nothing has succeeded since. */
+export const getFrameFailed = (): boolean => failed;
+
+/**
+ * Start loading the frame if it isn't loaded or in flight. Calling it again after a failure
+ * retries.
+ */
 export function ensureFrame(): Promise<void> {
+  if (!loading && failed) {
+    failed = false;
+    for (const l of listeners) l();
+  }
   loading ??= fetch(frameUrl)
     .then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -31,6 +42,8 @@ export function ensureFrame(): Promise<void> {
     })
     .catch(() => {
       loading = undefined;
+      failed = true;
+      for (const l of listeners) l();
     });
   return loading;
 }

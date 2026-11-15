@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { pngFilename, zipFilename } from "@/export/filenames";
-import { downloadBlob, renderPostToPng } from "@/export/png";
+import { describeMissing, downloadBlob, postAssetKey, renderPostToPng } from "@/export/png";
 import { exportBatchZip, missingBatchAssets } from "@/export/zip";
 import { scratchRenderCanvas } from "@/render/canvas";
 import { renderPost } from "@/render/renderPost";
+import { useAssetFailures } from "@/render/assets";
 import type { RenderAssets } from "@/render/types";
 import { useAppStore } from "@/store/store";
 import type { BatchItem, Post } from "@/store/types";
 import { BATCH_THUMBNAIL } from "@/templates/constants";
 import { templateFor } from "@/templates/registry";
+import { getTextCardSplit, subscribeTextCardSplit } from "@/templates/textCard";
+import { LoadProblem } from "./Editor";
 import { Panel } from "./Panel";
 import { COMPACT_BUTTON, PRIMARY_BUTTON } from "@/templates/formStyles";
 
@@ -18,6 +21,8 @@ const COPIED_MS = 2000;
 /** A batch post drawn by the real renderer from its stored data, then scaled down. */
 function BatchThumbnail({ post, assets }: { post: Post; assets: RenderAssets }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const assetKey = postAssetKey(post, assets);
+  const split = useSyncExternalStore(subscribeTextCardSplit, getTextCardSplit, getTextCardSplit);
   useEffect(() => {
     const out = ref.current?.getContext("2d");
     const scratch = scratchRenderCanvas();
@@ -26,7 +31,10 @@ function BatchThumbnail({ post, assets }: { post: Post; assets: RenderAssets }) 
     renderPost(ctx, post, assets);
     out.imageSmoothingQuality = "high";
     out.drawImage(scratch, 0, 0, BATCH_THUMBNAIL.width, BATCH_THUMBNAIL.height);
-  }, [post, assets]);
+    // Redrawn at full size, so only when an asset this post draws with changes, not every
+    // time some other photo or texture finishes loading. `split` is the `?tune` slider.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `assets` is covered by `assetKey`
+  }, [post, assetKey, split]);
   return (
     <canvas
       ref={ref}
@@ -70,6 +78,8 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
   }, [hasPosts]);
 
   const stillLoading = missingBatchAssets(batch, assets);
+  const failures = useAssetFailures();
+  const problem = describeMissing(stillLoading, failures.failed);
   const exporting = progress !== null;
 
   async function run(action: () => Promise<void>) {
@@ -143,8 +153,10 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
             Couldn’t finish: {error}
           </p>
         )}
-        {stillLoading.length > 0 && (
-          <p className="text-xs text-[#666]">Still loading: {stillLoading.join(", ")}</p>
+        {problem && (
+          <p className="text-xs">
+            <LoadProblem problem={problem} onRetry={failures.retry} />
+          </p>
         )}
         {!hasPosts && (
           <p className="rounded-md border border-dashed border-neutral-300 p-4 text-center text-sm text-[#666]">

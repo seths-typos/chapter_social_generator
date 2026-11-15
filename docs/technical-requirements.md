@@ -167,8 +167,8 @@ There are no automated visual tests. Visual review is done by eye with a dev-onl
 | Render at export | Each post is re-rendered from its stored `Post` data (not from cached preview pixels) |
 | Clipboard | `navigator.clipboard.writeText(caption)`, with a "Copied" confirmation |
 | Unload guard | A `beforeunload` handler is active while the batch isn't empty |
-| Batch thumbnails | Each stored `Post` drawn by `renderPost` on the shared scratch canvas, scaled to 270×360 |
-| Waiting for assets | "Download all" is disabled while any batch post's texture, image or the polaroid frame is still loading |
+| Batch thumbnails | Each stored `Post` drawn by `renderPost` on the shared scratch canvas, scaled to 270×360. Redrawn only when an asset that post draws with changes (`postAssetKey`), not on every photo import |
+| Waiting for assets | "Download all" is disabled while any batch post's texture, image or the polaroid frame is still loading. The textures of batch posts are loaded even with no post open. If a texture or the frame fails to load, the editor and the batch say so and offer "Try again" |
 
 ## Browser support
 

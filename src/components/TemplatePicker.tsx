@@ -26,7 +26,11 @@ function Thumbnail({ template, assets }: { template: TemplateId; assets: RenderA
     renderPost(ctx, draft, { ...assets, textures });
     out.imageSmoothingQuality = "high";
     out.drawImage(scratch, 0, 0, THUMBNAIL.width, THUMBNAIL.height);
-  }, [template, assets]);
+    // The fixture has no photos and a flat colour for a texture, so of everything in
+    // `assets` only the frame and the wordmark can change what is drawn. Redrawing on
+    // every photo import would be four full-size renders each time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
+  }, [template, assets.frame, assets.wordmark]);
 
   return (
     <canvas

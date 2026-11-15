@@ -1,5 +1,6 @@
 import { createElement, useState } from "react";
-import { downloadBlob, missingAssets, renderPostToPng } from "@/export/png";
+import { describeMissing, downloadBlob, missingAssets, renderPostToPng } from "@/export/png";
+import { useAssetFailures } from "@/render/assets";
 import { pngFilename } from "@/export/filenames";
 import { importToPool } from "@/image/importToPool";
 import type { FitWarning, RenderAssets } from "@/render/types";
@@ -52,6 +53,28 @@ export function RequiredNote() {
   return hasDraft ? <p className={HINT}>{REQUIRED_MARK.trim()} Required</p> : null;
 }
 
+/** Assets a post is waiting for, or that failed to load, with a way to try again. */
+export function LoadProblem({
+  problem,
+  onRetry,
+}: {
+  problem: { text: string; canRetry: boolean };
+  onRetry: () => void;
+}) {
+  return problem.canRetry ? (
+    <span role="alert" className="text-red-700">
+      {problem.text}{" "}
+      <button type="button" onClick={onRetry} className="font-medium underline touch:min-h-11">
+        Try again
+      </button>
+    </span>
+  ) : (
+    <span role="status" className="text-[#555]">
+      {problem.text}
+    </span>
+  );
+}
+
 interface PostActionsProps {
   /** Fit warnings from the latest preview render. Blocking ones stop Add to batch. */
   warnings: readonly FitWarning[];
@@ -77,6 +100,8 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
   const blocking = warnings.filter((w) => w.blocking);
   const post = draft && missing.length === 0 && blocking.length === 0 ? toPost(draft) : null;
   const loading = post ? missingAssets(post, assets) : [];
+  const failures = useAssetFailures();
+  const problem = describeMissing(loading, failures.failed);
 
   async function downloadPng() {
     if (!post) return;
@@ -93,9 +118,7 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
     ? pickerStatus(lastAction, batch.length)
     : blocking.length > 0
       ? "Shorten the text to finish this post."
-      : loading.length > 0
-        ? `Still loading: ${loading.join(", ")}`
-        : "";
+      : "";
 
   // The asterisks show what is required; a screen reader also gets it as the reason the
   // buttons are disabled.
@@ -146,7 +169,9 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
             Download PNG
           </button>
           {(!post || loading.length > 0) && (
-            <span className={`${TOOLTIP} right-0`}>{blocked || "Still loading"}</span>
+            <span className={`${TOOLTIP} right-0`}>
+              {blocked || (problem?.canRetry ? "Couldn’t load everything" : "Still loading")}
+            </span>
           )}
         </span>
       </div>
@@ -174,6 +199,9 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
           </span>
         )}
         {status && <span className="text-[#555]">{status}</span>}
+        {draft && blocking.length === 0 && problem && (
+          <LoadProblem problem={problem} onRetry={failures.retry} />
+        )}
       </div>
     </div>
   );

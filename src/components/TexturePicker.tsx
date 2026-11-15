@@ -1,6 +1,8 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { downloadBlob } from "@/export/png";
 import { exportTexturesZip, TEXTURES_ZIP_FILENAME } from "@/export/textures";
+import { downscaleSize } from "@/image/importImage";
+import { TEXTURE_MAX_LONG_EDGE } from "@/image/limits";
 import { setTextureAsset } from "@/render/assetCache";
 import { useTextureLibrary } from "@/render/assets";
 import { decodeImage, textureThumbUrl } from "@/render/textureLibrary";
@@ -59,6 +61,18 @@ export function TexturePicker() {
     let image: ImageBitmap;
     try {
       image = await decodeImage(file);
+      // A phone photo used as a texture can be 48 MP, about 190 MB decoded. The library's
+      // own textures are 2160×2880, so nothing is gained beyond that.
+      const size = downscaleSize(image.width, image.height, TEXTURE_MAX_LONG_EDGE);
+      if (size.width !== image.width) {
+        const smaller = await createImageBitmap(image, {
+          resizeWidth: size.width,
+          resizeHeight: size.height,
+          resizeQuality: "high",
+        });
+        image.close();
+        image = smaller;
+      }
     } catch {
       setNotice("That file isn’t an image the browser can open.");
       return;

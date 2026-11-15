@@ -11,14 +11,17 @@ import { getTextCardSplit, subscribeTextCardSplit } from "@/templates/textCard";
 import {
   ensureLibraryTexture,
   getPhotosSnapshot,
+  getTextureErrorsSnapshot,
   getTexturesSnapshot,
+  releaseUnusedLibraryTextures,
   subscribePhotos,
   subscribeTextures,
 } from "./assetCache";
-import { ensureFrame, getFrameSnapshot, subscribeFrame } from "./frame";
+import { ensureFrame, getFrameFailed, getFrameSnapshot, subscribeFrame } from "./frame";
 import { getGrain } from "./grain";
 import { fetchManifest, type TextureManifestEntry } from "./textureLibrary";
-import type { RenderAssets } from "./types";
+import { texturesInUse } from "./texturesInUse";
+import { textureKey, type RenderAssets } from "./types";
 import { getWordmark } from "./wordmark";
 
 export interface TextureLibraryState {
@@ -58,23 +61,38 @@ export function useTextureAssets() {
   return useSyncExternalStore(subscribeTextures, getTexturesSnapshot, getTexturesSnapshot);
 }
 
+const DEFAULT_TEXTURES = TEMPLATE_LIST.map((t) => t.defaultTexture);
+
+/** The library entries whose textures the draft, the batch or a template default needs. */
+function useWantedTextures(): { wanted: TextureManifestEntry[]; keys: ReadonlySet<string> } {
+  const { entries } = useTextureLibrary();
+  const current = useAppStore((s) => s.draft?.texture ?? null);
+  const batch = useAppStore((s) => s.batch);
+  return useMemo(() => {
+    const keys = texturesInUse(
+      current,
+      batch.map((item) => item.post.texture),
+      DEFAULT_TEXTURES,
+    );
+    const wanted = entries.filter((e) => keys.has(textureKey({ kind: "library", id: e.id })));
+    return { wanted, keys };
+  }, [entries, current, batch]);
+}
+
 /**
- * Everything the renderer needs. Also kicks off loading for the draft's current texture
- * and, up front, the two template defaults so the first preview isn't grey.
+ * Everything the renderer needs. Also loads the textures in use (the draft's, every batch
+ * post's and the template defaults, so the first preview isn't grey) and frees the decoded
+ * ones nothing uses any more.
  */
 export function useRenderAssets(): RenderAssets {
-  const { entries } = useTextureLibrary();
   const textures = useTextureAssets();
-  const current = useAppStore((s) => s.draft?.texture ?? null);
+  const { wanted, keys } = useWantedTextures();
 
   useEffect(() => {
-    if (entries.length === 0) return;
-    const wanted = new Set<string>(TEMPLATE_LIST.map((t) => t.defaultTexture.id));
-    if (current?.kind === "library") wanted.add(current.id);
-    for (const entry of entries) {
-      if (wanted.has(entry.id)) void ensureLibraryTexture(entry);
-    }
-  }, [entries, current]);
+    for (const entry of wanted) void ensureLibraryTexture(entry);
+    // Only once the library is known: before that nothing library-backed is "in use" yet.
+    if (wanted.length > 0) releaseUnusedLibraryTextures(keys);
+  }, [wanted, keys]);
 
   const photos = useSyncExternalStore(subscribePhotos, getPhotosSnapshot, getPhotosSnapshot);
   const frame = useSyncExternalStore(subscribeFrame, getFrameSnapshot, getFrameSnapshot);
@@ -97,4 +115,38 @@ export function useRenderAssets(): RenderAssets {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `cardSplit` forces a redraw
     [textures, photos, frame, cardSplit],
   );
+}
+
+/** Which of the assets in use failed to load, and a way to try them again. */
+export interface AssetFailures {
+  /** Named as `missingAssets` names them: "texture", "polaroid frame". */
+  failed: readonly string[];
+  retry: () => void;
+}
+
+/**
+ * Load failures among the assets in use. Without this a failed download would read as
+ * "Still loading" for the rest of the session.
+ */
+export function useAssetFailures(): AssetFailures {
+  const { wanted } = useWantedTextures();
+  const errors = useSyncExternalStore(
+    subscribeTextures,
+    getTextureErrorsSnapshot,
+    getTextureErrorsSnapshot,
+  );
+  const frameFailed = useSyncExternalStore(subscribeFrame, getFrameFailed, getFrameFailed);
+  return useMemo(() => {
+    const broken = wanted.filter((e) => errors.has(textureKey({ kind: "library", id: e.id })));
+    return {
+      failed: [
+        ...(broken.length > 0 ? ["texture"] : []),
+        ...(frameFailed ? ["polaroid frame"] : []),
+      ],
+      retry: () => {
+        for (const entry of broken) void ensureLibraryTexture(entry);
+        if (frameFailed) void ensureFrame();
+      },
+    };
+  }, [wanted, errors, frameFailed]);
 }

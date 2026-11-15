@@ -21,6 +21,46 @@ export function missingAssets(post: Post, assets: RenderAssets): string[] {
   return missing;
 }
 
+/**
+ * How to describe missing assets: the ones that failed to load can be retried, the rest
+ * are still on their way.
+ */
+export function describeMissing(
+  missing: readonly string[],
+  failed: readonly string[],
+): { text: string; canRetry: boolean } | null {
+  if (missing.length === 0) return null;
+  const broken = missing.filter((name) => failed.includes(name));
+  return broken.length > 0
+    ? { text: `Couldn’t load the ${broken.join(" or the ")}.`, canRetry: true }
+    : { text: `Still loading: ${missing.join(", ")}`, canRetry: false };
+}
+
+const assetIds = new WeakMap<object, number>();
+let nextAssetId = 1;
+/** A number that stays the same for the same object. */
+function idOf(value: unknown): string {
+  if (typeof value !== "object" || value === null) return "-";
+  let id = assetIds.get(value);
+  if (!id) assetIds.set(value, (id = nextAssetId++));
+  return String(id);
+}
+
+/**
+ * Changes only when one of the assets this post draws with does: its texture, its photos
+ * and the polaroid frame. A thumbnail keyed on this skips the redraw when some other
+ * photo or texture finishes loading.
+ */
+export function postAssetKey(post: Post, assets: RenderAssets): string {
+  return [
+    assets.textures.get(textureKey(post.texture)),
+    assets.frame,
+    ...photoIdsInPost(post).map((id) => assets.photos.get(id)),
+  ]
+    .map(idOf)
+    .join(",");
+}
+
 /** Render a post to a PNG blob. Rejects if an asset is missing or the canvas can't encode. */
 export function renderPostToPng(post: Post, assets: RenderAssets): Promise<Blob> {
   const missing = missingAssets(post, assets);
