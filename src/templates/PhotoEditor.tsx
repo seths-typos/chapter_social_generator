@@ -31,7 +31,7 @@ export function PhotoEditor(props: EditorProps<"photo">) {
   // The count sits at the top of the photo card, so choosing and filling read as one input.
   const header = (
     <div className="flex items-center gap-2">
-      <span className={LABEL}>Photos{REQUIRED_MARK}</span>
+      <h2 className={LABEL}>Photos{REQUIRED_MARK}</h2>
       <div role="group" aria-label="Number of photos" className="ml-auto flex gap-1">
         {COUNTS.map((count) => (
           <button

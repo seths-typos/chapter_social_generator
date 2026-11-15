@@ -216,7 +216,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                       disabled={index === 0}
                       onClick={() => moveItem(index, index - 1)}
                       aria-label={`Move ${item.name} up`}
-                      className="ml-auto px-1 touch:min-h-11 touch:min-w-11 disabled:opacity-30"
+                      className="ml-auto min-h-6 min-w-6 px-1 touch:min-h-11 touch:min-w-11 disabled:opacity-30"
                     >
                       ↑
                     </button>
@@ -225,7 +225,7 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                       disabled={index === batch.length - 1}
                       onClick={() => moveItem(index, index + 1)}
                       aria-label={`Move ${item.name} down`}
-                      className="px-1 touch:min-h-11 touch:min-w-11 disabled:opacity-30"
+                      className="min-h-6 min-w-6 px-1 touch:min-h-11 touch:min-w-11 disabled:opacity-30"
                     >
                       ↓
                     </button>

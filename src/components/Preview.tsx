@@ -217,6 +217,7 @@ export function Preview({ assets, onResult }: PreviewProps) {
     <div className="relative flex justify-center">
       <canvas
         ref={canvasRef}
+        role="img"
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         className={`${RENDER_CANVAS_CLASS} block h-auto w-full touch-none rounded-sm ${draft ? "shadow-sm" : "bg-neutral-200"} ${overPhoto ? "cursor-grab active:cursor-grabbing" : ""}`}

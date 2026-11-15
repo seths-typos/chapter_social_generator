@@ -161,7 +161,7 @@ export function PhotoSlotEditor({
 
         <div className={`flex items-center ${header ? "justify-end" : "justify-between"}`}>
           {/* With a header (the photo count), that row is the card's label. */}
-          {!header && <span className={LABEL}>Photo{REQUIRED_MARK}</span>}
+          {!header && <h2 className={LABEL}>Photo{REQUIRED_MARK}</h2>}
           <button
             type="button"
             disabled={busy}
@@ -224,7 +224,11 @@ export function PhotoSlotEditor({
           </p>
         )}
 
-        {error && <p className={ERROR_TEXT}>{error}</p>}
+        {error && (
+          <p className={ERROR_TEXT} role="alert">
+            {error}
+          </p>
+        )}
         {current && isLowResolution(current) && (
           <p className="text-xs text-amber-700">
             Low resolution: {current.width}×{current.height}. Under {LOW_RES_SHORT_EDGE}px on the

@@ -105,7 +105,9 @@ export function TexturePicker() {
     <>
       <Card className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className={LABEL}>Texture</span>
+          <h2 id="texture-heading" className={LABEL}>
+            Texture
+          </h2>
           <button
             type="button"
             disabled={disabled}
@@ -123,11 +125,19 @@ export function TexturePicker() {
           />
         </div>
 
-        {error && <p className={ERROR_TEXT}>Couldn’t load the texture library: {error}</p>}
+        {error && (
+          <p className={ERROR_TEXT} role="alert">
+            Couldn’t load the texture library: {error}
+          </p>
+        )}
         {loading && !error && <p className={HINT}>Loading textures…</p>}
 
         {/* As many columns as fit: four in the desktop column, more on a wide phone or tablet. */}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] gap-2">
+        <div
+          role="group"
+          aria-labelledby="texture-heading"
+          className="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] gap-2"
+        >
           {entries.map((entry) => {
             const ref: TextureRef = { kind: "library", id: entry.id };
             return (
@@ -176,7 +186,11 @@ export function TexturePicker() {
           })}
         </div>
 
-        {notice && <p className="text-xs text-amber-700">{notice}</p>}
+        {notice && (
+          <p className="text-xs text-amber-700" role="alert">
+            {notice}
+          </p>
+        )}
       </Card>
 
       {/* Under the card: the library as files, for use outside the generator. Works without a

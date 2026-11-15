@@ -28,7 +28,7 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
   return (
     <Card className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className={LABEL}>Graphic{REQUIRED_MARK}</span>
+        <h2 className={LABEL}>Graphic{REQUIRED_MARK}</h2>
         <button
           type="button"
           disabled={busy}
@@ -50,7 +50,11 @@ export function GraphicEditor({ draft, onChange, pool, importImage }: EditorProp
         <p className={HINT}>Or select an image in the Photo Library.</p>
       )}
 
-      {error && <p className={ERROR_TEXT}>{error}</p>}
+      {error && (
+        <p className={ERROR_TEXT} role="alert">
+          {error}
+        </p>
+      )}
       {current && current.width < GRAPHIC.width && (
         <p className="text-xs text-amber-700">
           Low resolution: {current.width}×{current.height}. Under {GRAPHIC.width}px wide it will

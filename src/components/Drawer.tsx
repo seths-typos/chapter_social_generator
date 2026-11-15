@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 /** A drawer's colours: the panel behind its content, and darker shades for the handle. */
 export interface DrawerTint {
@@ -17,6 +17,8 @@ interface DrawerProps {
   /** Width of the open drawer's content on a wide screen, in px. */
   width: number;
   tint: DrawerTint;
+  /** True on a narrower screen, where the drawer is a bottom sheet over the editor. */
+  sheet: boolean;
   open: boolean;
   onToggle: () => void;
   children: ReactNode;
@@ -31,19 +33,67 @@ interface DrawerProps {
  * - Narrower screens: the handle is a tab in the bar along the bottom, and the content is a
  *   sheet that rises from the bottom over the editor, above that bar.
  */
-export function Drawer({ side, label, count, width, tint, open, onToggle, children }: DrawerProps) {
+export function Drawer({
+  side,
+  label,
+  count,
+  width,
+  tint,
+  sheet,
+  open,
+  onToggle,
+  children,
+}: DrawerProps) {
   const left = side === "left";
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // An open sheet covers the editor, so it behaves as a dialog: focus moves into it,
+  // Escape closes it, and closing hands focus back to its tab.
+  const modal = sheet && open;
+  useEffect(() => {
+    if (!modal) return;
+    const content = contentRef.current;
+    const tab = handleRef.current;
+    // The sheet can't take focus while it is still hidden, which lasts a frame or two into
+    // its slide, so keep trying for a moment.
+    let frame = 0;
+    let tries = 0;
+    const takeFocus = () => {
+      content?.focus();
+      if (document.activeElement !== content && tries++ < 30) {
+        frame = requestAnimationFrame(takeFocus);
+      }
+    };
+    frame = requestAnimationFrame(takeFocus);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onToggle();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", onKey);
+      // Only if focus was left in the sheet (now inert) or nowhere: the other tab may have
+      // just been pressed, and it keeps focus.
+      const active = document.activeElement;
+      if (!active || active === document.body || content?.contains(active)) tab?.focus();
+    };
+  }, [modal, onToggle]);
+
   // The chevron points the way the drawer will move.
   const sideChevron = left === open ? "‹" : "›";
   const sheetChevron = open ? "⌄" : "⌃";
 
+  const action = `${open ? "Close" : "Open"} ${label}`;
   const handle = (
     <button
+      ref={handleRef}
       type="button"
       onClick={onToggle}
       aria-expanded={open}
-      aria-label={`${open ? "Close" : "Open"} ${label}`}
-      title={`${open ? "Close" : "Open"} ${label}`}
+      // The label replaces the button's contents for a screen reader, so it carries the count.
+      aria-label={count > 0 ? `${action} (${count})` : action}
+      title={action}
       className={`relative z-4 flex min-h-12 w-full shrink-0 items-center justify-center gap-2 border-t border-(--edge) bg-(--handle) pb-[env(safe-area-inset-bottom)] text-[#555] hover:bg-(--handle-hover) hover:text-neutral-900 lg:min-h-0 lg:w-9 lg:flex-col lg:justify-start lg:gap-3 lg:border-t-0 lg:py-3 ${
         left ? "lg:border-r" : "lg:border-l"
       }`}
@@ -63,7 +113,12 @@ export function Drawer({ side, label, count, width, tint, open, onToggle, childr
 
   const content = (
     <div
-      className={`fixed inset-x-0 bottom-(--tab-bar) z-3 h-[min(80dvh,100dvh-7rem)] overflow-hidden rounded-t-xl bg-(--panel) shadow-[0_-8px_24px_rgb(0_0_0/0.18)] transition-[translate,visibility] duration-200 ease-out lg:static lg:z-auto lg:h-auto lg:min-h-0 lg:w-(--open-width) lg:translate-y-0 lg:rounded-none lg:shadow-none lg:transition-[width] ${
+      ref={contentRef}
+      tabIndex={-1}
+      role={sheet ? "dialog" : undefined}
+      aria-modal={modal ? true : undefined}
+      aria-label={sheet ? label : undefined}
+      className={`outline-none fixed inset-x-0 bottom-(--tab-bar) z-3 h-[min(80dvh,100dvh-7rem)] overflow-hidden rounded-t-xl bg-(--panel) shadow-[0_-8px_24px_rgb(0_0_0/0.18)] transition-[translate,visibility] duration-200 ease-out lg:static lg:z-auto lg:h-auto lg:min-h-0 lg:w-(--open-width) lg:translate-y-0 lg:rounded-none lg:shadow-none lg:transition-[width] ${
         open ? "visible translate-y-0" : "invisible translate-y-full lg:visible"
       }`}
       inert={!open}

@@ -176,7 +176,7 @@ export function PhotoPool({ onImport }: { onImport?: () => void }) {
             <button
               type="button"
               onClick={() => setFailures([])}
-              className="mt-1 text-xs font-medium text-red-700 underline"
+              className="mt-1 text-xs font-medium text-red-700 underline touch:min-h-11"
             >
               Dismiss
             </button>
@@ -259,7 +259,7 @@ export function PhotoPool({ onImport }: { onImport?: () => void }) {
                           ? "Used in the batch. Remove those posts first."
                           : "Remove from this session"
                       }
-                      className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-sm bg-white/90 text-xs leading-none text-neutral-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                      className="absolute top-1 right-1 flex size-6 touch:size-11 items-center justify-center rounded-sm bg-white/90 text-xs leading-none text-neutral-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       ×
                     </button>

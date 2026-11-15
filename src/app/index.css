@@ -78,6 +78,16 @@
   }
 }
 
+/* One column (a phone): the preview is pinned over the top of the editor and the actions
+   over the bottom, so a field scrolled to by focus must stop short of both. The top value
+   mirrors --preview-one in AppShell: about 38% of the editor's height, plus its padding. */
+@media (max-width: 32rem) {
+  .editor {
+    scroll-padding-top: calc(clamp(11rem, (100dvh - 6.5rem) * 0.38, 26rem) + 1.5rem);
+    scroll-padding-bottom: 6.5rem;
+  }
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;

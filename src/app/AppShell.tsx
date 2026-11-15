@@ -12,6 +12,7 @@ import { useRenderAssets } from "@/render/assets";
 import type { FitWarning, RenderResult } from "@/render/types";
 import { useAppStore } from "@/store/store";
 import type { RequiredFont } from "./fonts";
+import { useMediaQuery } from "./useMediaQuery";
 
 const sameWarnings = (a: readonly FitWarning[], b: readonly FitWarning[]) =>
   a.length === b.length && a.every((w, i) => w.field === b[i]?.field && w.message === b[i].message);
@@ -34,6 +35,8 @@ const PREVIEW_WIDTHS = {
   // Texture | preview | form: as large as fits between the two 280px and 300px columns
   // and their 36px gaps.
   "--preview-three": `max(0px, min((100cqh - ${ACTIONS_HEIGHT}px) * 0.75, 100cqw - 652px))`,
+  // Two zones: the actions pin just under the pinned preview (its height plus the gap).
+  "--actions-top": "calc(var(--preview-two) * 4 / 3 + 1rem)",
 } as CSSProperties;
 
 // The drawers are tinted so they read as separate from the editor: pink for the photo
@@ -46,9 +49,9 @@ const PHOTOS_TINT = {
 };
 const BATCH_TINT = { panel: "#e7f4e5", handle: "#d5ebd2", handleHover: "#c3e0bf", edge: "#c6dfc2" };
 
-// A column of cards beside (or, on a narrow screen, under) the preview.
+// A column of cards. With three zones each one fills the row's height and scrolls by itself.
 const columnClass =
-  "flex w-full max-w-[35rem] shrink-0 flex-col gap-3 self-center @two:max-w-none @two:self-auto @three:min-h-0 @three:overflow-y-auto";
+  "flex flex-col gap-3 @three:row-span-2 @three:row-start-1 @three:min-h-0 @three:overflow-y-auto";
 
 /**
  * The one-screen layout from docs/prd.md#app-flow. The editor (template picker, texture,
@@ -57,6 +60,7 @@ const columnClass =
  *   two zones   – preview and actions pinned on the left | form then texture, scrolling
  *   one column  – preview pinned on top, form then texture scrolling under it, actions
  *                 pinned at the bottom
+ * The source order is the same in all three (see the comment on `main`).
  * The photo pool and the batch are drawers: at the left and right edges on a wide screen,
  * sheets rising from a bar of two tabs along the bottom on a narrower one.
  */
@@ -75,6 +79,12 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
   const [openDrawer, setOpenDrawer] = useState<"photos" | "batch" | null>(null);
   const toggle = (drawer: "photos" | "batch") =>
     setOpenDrawer((open) => (open === drawer ? null : drawer));
+  // Stable, because an open sheet's effect depends on its toggle.
+  const togglePhotos = useCallback(() => toggle("photos"), []);
+  const toggleBatch = useCallback(() => toggle("batch"), []);
+  const openPhotos = useCallback(() => setOpenDrawer("photos"), []);
+  // Below `lg` the drawers are bottom sheets, which behave as dialogs.
+  const sheet = useMediaQuery("(max-width: 63.999rem)");
   const photosOpen = openDrawer === "photos";
   const batchOpen = openDrawer === "batch";
   const photoCount = useAppStore((s) => s.pool.length);
@@ -105,43 +115,48 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
           count={photoCount}
           width={240}
           tint={PHOTOS_TINT}
+          sheet={sheet}
           open={photosOpen}
-          onToggle={() => toggle("photos")}
+          onToggle={togglePhotos}
         >
-          <PhotoPool onImport={() => setOpenDrawer("photos")} />
+          <PhotoPool onImport={openPhotos} />
         </Drawer>
 
+        {/* In source order the editor reads picker, preview, form, texture, actions, which
+            is the order a keyboard or screen reader meets them in every layout. Only the
+            three-zone layout places them differently, by grid position. */}
         <main
-          className="col-span-2 row-start-1 flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-x-clip overflow-y-auto p-4 [container-type:size]"
+          className="editor col-span-2 row-start-1 flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-x-clip overflow-y-auto p-4 [container-type:size]"
           style={PREVIEW_WIDTHS}
+          // Behind an open bottom sheet the editor is dimmed and out of reach.
+          inert={sheet && openDrawer !== null}
         >
           <TemplatePicker assets={assets} />
-          <div className="contents @two:grid @two:shrink-0 @two:grid-cols-[auto_minmax(0,1fr)] @two:items-start @two:gap-x-6 @two:gap-y-3 @three:flex @three:min-h-0 @three:flex-1 @three:items-stretch @three:justify-center @three:gap-9 @three:[container-type:size]">
-            <section
-              className={`order-3 @two:order-none @two:col-start-2 @two:row-start-2 @three:w-[280px] ${columnClass}`}
-            >
-              <TexturePicker />
-            </section>
-
-            {/* The preview with its actions under its bottom corners. In one column the two
-                come apart: the preview pins to the top and the actions to the bottom. */}
-            <div className="contents @two:sticky @two:top-0 @two:col-start-1 @two:row-span-2 @two:row-start-1 @two:flex @two:w-(--preview-two) @two:flex-col @two:gap-4 @three:static @three:w-(--preview-three) @three:shrink-0">
-              <div className="sticky -top-4 z-1 order-1 -mx-4 -my-2 flex shrink-0 justify-center bg-[#fffff9] px-4 py-2 @two:static @two:order-none @two:m-0 @two:block @two:p-0">
-                <div className="w-(--preview-one) @two:w-full">
-                  <Preview assets={assets} onResult={onResult} />
-                </div>
-              </div>
-              <div className="sticky -bottom-4 z-1 order-5 -mx-4 -mb-4 shrink-0 border-t border-neutral-200 bg-[#fffff9] px-4 py-3 @two:static @two:order-none @two:m-0 @two:border-t-0 @two:p-0">
-                <PostActions warnings={warnings} assets={assets} />
+          <div className="contents @two:grid @two:shrink-0 @two:grid-cols-[auto_minmax(0,1fr)] @two:grid-rows-[auto_auto_minmax(0,1fr)] @two:items-start @two:gap-x-6 @two:gap-y-4 @three:min-h-0 @three:flex-1 @three:shrink @three:grid-cols-[280px_auto_300px] @three:grid-rows-[auto_minmax(0,1fr)] @three:items-stretch @three:justify-center @three:gap-x-9 @three:[container-type:size]">
+            {/* One column: pinned to the top. Two zones: pinned on the left. */}
+            <div className="sticky -top-4 z-1 -mx-4 -my-2 flex shrink-0 justify-center bg-[#fffff9] px-4 py-2 @two:top-0 @two:col-start-1 @two:row-start-1 @two:m-0 @two:block @two:w-(--preview-two) @two:p-0 @three:static @three:col-start-2 @three:w-(--preview-three)">
+              <div className="w-(--preview-one) @two:w-full">
+                <Preview assets={assets} onResult={onResult} />
               </div>
             </div>
 
-            <section
-              className={`order-2 @two:order-none @two:col-start-2 @two:row-start-1 @three:w-[300px] ${columnClass}`}
-            >
-              <TemplateForm />
-              <RequiredNote />
-            </section>
+            {/* The form, then the texture: one scrolling column until there is room for a
+                column each side of the preview. */}
+            <div className="flex w-full max-w-[35rem] shrink-0 flex-col gap-3 self-center @two:col-start-2 @two:row-span-3 @two:row-start-1 @two:max-w-none @two:self-auto @three:contents">
+              {/* Empty until a template is chosen; hidden then, so it leaves no gap. */}
+              <section className={`empty:hidden @three:col-start-3 ${columnClass}`}>
+                <TemplateForm />
+                <RequiredNote />
+              </section>
+              <section className={`@three:col-start-1 ${columnClass}`}>
+                <TexturePicker />
+              </section>
+            </div>
+
+            {/* Under the preview's bottom corners; in one column, pinned to the bottom. */}
+            <div className="sticky -bottom-4 z-1 -mx-4 -mb-4 shrink-0 border-t border-neutral-200 bg-[#fffff9] px-4 py-3 @two:top-(--actions-top) @two:bottom-auto @two:col-start-1 @two:row-start-2 @two:m-0 @two:w-(--preview-two) @two:border-t-0 @two:p-0 @three:static @three:col-start-2 @three:w-(--preview-three)">
+              <PostActions warnings={warnings} assets={assets} />
+            </div>
           </div>
         </main>
 
@@ -151,8 +166,9 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
           count={batchCount}
           width={300}
           tint={BATCH_TINT}
+          sheet={sheet}
           open={batchOpen}
-          onToggle={() => toggle("batch")}
+          onToggle={toggleBatch}
         >
           <BatchList assets={assets} />
         </Drawer>

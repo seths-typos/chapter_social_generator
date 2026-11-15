@@ -198,7 +198,10 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
             Couldn’t download: {downloadError}
           </span>
         )}
-        {status && <span className="text-[#555]">{status}</span>}
+        {/* Always present, so a screen reader hears the text when it changes. */}
+        <span role="status" className="text-[#555] empty:hidden">
+          {status}
+        </span>
         {draft && blocking.length === 0 && problem && (
           <LoadProblem problem={problem} onRetry={failures.retry} />
         )}
