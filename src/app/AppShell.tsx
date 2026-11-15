@@ -108,7 +108,7 @@ export function AppShell({ missingFonts }: { missingFonts: readonly RequiredFont
           open={photosOpen}
           onToggle={() => toggle("photos")}
         >
-          <PhotoPool />
+          <PhotoPool onImport={() => setOpenDrawer("photos")} />
         </Drawer>
 
         <main

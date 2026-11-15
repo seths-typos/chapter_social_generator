@@ -127,6 +127,9 @@ describe("text card in drafts and posts", () => {
   it("needs text once switched on", () => {
     expect(missingInputs(withCard(filled, "", " "))).toEqual(["card text"]);
     expect(missingInputs(withCard(filled, "", "Nom Wah"))).toEqual([]);
+    // A heading on its own isn't enough: Text is the required field.
+    expect(missingInputs(withCard(filled, "food and art:", ""))).toEqual(["card text"]);
+    expect(missingInputs(withCard(filled, "food and art:", "Nom Wah"))).toEqual([]);
   });
 
   it("round-trips through a post", () => {

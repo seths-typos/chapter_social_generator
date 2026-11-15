@@ -133,7 +133,7 @@ An optional white card of text above the photos, offered on Photo (not Cover, wh
 - **Card:** x 116, width 848 (the polaroid and Info card width), from 48 px below the top of the canvas down to the split line. Fill `#FDFFFD`, standard drop shadow. Drawn above the photos.
 - **Photos:** the template's usual full-canvas layout is scaled by the lower area's share of the height (74%) and centred horizontally, with its top at the split line. Positions, rotations, frame and shadow all scale together, so the layout's own margins become the padding around it.
 - **Text:** an optional heading in slanted Druk Medium, then one line of text in Druk Medium, both centred and black. The text is 120 px and the heading is 16% smaller (0.84 × the text size). Both shrink together, down to 40 px for the text, until each fits the card width and the two together fit its height, each less 36 px of padding per side. Line height is 1.15 × each line's size. Nothing wraps. The block is centred vertically in the card; without a heading the text sits alone in the middle.
-- **Overflow:** if the text doesn't fit at 40 px, the post can't be added until it is shortened. A card switched on with no text also blocks the post.
+- **Overflow:** if the text doesn't fit at 40 px, the post can't be added until it is shortened. A card switched on without its line of text also blocks the post: the heading is optional, the text is required, so a heading on its own is not enough.
 - No italic Druk face is declared, so the heading is the browser's slant of Druk Medium (or of the fallback).
 
 ### Graphic (`graphic`)

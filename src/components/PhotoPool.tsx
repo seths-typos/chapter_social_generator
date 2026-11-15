@@ -17,7 +17,7 @@ const hasFiles = (e: DragEvent): boolean => e.dataTransfer?.types.includes("File
  * The session photo pool: add photos with the button or by dropping files anywhere on
  * the window. docs/prd.md#session-photo-pool
  */
-export function PhotoPool() {
+export function PhotoPool({ onImport }: { onImport?: () => void }) {
   const pool = useAppStore((s) => s.pool);
   const batch = useAppStore((s) => s.batch);
   const draft = useAppStore((s) => s.draft);
@@ -49,13 +49,25 @@ export function PhotoPool() {
   const [failures, setFailures] = useState<readonly string[]>([]);
   const [dragging, setDragging] = useState(false);
 
-  async function add(files: readonly File[]) {
-    if (files.length === 0) return;
-    setFailures([]);
-    setProgress({ done: 0, total: files.length });
-    const result = await importToPool(files, (done, total) => setProgress({ done, total }));
-    setProgress(null);
-    setFailures(result.failures);
+  // Imports run one after another, so a second drop can't hide the first one's progress
+  // or replace its failure messages.
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const waiting = useRef(0);
+
+  function add(files: readonly File[]): Promise<void> {
+    if (files.length === 0) return queue.current;
+    // Progress and failures are shown in this panel, which may be a closed drawer.
+    onImport?.();
+    if (waiting.current === 0) setFailures([]);
+    waiting.current++;
+    queue.current = queue.current.then(async () => {
+      setProgress({ done: 0, total: files.length });
+      const result = await importToPool(files, (done, total) => setProgress({ done, total }));
+      setFailures((earlier) => [...earlier, ...result.failures]);
+      waiting.current--;
+      if (waiting.current === 0) setProgress(null);
+    });
+    return queue.current;
   }
   const addRef = useRef(add);
   useEffect(() => {

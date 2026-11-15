@@ -341,6 +341,34 @@ describe("editing a batch item", () => {
     expect(s().batch[0]!.post).toMatchObject({ grain: false });
   });
 
+  it("loading the item already being edited keeps the unsaved changes", () => {
+    readyPhotoPost("p1");
+    const id = s().addToBatch()!;
+    s().loadForEdit(id);
+    s().setGrain(true);
+    s().loadForEdit(id);
+    expect(s().draft).toMatchObject({ grain: true });
+  });
+
+  it("records what last sent the editor back to the picker", () => {
+    expect(s().lastAction).toBeNull();
+    readyPhotoPost("p1");
+    const id = s().addToBatch()!;
+    expect(s().lastAction).toBe("added");
+    s().loadForEdit(id);
+    expect(s().lastAction).toBeNull();
+    s().cancelEdit();
+    expect(s().lastAction).toBe("cancelled");
+    s().loadForEdit(id);
+    s().saveEdit();
+    expect(s().lastAction).toBe("saved");
+    s().loadForEdit(id);
+    s().removeItem(id);
+    expect(s().lastAction).toBe("removed");
+    s().setTemplate("info");
+    expect(s().lastAction).toBeNull();
+  });
+
   it("removing the item being edited clears the editor", () => {
     readyPhotoPost("p1");
     const id = s().addToBatch()!;

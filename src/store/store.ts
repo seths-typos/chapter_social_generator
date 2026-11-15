@@ -32,6 +32,7 @@ import {
 } from "./draft";
 import {
   type BatchItem,
+  type LastAction,
   type PhotoMode,
   type PoolPhoto,
   type Post,
@@ -62,6 +63,8 @@ export interface AppState {
   draft: Draft | null;
   /** Batch item currently loaded for editing, if any. */
   editingId: string | null;
+  /** What last returned the editor to the template picker; null while a post is open. */
+  lastAction: LastAction | null;
   /** Choose a template: starts a draft, or converts the current one keeping compatible inputs. */
   setTemplate: (template: TemplateId) => void;
   /** Discard the draft and return to the template picker. */
@@ -164,9 +167,11 @@ export function createAppStore(): StoreApi<AppState> {
       // ── Editor draft
       draft: null,
       editingId: null,
+      lastAction: null,
       setTemplate: (template) =>
         set((s) => ({
           activeSlot: 0,
+          lastAction: null,
           draft: s.draft
             ? convertDraft(s.draft, template, { lastUsedTexture: s.lastUsedTexture })
             : newDraft(template, s.lastUsedTexture ?? undefined),
@@ -220,13 +225,16 @@ export function createAppStore(): StoreApi<AppState> {
           draft: null,
           editingId: null,
           activeSlot: 0,
+          lastAction: "added",
         });
         return item.id;
       },
       loadForEdit: (id) => {
+        // Already open: loading it again would throw away the unsaved changes.
+        if (get().editingId === id) return;
         const item = get().batch.find((b) => b.id === id);
         if (!item) return;
-        set({ draft: fromPost(item.post), editingId: id, activeSlot: 0 });
+        set({ draft: fromPost(item.post), editingId: id, activeSlot: 0, lastAction: null });
       },
       saveEdit: () => {
         const { draft, editingId, batch } = get();
@@ -239,10 +247,17 @@ export function createAppStore(): StoreApi<AppState> {
           draft: null,
           editingId: null,
           activeSlot: 0,
+          lastAction: "saved",
         });
         return true;
       },
-      cancelEdit: () => set({ draft: null, editingId: null, activeSlot: 0 }),
+      cancelEdit: () =>
+        set((s) => ({
+          draft: null,
+          editingId: null,
+          activeSlot: 0,
+          lastAction: s.editingId ? "cancelled" : s.lastAction,
+        })),
 
       // ── Batch
       batch: [],
@@ -251,7 +266,9 @@ export function createAppStore(): StoreApi<AppState> {
       removeItem: (id) =>
         set((s) => ({
           batch: s.batch.filter((b) => b.id !== id),
-          ...(s.editingId === id ? { editingId: null, draft: null } : {}),
+          ...(s.editingId === id
+            ? { editingId: null, draft: null, activeSlot: 0, lastAction: "removed" as const }
+            : {}),
         })),
       duplicateItem: (id) => {
         const { batch } = get();

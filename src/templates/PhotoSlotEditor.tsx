@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { isLowResolution } from "@/image/importImage";
 import { LOW_RES_SHORT_EDGE, PHOTO_ACCEPT } from "@/image/limits";
 import { previewUrl } from "@/image/previewUrl";
@@ -42,6 +42,11 @@ export function PhotoSlotEditor({
   const [dragging, setDragging] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<number | null>(null);
   const index = Math.min(active, draft.slots.length - 1);
+  // An upload can take seconds (HEIC), and the count or selection may change meanwhile.
+  const latestIndex = useRef(index);
+  useEffect(() => {
+    latestIndex.current = index;
+  });
   const slot = draft.slots[index];
   const current = pool.find((p) => p.id === slot?.photoId);
 
@@ -85,7 +90,7 @@ export function PhotoSlotEditor({
     setBusy(true);
     const result = await importImage(file);
     setBusy(false);
-    if (result.ok) setPhoto(index, result.photoId);
+    if (result.ok) setPhoto(latestIndex.current, result.photoId);
     else setError(result.message);
   }
 

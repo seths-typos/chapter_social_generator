@@ -115,3 +115,6 @@ export interface SessionTexture {
   /** Object URL for the picker thumbnail. Revoked when the page unloads. */
   previewUrl?: string;
 }
+
+/** What last sent the editor back to the template picker. */
+export type LastAction = "added" | "saved" | "cancelled" | "removed";

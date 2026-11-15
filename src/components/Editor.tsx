@@ -4,6 +4,7 @@ import { pngFilename } from "@/export/filenames";
 import { importToPool } from "@/image/importToPool";
 import type { FitWarning, RenderAssets } from "@/render/types";
 import { defaultName, useAppStore } from "@/store/store";
+import { pickerStatus } from "./postStatus";
 import type { ImportOutcome } from "@/templates/definition";
 import { missingInputs, templateFor, toPost } from "@/templates/registry";
 import {
@@ -69,6 +70,7 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
   const editing = useAppStore((s) => s.batch.find((b) => b.id === s.editingId) ?? null);
   const saveEdit = useAppStore((s) => s.saveEdit);
   const cancelEdit = useAppStore((s) => s.cancelEdit);
+  const lastAction = useAppStore((s) => s.lastAction);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const missing = draft ? missingInputs(draft) : [];
@@ -88,9 +90,7 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
   }
 
   const status = !draft
-    ? batch.length > 0
-      ? `Added. ${batch.length} ${batch.length === 1 ? "post" : "posts"} in the batch. Choose a template for the next one.`
-      : ""
+    ? pickerStatus(lastAction, batch.length)
     : blocking.length > 0
       ? "Shorten the text to finish this post."
       : loading.length > 0
@@ -116,7 +116,8 @@ export function PostActions({ warnings, assets }: PostActionsProps) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
+      {/* Wraps: with Cancel showing, three buttons don't fit a narrow preview column. */}
+      <div className="flex flex-wrap items-center gap-2">
         <span className="group relative">
           <button
             type="button"

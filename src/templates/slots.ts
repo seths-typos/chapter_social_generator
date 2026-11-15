@@ -52,7 +52,8 @@ export function slotDraftOps<K extends SlotTemplateId>(
       const card = activeTextCard(draft);
       return [
         ...(empty === 0 ? [] : [n === 1 ? "photo" : `${empty} of ${n} photos`]),
-        ...(card && !hasCardText(card) ? ["card text"] : []),
+        // The heading is optional; the line of text is not.
+        ...(card && card.text.trim() === "" ? ["card text"] : []),
       ];
     },
     toPost: (draft) => {

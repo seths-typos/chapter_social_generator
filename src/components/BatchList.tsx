@@ -104,7 +104,9 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
     });
 
   function edit(item: BatchItem) {
-    if (draft && editingId !== item.id) {
+    // Already open in the editor: nothing to load, and nothing to lose.
+    if (editingId === item.id) return;
+    if (draft) {
       const ok = window.confirm(`Edit ${item.name}? The post you’re working on will be discarded.`);
       if (!ok) return;
     }
@@ -242,7 +244,13 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
                     >
                       PNG
                     </button>
-                    <button type="button" className={smallButton} onClick={() => remove(item)}>
+                    {/* Off during Download all: the export is still reading this post's photos. */}
+                    <button
+                      type="button"
+                      className={smallButton}
+                      disabled={exporting}
+                      onClick={() => remove(item)}
+                    >
                       Remove
                     </button>
                   </div>
