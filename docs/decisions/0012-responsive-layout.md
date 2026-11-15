@@ -21,7 +21,7 @@ The interface works from 360px wide upwards. This replaces the 1200px minimum an
 
 ## Consequences
 
-- One DOM serves all three arrangements (flex `order`, `display: contents` and grid placement), so the preview canvas and the form are never mounted twice.
+- One DOM serves all three arrangements, so the preview canvas and the form are never mounted twice. It was first done with flex `order` and `display: contents`; [0013](0013-code-review-fixes.md) changed it to a fixed source order placed by grid, so keyboard order matches the screen.
 - On a laptop between roughly 1100px and 1400px wide, opening a drawer switches the editor from three zones to two.
 - A phone held sideways is usable but cramped: the preview is about 110px wide.
 - "Nothing is saved. Download before closing." is hidden below 640px to make room for the title.

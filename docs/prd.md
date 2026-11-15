@@ -165,7 +165,7 @@ Both drawers start closed and show a count on their handle. Opening one closes t
 - **The UI is a tool, not a template.** It should be clean, neutral and quiet so the preview is the most colorful thing on screen. Hints of the brand are welcome, such as the `ch.` mark in the header or the lavender accent from the Info badge, but the UI must not compete with the post.
 - **UI typography:** **Druk** for titles and headings (the app title "Chapter Post Generator", card headings such as "Texture" and "Photos", drawer titles). **Geist** (free, OFL) for body text, field labels, inputs and buttons.
 - **Required fields** are marked with an asterisk. A disabled Add to batch or Download PNG says why in a tooltip.
-- **Accessibility:** the target is WCAG 2.2 AA (text contrast, visible focus, labelled required fields, reduced motion honoured). Known gap: swapping and repositioning photos are drag-only.
+- **Accessibility:** the target is WCAG 2.2 AA (text contrast, visible focus, labelled required fields, reduced motion honoured, keyboard order that matches the screen, status and error messages announced, bottom sheets that behave as dialogs). Known gap: swapping and repositioning photos are drag-only.
 - **Device:** designed for laptop and desktop first. It works from 360px wide upwards, with larger targets and field text on touch screens.
 - **Errors in plain language:** for example "That file isn't an image" or "Photo is too small for a crisp export (min 1080px)". Show a warning, not a block, for low-resolution photos.
 - **Fast path by default:** sensible defaults everywhere, so he can make a good post by choosing a template, choosing a photo and clicking Add. Fine-tuning controls are there when wanted, never required.

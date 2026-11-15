@@ -21,7 +21,7 @@ How the Chapter Social Generator is built. Read with the [PRD](prd.md) (what it 
 | Language | **TypeScript** (strict) | |
 | UI | **React 19** | |
 | State | **Zustand** | One in-memory store: photo pool, session textures, editor draft, batch |
-| Styling | **Tailwind CSS v4** | Neutral UI. Brand tokens in the theme (lavender accent `#EBCBFE`/`#CB7FF8`). |
+| Styling | **Tailwind CSS v4** | Neutral UI. UI fonts and layout breakpoints in the theme; shared UI classes in `src/templates/formStyles.ts`. |
 | ZIP | **`fflate`** | `zipSync`, store-only (level 0), since PNGs are already compressed |
 | HEIC | **`heic2any`** | Loaded with a dynamic `import()` only when a HEIC/HEIF file is added |
 | Unit tests | **Vitest** | Pure logic only (see [Testing](#testing)) |
@@ -95,7 +95,6 @@ Each template file exports one `TemplateDefinition` (`src/templates/definition.t
 | `photoIds`, `clearPhoto` | Which pool photos a post uses, and removing one from a draft |
 | `render` | Draws everything above the background texture and returns fit warnings |
 | `Editor` (optional) | The template's own form fields. It gets its draft, an `onChange`, the photo pool and an `importImage` function as props, and never imports the store. |
-| `placeholder` (optional) | Marks a template whose render is still a stand-in. The picker shows it disabled, labelled "Soon". |
 | `hasTypedText` (optional) | Whether the draft holds typed text that switching template would discard. The picker asks before switching. |
 | `fixture` (optional) | Fills a draft with the inputs of the reference render. Dev only: `?template={id}&fixture`, and the comparison view. |
 
@@ -220,6 +219,11 @@ Unit tests cover the pure logic:
 - Homography: known corner sets map to the expected points
 - Shrink-to-fit and wrap decisions, using a mocked `measureText`
 - Photo presets for 2–4 photos: every polaroid's rotated bounds, plus shadow, stay inside the canvas
+- The slot edits the forms make (`slotEdits.ts`): filling, resizing and reselecting photo positions
+- The store: the batch, editing a batch post, and what the status line reports
+- Asset loading: which textures are in use, releasing the rest, reporting and retrying a failed load, and when a thumbnail needs redrawing
+
+Behaviour that needs a DOM (focus, the bottom-sheet dialog, wrapping, scroll position) has no automated test; it is checked in a browser.
 
 ## Hosting and deployment
 
