@@ -4,9 +4,9 @@ import { LOW_RES_SHORT_EDGE, PHOTO_ACCEPT } from "@/image/limits";
 import { previewUrl } from "@/image/previewUrl";
 import { zoomTo, type Size, type View } from "@/render/fit";
 import type { PhotoDraft } from "@/store/draft";
-import { emptySlot } from "@/store/draft";
 import { POLAROID, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from "./constants";
 import type { EditorProps } from "./definition";
+import { selectionAfterSwap, withSlotPhoto, withSlotView } from "./slotEdits";
 import { swapSlots } from "./swapSlots";
 import {
   CARD,
@@ -55,27 +55,17 @@ export function PhotoSlotEditor({
     if (!current) return;
     const size = { w: current.width, h: current.height };
     onChange(
-      (d) =>
-        ({
-          ...d,
-          slots: d.slots.map((s, i) => (i === index ? { ...s, ...change(size, s) } : s)),
-        }) as typeof d,
+      (d) => ({ ...d, slots: withSlotView(d.slots, index, (s) => change(size, s)) }) as typeof d,
     );
   };
 
   const setPhoto = (slot: number, photoId: string | null) =>
-    onChange(
-      (d) =>
-        ({
-          ...d,
-          slots: d.slots.map((s, i) => (i === slot ? { ...emptySlot(), photoId } : s)),
-        }) as typeof d,
-    );
+    onChange((d) => ({ ...d, slots: withSlotPhoto(d.slots, slot, photoId) }) as typeof d);
 
   /** Exchange two slots' photos. The selection stays on the same photo. */
   const swap = (from: number, to: number) => {
     onChange((d) => ({ ...d, slots: swapSlots(d.slots, from, to) }) as typeof d);
-    setActive(index === from ? to : index === to ? from : index);
+    setActive(selectionAfterSwap(index, from, to));
   };
   const endDrag = () => {
     setDragging(null);

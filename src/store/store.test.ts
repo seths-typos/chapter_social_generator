@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { hasSlots } from "./draft";
+import { withSlotCount, withSlotPhoto } from "@/templates/slotEdits";
+import { hasSlots, type Draft, type InfoFields } from "./draft";
 import { createAppStore, defaultName } from "./store";
 import type { PoolPhoto } from "./types";
 
@@ -29,11 +30,30 @@ beforeEach(() => {
   store = createAppStore();
 });
 
+// The edits the template forms make, through `editDraft` and the helpers the forms use.
+/** Edit the draft whatever its template; a no-op with no draft. */
+function edit(fn: (d: Draft) => Draft) {
+  const d = s().draft;
+  if (d) s().editDraft(d.template, fn as never);
+}
+const setSlotPhoto = (index: number, photoId: string | null) =>
+  edit((d) =>
+    hasSlots(d) ? ({ ...d, slots: withSlotPhoto(d.slots, index, photoId) } as Draft) : d,
+  );
+const setGrain = (grain: boolean) => edit((d) => (hasSlots(d) ? ({ ...d, grain } as Draft) : d));
+const setPhotoCount = (count: number) =>
+  edit((d) => (hasSlots(d) ? ({ ...d, slots: withSlotCount(d.slots, count) } as Draft) : d));
+const resetSlotView = (index: number) => s().setSlotView(index, { panX: 0, panY: 0, zoom: 1 });
+const setGraphic = (photoId: string | null) =>
+  s().editDraft("graphic", (d) => ({ ...d, graphicId: photoId }));
+const setInfo = (patch: Partial<InfoFields>) =>
+  s().editDraft("info", (d) => ({ ...d, info: { ...d.info, ...patch } }));
+
 /** Start a photo draft with one pool photo in its slot, ready for addToBatch. */
 function readyPhotoPost(photoId = "p1") {
   if (!s().pool.some((p) => p.id === photoId)) s().addPhotos([photo(photoId)]);
   s().setTemplate("photo");
-  s().setSlotPhoto(0, photoId);
+  setSlotPhoto(0, photoId);
 }
 
 describe("initial state", () => {
@@ -52,10 +72,10 @@ describe("initial state", () => {
   });
 
   it("draft setters are no-ops with no draft", () => {
-    s().setSlotPhoto(0, "p1");
-    s().setInfo({ title: "x" });
+    setSlotPhoto(0, "p1");
+    setInfo({ title: "x" });
     s().setTexture(upload);
-    s().setGrain(true);
+    setGrain(true);
     expect(s().draft).toBeNull();
     expect(s().addToBatch()).toBeNull();
   });
@@ -80,7 +100,7 @@ describe("photo pool", () => {
   it("clears a removed photo from the draft's slots", () => {
     s().addPhotos([photo("p1")]);
     s().setTemplate("photo");
-    s().setSlotPhoto(0, "p1");
+    setSlotPhoto(0, "p1");
     s().removePhoto("p1");
     expect(slots()[0]!.photoId).toBeNull();
   });
@@ -88,7 +108,7 @@ describe("photo pool", () => {
   it("clears a removed photo from a graphic draft", () => {
     s().addPhotos([photo("g1")]);
     s().setTemplate("graphic");
-    s().setGraphic("g1");
+    setGraphic("g1");
     s().removePhoto("g1");
     expect(s().draft).toMatchObject({ template: "graphic", graphicId: null });
   });
@@ -114,7 +134,7 @@ describe("choosing and switching templates", () => {
   it("setTemplate starts a draft with the template's default texture", () => {
     s().setTemplate("info");
     expect(s().draft).toMatchObject({ template: "info", texture: tile });
-    s().clearDraft();
+    s().cancelEdit();
     expect(s().draft).toBeNull();
     s().setTemplate("cover");
     expect(s().draft).toMatchObject({ template: "cover", texture: wood });
@@ -132,45 +152,43 @@ describe("choosing and switching templates", () => {
   it("switching template keeps photos between photo templates and drops info text", () => {
     s().addPhotos([photo("p1")]);
     s().setTemplate("photo");
-    s().setSlotPhoto(0, "p1");
-    s().setGrain(true);
-    s().setPhotoCount(2);
+    setSlotPhoto(0, "p1");
+    setGrain(true);
+    setPhotoCount(2);
     expect(slots().map((x) => x.photoId)).toEqual(["p1", null]);
     s().setTemplate("cover");
     expect(slots().map((x) => x.photoId)).toEqual(["p1"]);
     expect(s().draft).toMatchObject({ grain: true });
     s().setTemplate("info");
-    s().setInfo({ title: "Hello" });
+    setInfo({ title: "Hello" });
     s().setTemplate("photo");
     expect(slots()[0]!.photoId).toBeNull(); // photos don't survive via Info
     expect("info" in s().draft!).toBe(false);
   });
 
-  it("clamps pan, zoom and photo count", () => {
+  it("clamps pan and zoom", () => {
     s().setTemplate("photo");
     s().setSlotView(0, { panX: 5, panY: -5, zoom: 10 });
     expect(slots()[0]).toMatchObject({ panX: 1, panY: -1, zoom: 3 });
     s().setSlotView(0, { zoom: 0.1 });
     expect(slots()[0]!.zoom).toBe(1);
-    s().resetSlotView(0);
+    resetSlotView(0);
     expect(slots()[0]).toMatchObject({ panX: 0, panY: 0, zoom: 1 });
-    s().setPhotoCount(9 as 4);
-    expect(slots()).toHaveLength(4);
   });
 
   it("choosing a new photo for a slot resets that slot's view", () => {
     s().setTemplate("photo");
     s().setSlotView(0, { zoom: 2 });
-    s().setSlotPhoto(0, "p9");
+    setSlotPhoto(0, "p9");
     expect(slots()[0]).toEqual({ photoId: "p9", panX: 0, panY: 0, zoom: 1 });
   });
 
   it("patches info fields only on an info draft", () => {
     s().setTemplate("photo");
-    s().setInfo({ title: "ignored" });
+    setInfo({ title: "ignored" });
     expect("info" in s().draft!).toBe(false);
     s().setTemplate("info");
-    s().setInfo({ title: "Hi", eventNumber: 3 });
+    setInfo({ title: "Hi", eventNumber: 3 });
     expect(s().draft).toMatchObject({ info: { title: "Hi", eventNumber: 3, body: "" } });
   });
 
@@ -187,7 +205,7 @@ describe("choosing and switching templates", () => {
 
   it("addPhotoToDraft fills the selected position, then selects the next empty one", () => {
     s().setTemplate("photo");
-    s().setPhotoCount(3);
+    setPhotoCount(3);
     s().setActiveSlot(1);
     s().addPhotoToDraft("b");
     expect(slots().map((sl) => sl.photoId)).toEqual([null, "b", null]);
@@ -211,7 +229,7 @@ describe("choosing and switching templates", () => {
     expect(s().draft).toBe(before);
     s().editDraft("graphic", (d) => ({ ...d, graphicId: "g1" }));
     expect(s().draft).toMatchObject({ template: "graphic", graphicId: "g1" });
-    s().clearDraft();
+    s().cancelEdit();
     s().editDraft("graphic", (d) => ({ ...d, graphicId: "g2" }));
     expect(s().draft).toBeNull();
   });
@@ -228,7 +246,7 @@ describe("batch", () => {
   it("addToBatch snapshots the post, names it, remembers the texture and returns to the picker", () => {
     readyPhotoPost("p1");
     s().setTexture(upload);
-    s().setGrain(true);
+    setGrain(true);
     const id = s().addToBatch();
     expect(id).not.toBeNull();
     expect(s().batch).toHaveLength(1);
@@ -259,7 +277,7 @@ describe("batch", () => {
     readyPhotoPost("p1");
     s().addToBatch();
     s().setTemplate("cover");
-    s().setSlotPhoto(0, "p1");
+    setSlotPhoto(0, "p1");
     s().addToBatch();
     expect(s().batch.map((b) => b.name)).toEqual(["photo-1", "photo-2", "cover-1"]);
     expect(defaultName("photo", s().batch)).toBe("photo-3");
@@ -312,7 +330,7 @@ describe("editing a batch item", () => {
     s().loadForEdit(id);
     expect(s().editingId).toBe(id);
     expect(slots()[0]!.photoId).toBe("p1");
-    s().setGrain(true);
+    setGrain(true);
     expect(s().saveEdit()).toBe(true);
     expect(s().batch).toHaveLength(1);
     expect(s().batch[0]!.post).toMatchObject({ grain: true });
@@ -325,7 +343,7 @@ describe("editing a batch item", () => {
     readyPhotoPost("p1");
     const id = s().addToBatch()!;
     s().loadForEdit(id);
-    s().setSlotPhoto(0, null);
+    setSlotPhoto(0, null);
     expect(s().saveEdit()).toBe(false);
     expect(s().editingId).toBe(id);
   });
@@ -334,7 +352,7 @@ describe("editing a batch item", () => {
     readyPhotoPost("p1");
     const id = s().addToBatch()!;
     s().loadForEdit(id);
-    s().setGrain(true);
+    setGrain(true);
     s().cancelEdit();
     expect(s().editingId).toBeNull();
     expect(s().draft).toBeNull();
@@ -345,7 +363,7 @@ describe("editing a batch item", () => {
     readyPhotoPost("p1");
     const id = s().addToBatch()!;
     s().loadForEdit(id);
-    s().setGrain(true);
+    setGrain(true);
     s().loadForEdit(id);
     expect(s().draft).toMatchObject({ grain: true });
   });

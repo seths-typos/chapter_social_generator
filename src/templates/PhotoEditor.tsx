@@ -1,8 +1,8 @@
 import { createElement, type ComponentType, type ReactNode } from "react";
-import { emptySlot } from "@/store/draft";
 import { PHOTO_SLOTS } from "./constants";
 import type { EditorProps } from "./definition";
 import { PhotoSlotEditor } from "./PhotoSlotEditor";
+import { selectionAfterCount, withSlotCount } from "./slotEdits";
 import { TextCardEditor } from "./TextCardEditor";
 import { CARD, REQUIRED_MARK, LABEL, CHECK_ROW, CHECKBOX, segment } from "./formStyles";
 
@@ -18,13 +18,8 @@ export function PhotoEditor(props: EditorProps<"photo">) {
   const { draft, onChange, activeSlot, onActiveSlot } = props;
   // Fewer photos drops the last slots; more adds empty ones. Existing photos stay put.
   const setCount = (count: number) => {
-    const slots = Array.from({ length: count }, (_, i) => draft.slots[i] ?? emptySlot());
-    onChange((d) => ({ ...d, slots }));
-    // Keep the selection on a position that exists, and move it off a filled one to the
-    // first empty one, so the next photo clicked fills the new space.
-    const firstEmpty = slots.findIndex((s) => s.photoId === null);
-    const current = Math.min(activeSlot, count - 1);
-    const next = slots[current]?.photoId !== null && firstEmpty !== -1 ? firstEmpty : current;
+    onChange((d) => ({ ...d, slots: withSlotCount(d.slots, count) }));
+    const next = selectionAfterCount(withSlotCount(draft.slots, count), activeSlot);
     if (next !== activeSlot) onActiveSlot(next);
   };
 

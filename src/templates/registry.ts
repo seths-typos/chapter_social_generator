@@ -103,16 +103,6 @@ export function clearPhotoFromDraft(draft: Draft, photoId: string): Draft {
   return templateFor(draft.template).clearPhoto(draft, photoId);
 }
 
-/** Give a slot-based draft `count` slots (clamped to its template's range), keeping existing photos. */
-export function withPhotoCount(draft: Draft, count: number): Draft {
-  const range = templateFor(draft.template).slots;
-  if (!hasSlots(draft) || !range) return draft;
-  const n = clamp(count, range.min, range.max);
-  if (n === draft.slots.length) return draft;
-  const slots = Array.from({ length: n }, (_, i) => draft.slots[i] ?? emptySlot());
-  return { ...draft, slots } as Draft;
-}
-
 /**
  * Switch an in-progress draft to another template. Carries the texture (when chosen or
  * carried over from the session) and photos between the slot-based templates; drops the

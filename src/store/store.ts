@@ -9,7 +9,7 @@
 
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { ZOOM_MAX, ZOOM_MIN, type PhotoCount } from "@/templates/constants";
+import { ZOOM_MAX, ZOOM_MIN } from "@/templates/constants";
 import {
   acceptPhotoInDraft,
   clearPhotoFromDraft,
@@ -18,16 +18,13 @@ import {
   newDraft,
   photoIdsInPost,
   toPost,
-  withPhotoCount,
 } from "@/templates/registry";
 import {
-  emptySlot,
   hasSlots,
   slotCount,
   type Draft,
   type DraftFor,
   type DraftSlot,
-  type InfoFields,
   type PhotoDraft,
 } from "./draft";
 import {
@@ -67,12 +64,7 @@ export interface AppState {
   lastAction: LastAction | null;
   /** Choose a template: starts a draft, or converts the current one keeping compatible inputs. */
   setTemplate: (template: TemplateId) => void;
-  /** Discard the draft and return to the template picker. */
-  clearDraft: () => void;
   setTexture: (texture: TextureRef) => void;
-  setGrain: (grain: boolean) => void;
-  setPhotoCount: (count: PhotoCount) => void;
-  setSlotPhoto: (index: number, photoId: string | null) => void;
   /** The photo position selected in the editor. Always 0 for one-photo templates. */
   activeSlot: number;
   setActiveSlot: (slot: number) => void;
@@ -82,14 +74,11 @@ export interface AppState {
    */
   addPhotoToDraft: (photoId: string) => void;
   setSlotView: (index: number, view: { panX?: number; panY?: number; zoom?: number }) => void;
-  resetSlotView: (index: number) => void;
   /**
    * Edit the draft's template-specific fields. A no-op unless the draft is for `template`.
    * New templates use this rather than adding their own store action.
    */
   editDraft: <K extends TemplateId>(template: K, fn: (draft: DraftFor<K>) => DraftFor<K>) => void;
-  setGraphic: (photoId: string | null) => void;
-  setInfo: (patch: Partial<InfoFields>) => void;
   /** Snapshot the draft into the batch and return to the picker. Null if the draft is incomplete. */
   addToBatch: () => string | null;
   loadForEdit: (id: string) => void;
@@ -176,10 +165,7 @@ export function createAppStore(): StoreApi<AppState> {
             ? convertDraft(s.draft, template, { lastUsedTexture: s.lastUsedTexture })
             : newDraft(template, s.lastUsedTexture ?? undefined),
         })),
-      clearDraft: () => set({ draft: null, editingId: null, activeSlot: 0 }),
       setTexture: (texture) => updateDraft((d) => ({ ...d, texture, textureChosen: true })),
-      setGrain: (grain) => updatePhotoDraft((d) => ({ ...d, grain })),
-      setPhotoCount: (count) => updateDraft((d) => withPhotoCount(d, count)),
       activeSlot: 0,
       setActiveSlot: (slot) => set({ activeSlot: Math.max(0, slot) }),
       addPhotoToDraft: (photoId) =>
@@ -191,8 +177,6 @@ export function createAppStore(): StoreApi<AppState> {
           const empty = hasSlots(draft) ? draft.slots.findIndex((sl) => sl.photoId === null) : -1;
           return { draft, activeSlot: empty === -1 ? slot : empty };
         }),
-      setSlotPhoto: (index, photoId) =>
-        updatePhotoDraft((d) => mapSlot(d, index, () => ({ ...emptySlot(), photoId }))),
       setSlotView: (index, view) =>
         updatePhotoDraft((d) =>
           mapSlot(d, index, (sl) => ({
@@ -202,12 +186,8 @@ export function createAppStore(): StoreApi<AppState> {
             zoom: clamp(view.zoom ?? sl.zoom, ZOOM_MIN, ZOOM_MAX),
           })),
         ),
-      resetSlotView: (index) =>
-        updatePhotoDraft((d) => mapSlot(d, index, (sl) => ({ ...sl, panX: 0, panY: 0, zoom: 1 }))),
       editDraft: <K extends TemplateId>(template: K, fn: (d: DraftFor<K>) => DraftFor<K>) =>
         updateDraft((d) => (d.template === template ? fn(d as DraftFor<K>) : d)),
-      setGraphic: (photoId) => get().editDraft("graphic", (d) => ({ ...d, graphicId: photoId })),
-      setInfo: (patch) => get().editDraft("info", (d) => ({ ...d, info: { ...d.info, ...patch } })),
 
       addToBatch: () => {
         const { draft, batch } = get();

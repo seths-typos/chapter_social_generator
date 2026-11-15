@@ -16,13 +16,16 @@ import {
   TEMPLATE_LIST,
   TEMPLATES,
   toPost,
-  withPhotoCount,
 } from "./registry";
+import { withSlotCount } from "./slotEdits";
 
 const wood = { kind: "library", id: "wood-dark-worn" } as const;
 const tile = { kind: "library", id: "plaster-white" } as const;
 const upload = { kind: "upload", id: "u1" } as const;
 const slot = (photoId: string) => ({ photoId, panX: 0, panY: 0, zoom: 1 });
+/** A slot-based draft with `count` positions, as the Photo form makes it. */
+const withPhotoCount = (d: Draft, count: number): Draft =>
+  hasSlots(d) ? ({ ...d, slots: withSlotCount(d.slots, count) } as Draft) : d;
 const photoPost = (photoId: string): Post => ({
   template: "photo",
   slots: [slot(photoId)],
@@ -114,27 +117,6 @@ describe("convertDraft", () => {
     expect(convertDraft(chosen, "info", none).texture).toEqual(upload);
     const carried = newDraft("photo", upload);
     expect(convertDraft(carried, "info", { lastUsedTexture: upload }).texture).toEqual(upload);
-  });
-});
-
-describe("withPhotoCount", () => {
-  it("resizes Photo slots, keeping photos, and clamps to 1–4", () => {
-    let d = newDraft("photo");
-    if (!hasSlots(d)) throw new Error();
-    d.slots[0]!.photoId = "a";
-    d = withPhotoCount(d, 4);
-    expect(hasSlots(d) && d.slots.map((s) => s.photoId)).toEqual(["a", null, null, null]);
-    d = withPhotoCount(d, 2);
-    expect(slotCount(d)).toBe(2);
-    expect(slotCount(withPhotoCount(d, 9))).toBe(4);
-    expect(slotCount(withPhotoCount(d, 0))).toBe(1);
-  });
-
-  it("is a no-op for other templates", () => {
-    const cover = newDraft("cover");
-    expect(withPhotoCount(cover, 4)).toBe(cover);
-    const info = newDraft("info");
-    expect(withPhotoCount(info, 4)).toBe(info);
   });
 });
 
