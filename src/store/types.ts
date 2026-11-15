@@ -109,7 +109,6 @@ export interface BatchItem {
 export interface SessionTexture {
   id: string;
   name: string;
-  file: Blob;
   width: number;
   height: number;
   /** Object URL for the picker thumbnail. Revoked when the page unloads. */

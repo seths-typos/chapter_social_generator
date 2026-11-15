@@ -107,10 +107,3 @@ export function covers(inner: Rect, outer: Rect, eps = 1e-6): boolean {
     inner.y + inner.h >= outer.y + outer.h - eps
   );
 }
-
-/** Offset a rect. */
-export const translateRect = (r: Rect, dx: number, dy: number): Rect => ({
-  ...r,
-  x: r.x + dx,
-  y: r.y + dy,
-});

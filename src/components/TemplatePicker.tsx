@@ -77,19 +77,15 @@ export function TemplatePicker({ assets }: { assets: RenderAssets }) {
             <button
               key={t.id}
               type="button"
-              disabled={t.placeholder}
               aria-pressed={active}
-              title={t.placeholder ? `${t.label}: coming soon` : t.label}
+              title={t.label}
               onClick={() => choose(t.id)}
-              className="group flex w-[66px] flex-col items-center gap-1 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-[66px] flex-col items-center gap-1"
             >
               <span className={`block w-full overflow-hidden ${thumbFrame(active)}`}>
                 <Thumbnail template={t.id} assets={assets} />
               </span>
-              <span className={FIELD_LABEL}>
-                {t.label}
-                {t.placeholder && <span className="block text-[#707070]">Soon</span>}
-              </span>
+              <span className={FIELD_LABEL}>{t.label}</span>
             </button>
           );
         })}

@@ -51,8 +51,6 @@ export interface TemplateDefinition<K extends TemplateId> {
   /** The draft with a (removed) pool photo taken out. */
   clearPhoto(draft: DraftFor<K>, photoId: string): DraftFor<K>;
 
-  /** True while the template still draws a stand-in. The picker shows it as "Soon". */
-  placeholder?: true;
   /** Whether the draft holds typed text that switching template would discard. */
   hasTypedText?(draft: DraftFor<K>): boolean;
 

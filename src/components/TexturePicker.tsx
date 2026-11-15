@@ -83,7 +83,6 @@ export function TexturePicker() {
     addSessionTexture({
       id,
       name: file.name.replace(/\.[^.]+$/, ""),
-      file,
       width: image.width,
       height: image.height,
       previewUrl: URL.createObjectURL(file),

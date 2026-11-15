@@ -3,14 +3,10 @@
 
 /* Brand tokens. See docs/technical-requirements.md#stack and docs/template-spec.md */
 @theme {
-  --color-lavender-200: #ebcbfe;
-  --color-lavender-500: #cb7ff8;
-
   /* UI body: Geist. Templates draw with their own families on canvas. */
   --font-sans: "Geist", system-ui, sans-serif;
   /* UI titles and headings: Druk. */
   --font-display: "Chapter Druk", Impact, "Arial Narrow", "Geist", sans-serif;
-  --font-serif: "Instrument Serif", Georgia, serif;
 
   /* The editor lays itself out by its own width, not the window's (a drawer can take
      room from it): one column, then preview | controls, then texture | preview | form. */

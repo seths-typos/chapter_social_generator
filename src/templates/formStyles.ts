@@ -21,9 +21,9 @@ export const SR_ONLY = "sr-only";
 
 /** The label above a text input. */
 export const FIELD_LABEL = `${UI_TEXT} text-[#555]`;
-/** Helper text under a control. */
 /** Muted text that still passes WCAG AA on white (4.95:1). */
 export const MUTED = "text-[#707070]";
+/** Helper text under a control. */
 export const HINT = `${UI_TEXT} ${MUTED}`;
 export const ERROR_TEXT = `${UI_TEXT} text-red-700`;
 

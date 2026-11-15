@@ -136,7 +136,6 @@ export function PhotoPool({ onImport }: { onImport?: () => void }) {
   return (
     <Panel
       title="Photo Library"
-      flat
       className={dragging ? "ring-2 ring-neutral-900" : ""}
       actions={
         <>

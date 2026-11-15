@@ -120,7 +120,6 @@ export function CompareView({ template }: { template: CompareId }) {
         {definition.fixture
           ? "Rendered from the template’s fixture inputs."
           : "This template has no fixture yet, so it renders empty."}{" "}
-        {definition.placeholder && "Its render is still a stand-in. "}
         The background texture differs from the reference by design. In Difference, black means
         identical.
         {warnings.length > 0 && ` Fit warnings: ${warnings.map((w) => w.message).join(" ")}`}

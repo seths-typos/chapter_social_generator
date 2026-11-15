@@ -33,10 +33,10 @@ const samePlacements = (a: readonly PolaroidPlacement[], b: readonly PolaroidPla
     return p.cx === q.cx && p.cy === q.cy && p.rotation === q.rotation && p.scale === q.scale;
   });
 
-/** Only moves between framed and framed (or unframed and unframed) can be tweened. */
 /** Whether the system asks for less motion; the layout then changes without a tween. */
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/** Only moves between framed and framed (or unframed and unframed) can be tweened. */
 const canAnimate = (from: readonly PolaroidPlacement[], to: readonly PolaroidPlacement[]) =>
   from.length > 0 && to.length > 0 && Boolean(from[0]!.frameless) === Boolean(to[0]!.frameless);
 

@@ -135,7 +135,6 @@ export function BatchList({ assets }: { assets: RenderAssets }) {
   return (
     <Panel
       title="Batch"
-      flat
       actions={
         <button
           type="button"
